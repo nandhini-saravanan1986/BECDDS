@@ -35,8 +35,8 @@ import com.bornfire.xbrl.entities.KYC_Audit_Rep;
 import com.bornfire.xbrl.entities.Kyc_Repo;
 import com.bornfire.xbrl.entities.UserProfile;
 import com.bornfire.xbrl.entities.UserProfileRep;
-import com.bornfire.xbrl.entities.BRBS.EcddIndividualProfileRepository;
-import com.bornfire.xbrl.entities.BRBS.Ecdd_Individual_Profile_Entity;
+import com.bornfire.xbrl.entities.BECCDS.EcddIndividualProfileRepository;
+import com.bornfire.xbrl.entities.BECCDS.Ecdd_Individual_Profile_Entity;
 
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;

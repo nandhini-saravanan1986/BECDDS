@@ -119,7 +119,7 @@
 </style>
 <script type="text/javascript">
 	function goHome() {
-		window.location.href = '/BRBS/';
+		window.location.href = '/BECCDS/';
 	}
 	function goBack() {
 		window.history.back();
@@ -130,7 +130,7 @@
 	function corporatehome() {
 		const srl_no = document.getElementById("srl_no")?.value;
 		if (srl_no) {
-			window.location.href = `/BRBS/kyc/corporate?srl_no=${encodeURIComponent(srl_no)}&formmode=modify`;
+			window.location.href = `/BECCDS/kyc/corporate?srl_no=${encodeURIComponent(srl_no)}&formmode=modify`;
 		} else {
 			goHome();
 		}
@@ -140,7 +140,7 @@
 		const srl_no = element.getAttribute("data-resource");
 	//	$('#loader1').modal("show");
 		requestAnimationFrame(() => {
-			window.location.href = `/BRBS/kyc/corporate?formmode=modify&srl_no=${encodeURIComponent(srl_no)}`;
+			window.location.href = `/BECCDS/kyc/corporate?formmode=modify&srl_no=${encodeURIComponent(srl_no)}`;
 		});
 	}
 
@@ -148,7 +148,7 @@
 		const srl_no = element.getAttribute("data-resource");
 	//	$('#loader1').modal('show');
 		try {
-			const response = await fetch(`/BRBS/kyc/corporate/download?srl_no=${encodeURIComponent(srl_no)}`);
+			const response = await fetch(`/BECCDS/kyc/corporate/download?srl_no=${encodeURIComponent(srl_no)}`);
 			if (!response.ok) throw new Error(`Server error ${response.status}`);
 			const blob = await response.blob();
 			const link = document.createElement('a');
@@ -178,7 +178,7 @@
 	//	$('#loader1').modal('show');
 	if ((Reviewdate && Reviewdesig && Branchname && Approvaldate && Approvaldesig)) {
 		$.ajax({
-			url: '/BRBS/kyc/corporate/verify',
+			url: '/BECCDS/kyc/corporate/verify',
 			type: 'POST',
 			data: {formmode: 'verified', custid: srl_no}
 		})
@@ -253,7 +253,7 @@
 
 </script>
 
-<title>XBRL</title>
+<title>BECCDS</title>
 
 <body>
 	<div class="col-sm-2">
@@ -2220,7 +2220,7 @@
 <script>
 	// A global array to store files in the staging area.
 	let fileListStore = [];
-	const APP_CONTEXT_PATH = '/BRBS'; // Make sure this matches your application.properties
+	const APP_CONTEXT_PATH = '/BECCDS'; // Make sure this matches your application.properties
 
 	function openUploadModal(srlNo, customerId, customerType) {
 		fileListStore = [];

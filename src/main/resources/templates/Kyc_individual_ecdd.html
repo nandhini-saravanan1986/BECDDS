@@ -135,11 +135,11 @@
 		const srlno = element.getAttribute("data-resource");
 	//	$('#loader1').modal("show");
 		requestAnimationFrame(() => {
-			window.location.href = `/BRBS/kyc/individual?&srlno=${encodeURIComponent(srlno)}&formmode=modify`;
+			window.location.href = `/BECCDS/kyc/individual?&srlno=${encodeURIComponent(srlno)}&formmode=modify`;
 		});
 	}
 	function goHome() {
-		window.location.href = '/BRBS/';
+		window.location.href = '/BECCDS/';
 	}
 	function goBack() {
 		window.history.back();
@@ -150,7 +150,7 @@
 	}
 	function corporatehome() {
 		const srlno = document.getElementById("srlno").value;
-		var url = "/BRBS/kyc/individual?srlno=" + encodeURIComponent(srlno) + "&formmode=modify";
+		var url = "/BECCDS/kyc/individual?srlno=" + encodeURIComponent(srlno) + "&formmode=modify";
 		window.location.href = url;
 	}
 	function verifyrecord(a) {
@@ -168,7 +168,7 @@
 	if ((Reviewdate && Reviewdesig && Branchname && Approvaldate && entrydatefin && entrybyfin && docuploaddate && docuploadby)) {
 		
 		$.ajax({
-			url: '/BRBS/kyc/individual/verify',
+			url: '/BECCDS/kyc/individual/verify',
 			type: 'POST',
 			data: {
 				formmode: 'verified',
@@ -203,7 +203,7 @@
 //		$('#loader1').modal('show');
 
 		try {
-			const response = await fetch(`/BRBS/kyc/individual/downloadfn?srlno=${encodeURIComponent(srlno)}`);
+			const response = await fetch(`/BECCDS/kyc/individual/downloadfn?srlno=${encodeURIComponent(srlno)}`);
 
 			if (!response.ok) {
 				throw new Error(`Server responded with status: ${response.status}`);
@@ -300,7 +300,7 @@
 	});
 </script>
 
-<title>BRBS</title>
+<title>BECCDS</title>
 
 <body>
 	<div class="col-sm-2">
@@ -2493,7 +2493,7 @@
 
 		try {
 			// IMPORTANT: Ensure this URL uses your correct context path (e.g., /BCDRS)
-			const response = await fetch('/BRBS/kyc/individual/upload-document', {
+			const response = await fetch('/BECCDS/kyc/individual/upload-document', {
 				method: 'POST',
 				body: formData
 				// If using Spring Security with CSRF, add CSRF headers here
@@ -2528,7 +2528,7 @@
 
 		try {
 			// 3. Fetch the list of documents from your backend controller.
-			const response = await fetch(`/BRBS/kyc/individual/list-documents?customerId=${customerId}`);
+			const response = await fetch(`/BECCDS/kyc/individual/list-documents?customerId=${customerId}`);
 			if (!response.ok) {
 				throw new Error('Failed to fetch documents from the server.');
 			}
@@ -2555,7 +2555,7 @@
 	                     <td>${formattedDate}</td>
 	                     <td class="text-center">
 	                         <!-- This link now uses a Font Awesome icon instead of text -->
-	                         <a href="/BRBS/kyc/individual/download-doc/${doc.docId}" 
+	                         <a href="/BECCDS/kyc/individual/download-doc/${doc.docId}" 
 	                            class="btn btn-sm btn-success" 
 	                            title="Download ${doc.documentName}" 
 	                            download>

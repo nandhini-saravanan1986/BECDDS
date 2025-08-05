@@ -138,7 +138,7 @@
 		/*   console.log(custid);
 		  console.log(action);
 	   */
-		var baseUrl = `/BRBS/kyc/${type}`; // Corrected the base URL
+		var baseUrl = `/BECCDS/kyc/${type}`; // Corrected the base URL
 		var url;
 
 		if (action === 'view') {
@@ -175,7 +175,7 @@
 
 		const Customer_id = document.getElementById("Customer_id").value.trim();
 
-		const url = `/BRBS/kyc/individual?formmode=submit&custid=${encodeURIComponent(Customer_id)}`;
+		const url = `/BECCDS/kyc/individual?formmode=submit&custid=${encodeURIComponent(Customer_id)}`;
 
 
 		$.ajax({
@@ -189,7 +189,7 @@
 				$("#alertmsg").text(data);
 				$('#alert').modal("show");
 
-				location.href = `/BRBS/kyc/?formmode=individual`
+				location.href = `/BECCDS/kyc/?formmode=individual`
 			},
 			error: function (error) {
 				// Handle errors
@@ -208,11 +208,11 @@
 
 		const Customer_id = document.getElementById("Customer_id").value.trim();
 		/* console.log(Customer_id) */
-		const url = `/BRBS/kyc/individual?formmode=verified&custid=${Customer_id}`;
+		const url = `/BECCDS/kyc/individual?formmode=verified&custid=${Customer_id}`;
 		$.ajax({
 			url: url,
 			success: function () {
-				location.href = `/BRBS/kyc/?formmode=individual`
+				location.href = `/BECCDS/kyc/?formmode=individual`
 				//window.history.back();
 			}
 		});
@@ -290,7 +290,7 @@
 	// Function to redirect to the Home page
 	function goHome() {
 		// Redirect to the home page (adjust the URL as needed)
-		window.location.href = '/BRBS/kyc'; // Replace with your actual home page URL
+		window.location.href = '/BECCDS/kyc'; // Replace with your actual home page URL
 	}
 
 	// Function to go back to the previous page
@@ -344,7 +344,7 @@
 		$("#downloadProcessingModal").modal("show");
 
 		try {
-			const response = await fetch(`/BRBS/kyc/individual/download?custid=${Customer_id}`, {
+			const response = await fetch(`/BECCDS/kyc/individual/download?custid=${Customer_id}`, {
 				method: "GET"
 			});
 
@@ -443,7 +443,7 @@
 </script>
 
 
-<title>XBRL</title>
+<title>BECCDS</title>
 
 <body>
 	<div th:insert="XBRLHeaderMenu :: header"></div>

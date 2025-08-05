@@ -45,9 +45,9 @@ import com.bornfire.xbrl.entities.KYC_Audit_Rep;
 import com.bornfire.xbrl.entities.UserAuditRepo;
 import com.bornfire.xbrl.entities.UserProfile;
 import com.bornfire.xbrl.entities.UserProfileRep;
-import com.bornfire.xbrl.entities.BRBS.MANUAL_Audit_Entity;
-import com.bornfire.xbrl.entities.BRBS.MANUAL_Audit_Rep;
-import com.bornfire.xbrl.entities.BRBS.UserAuditLevel_Entity;
+import com.bornfire.xbrl.entities.BECCDS.MANUAL_Audit_Entity;
+import com.bornfire.xbrl.entities.BECCDS.MANUAL_Audit_Rep;
+import com.bornfire.xbrl.entities.BECCDS.UserAuditLevel_Entity;
 import com.bornfire.xbrl.services.LoginServices;
 
 @Configuration

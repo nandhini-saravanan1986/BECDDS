@@ -34,7 +34,7 @@
 
 	<script src="js/bootstrap411.js"></script>
 	<link rel="stylesheet" href="css/spur.css">
-	<title>XBRL - ECDD Customers</title>
+	<title>BECCDS - ECDD Customers</title>
 </head>
 
 <style>
@@ -138,7 +138,7 @@
 	function navigateToForm(element, action, type) {
 		
 		const srlno = element.getAttribute('data-srlno');
-		const baseUrl = `/BRBS/kyc/${type}`;
+		const baseUrl = `/BECCDS/kyc/${type}`;
 		let url = "";
 
 		if (action === 'view') {
@@ -164,7 +164,7 @@
 	function navigateToForm1(element, action, type) {
 			
 			const srl_no = element.getAttribute('data-srl_no');
-			const baseUrl = `/BRBS/kyc/${type}`;
+			const baseUrl = `/BECCDS/kyc/${type}`;
 			let url = "";
 
 			if (action === 'view') {
@@ -190,7 +190,7 @@
 
 	// --- General Navigation ---
 	function goHome() {
-		window.location.href = '/BRBS/';
+		window.location.href = '/BECCDS/';
 	}
 
 	function goBack() {

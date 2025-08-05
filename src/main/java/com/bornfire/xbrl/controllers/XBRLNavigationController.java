@@ -78,16 +78,16 @@ import com.bornfire.xbrl.entities.Kyc_Repo;
 import com.bornfire.xbrl.entities.UserProfile;
 import com.bornfire.xbrl.entities.UserProfileRep;
 import com.bornfire.xbrl.entities.XBRLReportsMasterRep;
-import com.bornfire.xbrl.entities.BRBS.AuditTablePojo;
-import com.bornfire.xbrl.entities.BRBS.BRFValidationsRepo;
-import com.bornfire.xbrl.entities.BRBS.Charge_Back_Rep;
-import com.bornfire.xbrl.entities.BRBS.EcddIndividualProfileRepository;
-import com.bornfire.xbrl.entities.BRBS.Ecdd_Individual_Profile_Entity;
-import com.bornfire.xbrl.entities.BRBS.Ecdd_customer_transaction;
-import com.bornfire.xbrl.entities.BRBS.Ecdd_customer_transaction_repo;
-import com.bornfire.xbrl.entities.BRBS.MANUAL_Audit_Rep;
-import com.bornfire.xbrl.entities.BRBS.MANUAL_Service_Entity;
-import com.bornfire.xbrl.entities.BRBS.MANUAL_Service_Rep;
+import com.bornfire.xbrl.entities.BECCDS.AuditTablePojo;
+import com.bornfire.xbrl.entities.BECCDS.BRFValidationsRepo;
+import com.bornfire.xbrl.entities.BECCDS.Charge_Back_Rep;
+import com.bornfire.xbrl.entities.BECCDS.EcddIndividualProfileRepository;
+import com.bornfire.xbrl.entities.BECCDS.Ecdd_Individual_Profile_Entity;
+import com.bornfire.xbrl.entities.BECCDS.Ecdd_customer_transaction;
+import com.bornfire.xbrl.entities.BECCDS.Ecdd_customer_transaction_repo;
+import com.bornfire.xbrl.entities.BECCDS.MANUAL_Audit_Rep;
+import com.bornfire.xbrl.entities.BECCDS.MANUAL_Service_Entity;
+import com.bornfire.xbrl.entities.BECCDS.MANUAL_Service_Rep;
 import com.bornfire.xbrl.services.AccessAndRolesServices;
 import com.bornfire.xbrl.services.AlertManagementServices;
 import com.bornfire.xbrl.services.EcddUploadDocumentService;
@@ -132,7 +132,7 @@ public class XBRLNavigationController {
 	AlertManagementServices alertservices;
 
 	@Autowired
-	com.bornfire.xbrl.entities.BRBS.AUD_SERVICE_REPO AUD_SERVICE_REPO;
+	com.bornfire.xbrl.entities.BECCDS.AUD_SERVICE_REPO AUD_SERVICE_REPO;
 
 	@Autowired
 	UserProfileRep userProfileRep;
