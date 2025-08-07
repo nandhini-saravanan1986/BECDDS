@@ -2028,7 +2028,6 @@
 </body>
 
 <!-- FINAL SCRIPT FOR CORPORATE MODIFY MODE -->
-
 <script th:if="${formmode == 'modify'}">
 	document.addEventListener("DOMContentLoaded", function () {
 		const kycForm = document.getElementById('kycForm');
@@ -2037,6 +2036,8 @@
 			return;
 		}
 
+		// --- STEP 1: ADD STATE VARIABLES ---
+		let activeSectionId = null;
 		let originalSectionValues = {};
 
 		// --- HELPER FUNCTIONS ---
@@ -2068,11 +2069,20 @@
 
 		// --- EVENT LISTENERS FOR SECTION CONTROLS ---
 
-		// MODIFY BUTTON
+		// --- STEP 2: UPDATE MODIFY BUTTON ---
 		document.querySelectorAll('.modify-btn').forEach(button => {
 			button.addEventListener('click', function () {
 				const actionsContainer = this.closest('.section-actions');
 				const targetId = actionsContainer.dataset.target;
+
+				// Check if another section is already being edited
+				if (activeSectionId && activeSectionId !== targetId) {
+					alert("Please Save or Cancel the active section first.");
+					return; // Stop the function here
+				}
+
+				// Set the current section as the active one.
+				activeSectionId = targetId;
 				const targetSection = document.getElementById(targetId);
 
 				originalSectionValues[targetId] = {};
@@ -2095,7 +2105,7 @@
 			});
 		});
 
-		// CANCEL BUTTON
+		// --- STEP 3: UPDATE CANCEL BUTTON ---
 		document.querySelectorAll('.cancel-btn').forEach(button => {
 			button.addEventListener('click', function () {
 				const actionsContainer = this.closest('.section-actions');
@@ -2120,29 +2130,28 @@
 				updateFieldDependencies();
 				actionsContainer.querySelector('.modify-btn').classList.remove('d-none');
 				actionsContainer.querySelector('.save-cancel-controls').classList.add('d-none');
+
+				activeSectionId = null; // Reset the state
 			});
 		});
 
-		// *** SAVE BUTTON - UPDATED ***
+		// *** SAVE BUTTON - NO CHANGES NEEDED HERE ***
 		document.querySelectorAll('.save-btn').forEach(button => {
 			button.addEventListener('click', async function () {
 				const actionsContainer = this.closest('.section-actions');
 				const targetSection = document.getElementById(actionsContainer.dataset.target);
 
-				// 1. Validate the current section's fields
 				for (const input of targetSection.querySelectorAll('input:not(:disabled), select:not(:disabled), textarea:not(:disabled)')) {
 					if (!input.checkValidity()) {
-						input.reportValidity(); // Show browser validation error
+						input.reportValidity();
 						return;
 					}
 				}
 
-				// 2. Provide visual feedback on the button and disable it
 				const saveIcon = this.querySelector('i.fa-spinner');
 				this.disabled = true;
 				if (saveIcon) saveIcon.classList.remove('d-none');
 
-				// 3. Prepare form data for submission
 				const allDisabledElements = Array.from(kycForm.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
 				allDisabledElements.forEach(el => el.disabled = false);
 				const formData = new FormData(kycForm);
@@ -2154,23 +2163,15 @@
 					}
 				});
 
-				// 4. Attempt to save the data
 				try {
 					const response = await fetch(kycForm.action + '?ajax=true', {method: 'POST', body: formData});
 					if (!response.ok) {
-						// If server responds with an error, throw it to the catch block
 						throw new Error(await response.text() || `Server error ${response.status}`);
 					}
-
-					// SUCCESS: Immediately reload the page.
 					location.reload();
-
 				} catch (error) {
-					// FAILURE: Show a simple alert with the error message.
 					console.error('Section save failed:', error);
 					alert(`Save Failed: ${error.message}`);
-
-					// Re-enable the button and hide spinner so the user can try again
 					this.disabled = false;
 					if (saveIcon) saveIcon.classList.add('d-none');
 				}

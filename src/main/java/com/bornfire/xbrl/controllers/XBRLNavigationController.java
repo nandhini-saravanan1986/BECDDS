@@ -38,6 +38,7 @@ import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +95,7 @@ import com.bornfire.xbrl.services.EcddUploadDocumentService;
 import com.bornfire.xbrl.services.IndividualPdfService;
 import com.bornfire.xbrl.services.Kyc_individual_service;
 import com.bornfire.xbrl.services.LoginServices;
+import com.bornfire.xbrl.services.ReportServices;
 
 import net.sf.jasperreports.engine.JRException;
 
@@ -516,6 +518,65 @@ public class XBRLNavigationController {
 
 		md.addAttribute("menu", "Dashboard");
 		return "XBRLDashboard";
+	}
+
+	@Autowired
+	ReportServices reportServices;
+
+	@RequestMapping(value = "UserProfile", method = { RequestMethod.GET, RequestMethod.POST })
+	public String userprofile(@RequestParam(required = false) String formmode,
+			@RequestParam(required = false) String userid,
+			@RequestParam(value = "page", required = false) Optional<Integer> page,
+			@RequestParam(value = "size", required = false) Optional<Integer> size, Model md, HttpServletRequest req) {
+
+		int currentPage = page.orElse(0);
+		int pageSize = size.orElse(Integer.parseInt(pagesize));
+
+		String loginuserid = (String) req.getSession().getAttribute("USERID");
+		String WORKCLASSAC = (String) req.getSession().getAttribute("WORKCLASS");
+		String ROLEIDAC = (String) req.getSession().getAttribute("ROLEID");
+		md.addAttribute("RuleIDType", accessandrolesrepository.roleidtype());
+
+		System.out.println("work class is : " + WORKCLASSAC);
+		// Logging Navigation
+		loginServices.SessionLogging("USERPROFILE", "M2", req.getSession().getId(), loginuserid, req.getRemoteAddr(),
+				"ACTIVE");
+		Session hs1 = sessionFactory.getCurrentSession();
+		md.addAttribute("menu", "USER PROFILE"); // To highlight the menu
+
+		if (formmode == null || formmode.equals("list")) {
+
+			md.addAttribute("formmode", "list");// to set which form - valid values are "edit" , "add" & "list"
+			md.addAttribute("WORKCLASSAC", WORKCLASSAC);
+			md.addAttribute("ROLEIDAC", ROLEIDAC);
+			md.addAttribute("loginuserid", loginuserid);
+
+			Iterable<UserProfile> user = loginServices.getUsersList(ROLEIDAC);
+
+			md.addAttribute("userProfiles", user);
+
+		} else if (formmode.equals("edit")) {
+
+			md.addAttribute("formmode", formmode);
+			md.addAttribute("domains", reportServices.getDomainList());
+			md.addAttribute("userProfile", loginServices.getUser(userid));
+
+		} else if (formmode.equals("verify")) {
+
+			md.addAttribute("formmode", formmode);
+			md.addAttribute("domains", reportServices.getDomainList());
+			md.addAttribute("userProfile", loginServices.getUser(userid));
+
+		} else {
+
+			md.addAttribute("formmode", formmode);
+			md.addAttribute("domains", reportServices.getDomainList());
+			md.addAttribute("FinUserProfiles", loginServices.getFinUsersList());
+			md.addAttribute("userProfile", loginServices.getUser(""));
+
+		}
+
+		return "XBRLUserprofile";
 	}
 
 	@RequestMapping(value = "AccessandRoles", method = { RequestMethod.GET, RequestMethod.POST })
