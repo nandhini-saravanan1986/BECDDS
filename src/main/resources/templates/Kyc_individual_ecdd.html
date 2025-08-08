@@ -1436,7 +1436,7 @@
 												minlength="30"></textarea>-->
 												
 												<input list="branchRemarksList" class="form-control" name="branch_remarks"
-													       th:value="${user_data?.branch_remarks}" required
+													       th:value="${user_data?.branch_remarks}" required minlength="30"
 													       placeholder="Type or select a remark" />
 
 													<datalist id="branchRemarksList">
@@ -1647,7 +1647,7 @@
 											<em>(if No, please provide your justification, recommendations, and
 												comments)</em>
 											<textarea class="form-control" name="profile_mismatch_remarks" rows="2"
-												th:text="${user_data?.profile_mismatch_remarks}" required
+												th:text="${user_data?.profile_mismatch_remarks}" required minlength="30"
 												></textarea>
 										</td>
 									</tr>
@@ -1742,7 +1742,7 @@
 													class="form-check-label" for="aof_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="aof_remarks" rows="1"
-												th:text="${user_data?.aof_remarks}" required></textarea>
+												th:text="${user_data?.aof_remarks}" required minlength="30"></textarea>
 										</td>
 									</tr>
 									<tr>
@@ -1759,7 +1759,7 @@
 													class="form-check-label" for="kycdoc_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="kyc_doc_remarks" rows="1"
-												th:text="${user_data?.kyc_doc_remarks}" required
+												th:text="${user_data?.kyc_doc_remarks}" required minlength="30"
 												></textarea></td>
 									</tr>
 									<tr>
@@ -1777,7 +1777,7 @@
 													class="form-check-label" for="sof_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="source_of_funds_remarks" rows="1"
-												th:text="${user_data?.source_of_funds_remarks}" required
+												th:text="${user_data?.source_of_funds_remarks}" required minlength="30"
 												></textarea>
 										</td>
 									</tr>
