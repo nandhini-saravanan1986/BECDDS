@@ -35,8 +35,8 @@ import com.bornfire.xbrl.entities.KYC_Audit_Rep;
 import com.bornfire.xbrl.entities.Kyc_Repo;
 import com.bornfire.xbrl.entities.UserProfile;
 import com.bornfire.xbrl.entities.UserProfileRep;
-import com.bornfire.xbrl.entities.BECCDS.EcddIndividualProfileRepository;
-import com.bornfire.xbrl.entities.BECCDS.Ecdd_Individual_Profile_Entity;
+import com.bornfire.xbrl.entities.BECDDS.EcddIndividualProfileRepository;
+import com.bornfire.xbrl.entities.BECDDS.Ecdd_Individual_Profile_Entity;
 
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -380,10 +380,11 @@ public class Kyc_individual_service {
 			Ecdd_Individual_Profile_Entity kycEntity = optionalKyc.get();
 
 			String customerId = kycEntity.getCustomer_id();
-
+			kycEntity.setApproval_date(new Date());
 			kycEntity.setApproved_by_name(Userdetails.get().getUsername());
 			kycEntity.setApproved_by_ec_no(Userdetails.get().getEmpid());
-
+			kycEntity.setApproved_by_designation(
+					Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
 			kycEntity.setModify_flg("N");
 			kycEntity.setEntity_flg("Y");
 			kycEntity.setVerify_user(userId);
@@ -767,26 +768,35 @@ public class Kyc_individual_service {
 		// STEP 4: HANDLE SPECIAL CASES & SET METADATA
 		// =================================================================================
 		String userId = (String) req.getSession().getAttribute("USERID");
-		
+
 		// Special logic for reviewer details (this is correct)
 		if (incomingData.getReviewed_by_designation() != null) {
 			userProfileRep.findById(userId).ifPresent(userProfile -> {
+				existingEntity.setReview_date(
+						incomingData.getReview_date() != null ? incomingData.getReview_date() : new Date());
 				existingEntity.setReviewed_by_name(userProfile.getUsername());
 				existingEntity.setReviewed_by_ec_no(userProfile.getEmpid());
+				existingEntity.setReviewed_by_designation(
+						userProfile.getDesignation() != null ? userProfile.getDesignation() : "");
+
 			});
 		}
-		incomingData.setAuth_flg(incomingData.getAuth_flg()==null ? "N" : incomingData.getAuth_flg());
-		if(incomingData.getAuth_flg().equals("Y")) {
-		System.out.println(incomingData.getAuth_flg());
-		// Set mandatory metadata
-		
-		existingEntity.setEntity_flg("N"); // Assuming this should be set on modification
-		existingEntity.setAuth_flg("Y");
-		existingEntity.setModify_flg("Y");
-		existingEntity.setModify_user(userId);
-		existingEntity.setModify_time(new Date());
-		}else {
-		existingEntity.setAuth_flg("N");
+		incomingData.setAuth_flg(incomingData.getAuth_flg() == null ? "N" : incomingData.getAuth_flg());
+		if (incomingData.getAuth_flg().equals("Y")) {
+			System.out.println(incomingData.getAuth_flg());
+			// Set mandatory metadata
+
+			existingEntity.setEntity_flg("N"); // Assuming this should be set on modification
+			existingEntity.setAuth_flg("Y");
+			existingEntity.setModify_flg("Y");
+			existingEntity.setModify_user(userId);
+			existingEntity.setModify_time(new Date());
+		} else {
+			existingEntity.setEntity_flg("N"); // Assuming this should be set on modification
+			existingEntity.setAuth_flg("N");
+			existingEntity.setModify_flg("N");
+			existingEntity.setModify_user(userId);
+			existingEntity.setModify_time(new Date());
 		}
 		// =================================================================================
 		// STEP 5: SAVE THE UPDATED ENTITY

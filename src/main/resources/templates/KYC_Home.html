@@ -34,7 +34,7 @@
 
 	<script src="js/bootstrap411.js"></script>
 	<link rel="stylesheet" href="css/spur.css">
-	<title>BECCDS - ECDD Customers</title>
+	<title>XBRL - ECDD Customers</title>
 </head>
 
 <style>
@@ -114,6 +114,15 @@
 		font-size: large;
 		color: #007bff;
 	}
+	.custom-alert {
+		  display:none;
+		  position: fixed;
+		  bottom: 0px;
+		  right: 0px;
+		  .fa {
+		    margin-right:.10em;
+		  }
+	    }
 </style>
 
 <script>
@@ -138,7 +147,7 @@
 	function navigateToForm(element, action, type) {
 		
 		const srlno = element.getAttribute('data-srlno');
-		const baseUrl = `/BECCDS/kyc/${type}`;
+		const baseUrl = `/BECDDS/kyc/${type}`;
 		let url = "";
 
 		if (action === 'view') {
@@ -164,7 +173,7 @@
 	function navigateToForm1(element, action, type) {
 			
 			const srl_no = element.getAttribute('data-srl_no');
-			const baseUrl = `/BECCDS/kyc/${type}`;
+			const baseUrl = `/BECDDS/kyc/${type}`;
 			let url = "";
 
 			if (action === 'view') {
@@ -190,16 +199,22 @@
 
 	// --- General Navigation ---
 	function goHome() {
-		window.location.href = '/BECCDS/';
+		window.location.href = '/BECDDS/';
 	}
 
 	function goBack() {
 		window.history.back();
 	}
 	
+	function Downloadstatusmodal(){
+		$('#exampleModal').modal('show');
+	}
+	
 	function Downloadstatus() {
-	       
-	       fetch(`./kyc/Reportstatus/Download`)
+		
+		var Fromdate = $('#datechanger').val();
+	       $('#exampleModal').modal('hide');
+	       fetch(`./kyc/Reportstatus/Download?Fromdate=${Fromdate}`)
 	           .then(response => {
 	               if (!response.ok) {
 	                   throw new Error("No transaction file found or server error.");
@@ -313,7 +328,7 @@
 							<button type="button" class="btn" th:classappend="${formmode == 'corporate'} ? 'btn-outline-primary2' : 'btn-outline-primary'" id="corporate" onclick="submitForm(this.id)">CDD Corporate</button>
 						</div>
 						<div class="btn-group">
-							<button type="button" class="btn-outline-primary" onclick="Downloadstatus()" 
+							<button type="button" class="btn-outline-primary" onclick="Downloadstatusmodal()" 
 							th:if="${#session.getAttribute('ROLEID') == 'Superadmin' or #session.getAttribute('ROLEID') == 'DCD_ADMIN'}">
 								<i class="fa fa-download" aria-hidden="true"></i> Report</button>
 						
@@ -471,6 +486,44 @@
 			</div>
 		</div>
 	</div>
+	
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel" style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Select Date </h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+	      </div>
+	      <div class="modal-footer">
+			<input type="date" th:value="${#dates.format(datavalue, 'yyyy-MM-dd')}" id="datechanger"
+									   class="form-control border-info" />
+	        <button type="button" id="showAlert" class="btn btn-primary" style="font-family: Verdana, Geneva, Tahoma, sans-serif;"
+			onclick="Downloadstatus()">Download</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="alert alert-danger custom-alert" role="alert" id="autoHideAlert">
+		<button type="button" class="close" aria-label="Close">
+		   <span aria-hidden="true">&times;</span>
+		 </button>
+		 <p><i class="fa fa-check-circle"></i>Download request received</p>
+	</div>
 
 </body>
+
+<script>
+  document.getElementById("showAlert").addEventListener("click", function () {
+    const alertBox = document.getElementById("autoHideAlert");
+    alertBox.style.display = "block";
+
+    setTimeout(() => {
+      alertBox.style.display = "none";
+    }, 5000);
+  });
+</script>
+
 </html>

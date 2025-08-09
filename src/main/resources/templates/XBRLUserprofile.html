@@ -486,7 +486,7 @@
 		}
 
 		function home() {
-			location.href = "/BECCDS/Dashboard";
+			location.href = "/BECDDS/Dashboard";
 		}
 
 		function back() {
@@ -541,7 +541,7 @@
 		}
 	</script>
 </head>
-<title>BECCDS</title>
+<title>BECDDS</title>
 
 <body>
 	<div th:insert="XBRLHeaderMenu :: header"></div>
@@ -577,6 +577,7 @@
 										<th>User Id</th>
 										<th>User Name</th>
 										<th>Employee Id</th>
+										<th>Designation</th>
 										<th>Branch code</th>
 										<th>Branch Name</th>
 										<th>Status</th>
@@ -590,6 +591,7 @@
 										<td style="width: 125px" th:text="${userProfile.userid}">456</td>
 										<td style="width: 250px" th:text="${userProfile.username}">TEST</td>
 										<td th:text="${userProfile.empid}">123</td>
+										<td th:text="${userProfile.designation}">123</td>
 										<td th:text="${userProfile.branch_code}">123</td>
 										<td style="width: 250px" th:text="${userProfile.branch_name}">CHENNAI</td>
 										<th:block th:switch="${userProfile.entity_flg}">
@@ -743,12 +745,12 @@
 										<div class="col-sm-1"></div>
 
 
-										<!-- <label class="col-sm-2">Employee Name</label>
-									<div class="col-sm-3">
-										<input type="text" th:field="*{emp_name}"
-											th:value="${emp_name}" id="empName" value=""
-											class="form-control form-control-sm" required />
-									</div> -->
+										<label class="col-sm-2">Designation <b style="color:red;">*</b></label>
+										<div class="col-sm-3">
+											<input type="text" th:field="*{designation}" th:value="${designation}"
+												id="designation" value="" class="form-control form-control-sm"
+												autocomplete="off" required />
+										</div>
 										<div class="col-sm-1"></div>
 									</div>
 
@@ -1175,6 +1177,15 @@
 										</div>
 										<div class="col-sm-1"></div>
 
+
+
+										<label class="col-sm-2">Designation <b style="color:red;">*</b></label>
+										<div class="col-sm-3">
+											<input type="text" th:field="*{designation}" th:value="${designation}"
+												id="designation" value="" class="form-control form-control-sm"
+												autocomplete="off" readonly="readonly" required />
+										</div>
+
 										<div class="col-sm-1"></div>
 									</div>
 
@@ -1474,7 +1485,7 @@
 	    
 		if (roleId) {
 			$.ajax({
-				url: "/BECCDS/getRoleDetails",
+				url: "/BECDDS/getRoleDetails",
 				type: "GET",
 				data: { roleId: roleId },
 				success: function(data) {
@@ -1498,7 +1509,7 @@
 	
 			if (roleId) {
 				$.ajax({
-					url: "/BECCDS/getRoleDetails",
+					url: "/BECDDS/getRoleDetails",
 					type: "GET",
 					data: {roleId: roleId},
 					success: function (data) {

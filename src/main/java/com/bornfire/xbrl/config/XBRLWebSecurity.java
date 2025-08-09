@@ -45,9 +45,6 @@ import com.bornfire.xbrl.entities.KYC_Audit_Rep;
 import com.bornfire.xbrl.entities.UserAuditRepo;
 import com.bornfire.xbrl.entities.UserProfile;
 import com.bornfire.xbrl.entities.UserProfileRep;
-import com.bornfire.xbrl.entities.BECCDS.MANUAL_Audit_Entity;
-import com.bornfire.xbrl.entities.BECCDS.MANUAL_Audit_Rep;
-import com.bornfire.xbrl.entities.BECCDS.UserAuditLevel_Entity;
 import com.bornfire.xbrl.services.LoginServices;
 
 @Configuration
@@ -71,9 +68,6 @@ public class XBRLWebSecurity extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	SequenceGenerator sequence;
-
-	@Autowired
-	MANUAL_Audit_Rep mANUAL_Audit_Rep;
 
 	@Autowired
 	UserAuditRepo userAuditRepo;
@@ -288,70 +282,7 @@ public class XBRLWebSecurity extends WebSecurityConfigurerAdapter {
 					audit.setAuth_time(auth_user_date);
 					audit.setAudit_ref_no(auditID.toString());
 					kyc_Audit_Rep.save(audit);
-				} else if (roleId.equals("IT") || roleId.equals("HR") || roleId.equals("OP") || roleId.equals("AC")) {
-					MANUAL_Audit_Entity audit = new MANUAL_Audit_Entity();
-					LocalDateTime currentDateTime = LocalDateTime.now();
-					Date dateValue = Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant());
-					audit.setAudit_date(new Date());
-					audit.setEntry_time(dateValue);
-					audit.setEntry_user(user.getUserid());
-					audit.setFunc_code("LOGIN");
-					audit.setRemarks("Login Successfully");
-					audit.setAudit_table("XBRLUSERPROFILETABLE");
-					audit.setAudit_screen("LOGIN");
-					audit.setEvent_id(user.getUserid());
-					audit.setEvent_name(user.getUsername());
-					audit.setModi_details("Login Successfully");
-					UserProfile auth_user = userProfileRep.getRole(user.getUserid());
-					String auth_user_val = auth_user.getAuth_user();
-					Date auth_user_date = auth_user.getAuth_time();
-					audit.setAuth_user(auth_user_val);
-					audit.setAuth_time(auth_user_date);
-					audit.setAudit_ref_no(auditID.toString());
-					mANUAL_Audit_Rep.save(audit);
-				} else if (roleId.equals("DCD")) {
-					MANUAL_Audit_Entity audit = new MANUAL_Audit_Entity();
-					LocalDateTime currentDateTime = LocalDateTime.now();
-					Date dateValue = Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant());
-					audit.setAudit_date(new Date());
-					audit.setEntry_time(dateValue);
-					audit.setEntry_user(user.getUserid());
-					audit.setFunc_code("LOGIN");
-					audit.setRemarks("Login Successfully");
-					audit.setAudit_table("XBRLUSERPROFILETABLE");
-					audit.setAudit_screen("LOGIN");
-					audit.setEvent_id(user.getUserid());
-					audit.setEvent_name(user.getUsername());
-					audit.setModi_details("Login Successfully");
-					UserProfile auth_user = userProfileRep.getRole(user.getUserid());
-					String auth_user_val = auth_user.getAuth_user();
-					Date auth_user_date = auth_user.getAuth_time();
-					audit.setAuth_user(auth_user_val);
-					audit.setAuth_time(auth_user_date);
-					audit.setAudit_ref_no(auditID.toString());
-					mANUAL_Audit_Rep.save(audit);
-				} else if (roleId.equals("ADM")) {
-					UserAuditLevel_Entity audit = new UserAuditLevel_Entity();
-					LocalDateTime currentDateTime = LocalDateTime.now();
-					Date dateValue = Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant());
-					audit.setAudit_date(new Date());
-					audit.setEntry_time(dateValue);
-					audit.setEntry_user(user.getUserid());
-					audit.setFunc_code("LOGIN");
-					audit.setRemarks("Login Successfully");
-					audit.setAudit_table("XBRLUSERPROFILETABLE");
-					audit.setAudit_screen("LOGIN");
-					audit.setEvent_id(user.getUserid());
-					audit.setEvent_name(user.getUsername());
-					audit.setModi_details("Login Successfully");
-					UserProfile auth_user = userProfileRep.getRole(user.getUserid());
-					String auth_user_val = auth_user.getAuth_user();
-					Date auth_user_date = auth_user.getAuth_time();
-					audit.setAuth_user(auth_user_val);
-					audit.setAuth_time(auth_user_date);
-					audit.setAudit_ref_no(auditID.toString());
-					userAuditRepo.save(audit);
-				}
+				} 
 
 				response.sendRedirect("systemotp");
 				// }
@@ -414,49 +345,6 @@ public class XBRLWebSecurity extends WebSecurityConfigurerAdapter {
 						audit.setModi_details("Logout Successfully");
 						audit.setAudit_ref_no(Number1.toString());
 						kyc_Audit_Rep.save(audit);
-					} else if (roleId.equals("IT") || roleId.equals("HR") || roleId.equals("OP")
-							|| roleId.equals("AC")) {
-						UserProfile user = up.get();
-						MANUAL_Audit_Entity audit = new MANUAL_Audit_Entity();
-						String Number1 = sequence.generateRequestUUId();
-						audit.setAudit_date(new Date());
-						audit.setEntry_time(new Date());
-						audit.setEntry_user(user.getUserid());
-						audit.setFunc_code("LOGOUT");
-						audit.setRemarks("Logout Successfully");
-						audit.setAudit_table("XBRLUSERPROFILETABLE");
-						audit.setAudit_screen("LOGOUT");
-						audit.setEvent_id(user.getUserid());
-						audit.setEvent_name(user.getUsername());
-						UserProfile auth_user = userProfileRep.getRole(user.getUserid());
-						String auth_user_val = auth_user.getAuth_user();
-						Date auth_user_date = auth_user.getAuth_time();
-						audit.setAuth_user(auth_user_val);
-						audit.setAuth_time(auth_user_date);
-						audit.setModi_details("Logout Successfully");
-						audit.setAudit_ref_no(Number1.toString());
-						mANUAL_Audit_Rep.save(audit);
-					} else if (roleId.equals("ADM")) {
-						UserProfile user = up.get();
-						UserAuditLevel_Entity audit = new UserAuditLevel_Entity();
-						String Number1 = sequence.generateRequestUUId();
-						audit.setAudit_date(new Date());
-						audit.setEntry_time(new Date());
-						audit.setEntry_user(user.getUserid());
-						audit.setFunc_code("LOGOUT");
-						audit.setRemarks("Logout Successfully");
-						audit.setAudit_table("XBRLUSERPROFILETABLE");
-						audit.setAudit_screen("LOGOUT");
-						audit.setEvent_id(user.getUserid());
-						audit.setEvent_name(user.getUsername());
-						UserProfile auth_user = userProfileRep.getRole(user.getUserid());
-						String auth_user_val = auth_user.getAuth_user();
-						Date auth_user_date = auth_user.getAuth_time();
-						audit.setAuth_user(auth_user_val);
-						audit.setAuth_time(auth_user_date);
-						audit.setModi_details("Logout Successfully");
-						audit.setAudit_ref_no(Number1.toString());
-						userAuditRepo.save(audit);
 					}
 				} catch (Exception e) {
 					System.out.println("Exception in logout handler: " + e.getMessage());

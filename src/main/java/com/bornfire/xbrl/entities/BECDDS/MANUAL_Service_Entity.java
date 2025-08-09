@@ -1,5 +1,4 @@
-package com.bornfire.xbrl.entities.BECCDS;
-
+package com.bornfire.xbrl.entities.BECDDS;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -8,8 +7,8 @@ import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 @Entity
-@Table(name = "MANUAL_AUDIT_TABLE")
-public class MANUAL_Audit_Entity {
+@Table(name = "MANUAL_SERVICE_TABLE")
+public class MANUAL_Service_Entity {
 	@Id
 	private String audit_ref_no;
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
@@ -18,7 +17,9 @@ public class MANUAL_Audit_Entity {
 	private String audit_screen;
 	private String event_id;
 	private String event_name;
-	
+	private String old_value;
+	private String new_value;
+	private String field_name;
 	private String modi_details;
 	private String entry_user;
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
@@ -64,6 +65,24 @@ public class MANUAL_Audit_Entity {
 	public void setEvent_name(String event_name) {
 		this.event_name = event_name;
 	}
+	public String getOld_value() {
+		return old_value;
+	}
+	public void setOld_value(String old_value) {
+		this.old_value = old_value;
+	}
+	public String getNew_value() {
+		return new_value;
+	}
+	public void setNew_value(String new_value) {
+		this.new_value = new_value;
+	}
+	public String getField_name() {
+		return field_name;
+	}
+	public void setField_name(String field_name) {
+		this.field_name = field_name;
+	}
 	public String getModi_details() {
 		return modi_details;
 	}
@@ -106,9 +125,10 @@ public class MANUAL_Audit_Entity {
 	public void setFunc_code(String func_code) {
 		this.func_code = func_code;
 	}
-	public MANUAL_Audit_Entity(String audit_ref_no, Date audit_date, String audit_table, String audit_screen,
-			String event_id, String event_name, String modi_details, String entry_user, Date entry_time, String remarks,
-			String auth_user, Date auth_time, String func_code) {
+	public MANUAL_Service_Entity(String audit_ref_no, Date audit_date, String audit_table, String audit_screen,
+			String event_id, String event_name, String old_value, String new_value, String field_name,
+			String modi_details, String entry_user, Date entry_time, String remarks, String auth_user, Date auth_time,
+			String func_code) {
 		super();
 		this.audit_ref_no = audit_ref_no;
 		this.audit_date = audit_date;
@@ -116,6 +136,9 @@ public class MANUAL_Audit_Entity {
 		this.audit_screen = audit_screen;
 		this.event_id = event_id;
 		this.event_name = event_name;
+		this.old_value = old_value;
+		this.new_value = new_value;
+		this.field_name = field_name;
 		this.modi_details = modi_details;
 		this.entry_user = entry_user;
 		this.entry_time = entry_time;
@@ -124,10 +147,8 @@ public class MANUAL_Audit_Entity {
 		this.auth_time = auth_time;
 		this.func_code = func_code;
 	}
-	public MANUAL_Audit_Entity() {
+	public MANUAL_Service_Entity() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
-	
 }

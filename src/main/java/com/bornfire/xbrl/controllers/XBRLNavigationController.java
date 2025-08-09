@@ -12,8 +12,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -61,34 +59,27 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.bornfire.xbrl.config.PasswordEncryption;
-import com.bornfire.xbrl.config.SequenceGenerator;
 import com.bornfire.xbrl.entities.AccessAndRoles;
 import com.bornfire.xbrl.entities.AccessandRolesRepository;
 import com.bornfire.xbrl.entities.AlertEntity;
-import com.bornfire.xbrl.entities.AlertManagementEntity;
 import com.bornfire.xbrl.entities.AlertManagementRepository;
-import com.bornfire.xbrl.entities.AlertRep;
 import com.bornfire.xbrl.entities.EcddCorporateEntity;
 import com.bornfire.xbrl.entities.EcddCustomerDocumentsEntity;
+import com.bornfire.xbrl.entities.Ecdd_profile_report_entity;
+import com.bornfire.xbrl.entities.Ecdd_profile_report_repo;
 import com.bornfire.xbrl.entities.KYC_Audit_Rep;
 import com.bornfire.xbrl.entities.Kyc_Corprate_Repo;
 import com.bornfire.xbrl.entities.Kyc_Repo;
 import com.bornfire.xbrl.entities.UserProfile;
 import com.bornfire.xbrl.entities.UserProfileRep;
 import com.bornfire.xbrl.entities.XBRLReportsMasterRep;
-import com.bornfire.xbrl.entities.BECCDS.AuditTablePojo;
-import com.bornfire.xbrl.entities.BECCDS.BRFValidationsRepo;
-import com.bornfire.xbrl.entities.BECCDS.Charge_Back_Rep;
-import com.bornfire.xbrl.entities.BECCDS.EcddIndividualProfileRepository;
-import com.bornfire.xbrl.entities.BECCDS.Ecdd_Individual_Profile_Entity;
-import com.bornfire.xbrl.entities.BECCDS.Ecdd_customer_transaction;
-import com.bornfire.xbrl.entities.BECCDS.Ecdd_customer_transaction_repo;
-import com.bornfire.xbrl.entities.BECCDS.MANUAL_Audit_Rep;
-import com.bornfire.xbrl.entities.BECCDS.MANUAL_Service_Entity;
-import com.bornfire.xbrl.entities.BECCDS.MANUAL_Service_Rep;
+import com.bornfire.xbrl.entities.BECDDS.Charge_Back_Rep;
+import com.bornfire.xbrl.entities.BECDDS.EcddIndividualProfileRepository;
+import com.bornfire.xbrl.entities.BECDDS.Ecdd_Individual_Profile_Entity;
+import com.bornfire.xbrl.entities.BECDDS.Ecdd_customer_transaction;
+import com.bornfire.xbrl.entities.BECDDS.Ecdd_customer_transaction_repo;
 import com.bornfire.xbrl.services.AccessAndRolesServices;
 import com.bornfire.xbrl.services.AlertManagementServices;
 import com.bornfire.xbrl.services.EcddUploadDocumentService;
@@ -116,46 +107,34 @@ public class XBRLNavigationController {
 	EcddIndividualProfileRepository ecddIndividualProfileRepository;
 
 	@Autowired
-	XBRLReportsMasterRep XBRLReportsMasterReps;
-
-	@Autowired
-	AlertRep alertRep;
-
-	@Autowired
-	SequenceGenerator sequence;
-
-	@Autowired
-	BRFValidationsRepo brfValidationsRepo;
-
-	@Autowired
 	private AlertManagementRepository alertmanagementrepository;
-
-	@Autowired
-	AlertManagementServices alertservices;
-
-	@Autowired
-	com.bornfire.xbrl.entities.BECCDS.AUD_SERVICE_REPO AUD_SERVICE_REPO;
-
-	@Autowired
-	UserProfileRep userProfileRep;
-
-	@Autowired
-	MANUAL_Audit_Rep mANUAL_Audit_Rep;
-
-	@Autowired
-	MANUAL_Service_Rep mANUAL_Service_Rep;
-
-	@Autowired
-	Charge_Back_Rep charge_Back_Rep;
 
 	@Autowired
 	Ecdd_customer_transaction_repo Ecdd_customer_transaction_repo;
 
 	@Autowired
-	AccessAndRolesServices AccessRoleService;
+	AlertManagementServices alertservices;
 
 	@Autowired
 	AccessandRolesRepository accessandrolesrepository;
+
+	@Autowired
+	ReportServices reportServices;
+
+	@Autowired
+	UserProfileRep userProfileRep;
+
+	@Autowired
+	AccessAndRolesServices AccessRoleService;
+
+	@Autowired
+	XBRLReportsMasterRep XBRLReportsMasterReps;
+
+	@Autowired
+	Ecdd_profile_report_repo Ecdd_profile_report_repo;
+
+	@Autowired
+	Charge_Back_Rep charge_Back_Rep;
 
 	private String auditRefNo;
 
@@ -358,6 +337,7 @@ public class XBRLNavigationController {
 
 			System.out.println(Dashboardpage);
 		}
+
 		md.addAttribute("menu", "Dashboard");
 		return "XBRLDashboard";
 	}
@@ -515,68 +495,8 @@ public class XBRLNavigationController {
 
 			System.out.println(Dashboardpage);
 		}
-
 		md.addAttribute("menu", "Dashboard");
 		return "XBRLDashboard";
-	}
-
-	@Autowired
-	ReportServices reportServices;
-
-	@RequestMapping(value = "UserProfile", method = { RequestMethod.GET, RequestMethod.POST })
-	public String userprofile(@RequestParam(required = false) String formmode,
-			@RequestParam(required = false) String userid,
-			@RequestParam(value = "page", required = false) Optional<Integer> page,
-			@RequestParam(value = "size", required = false) Optional<Integer> size, Model md, HttpServletRequest req) {
-
-		int currentPage = page.orElse(0);
-		int pageSize = size.orElse(Integer.parseInt(pagesize));
-
-		String loginuserid = (String) req.getSession().getAttribute("USERID");
-		String WORKCLASSAC = (String) req.getSession().getAttribute("WORKCLASS");
-		String ROLEIDAC = (String) req.getSession().getAttribute("ROLEID");
-		md.addAttribute("RuleIDType", accessandrolesrepository.roleidtype());
-
-		System.out.println("work class is : " + WORKCLASSAC);
-		// Logging Navigation
-		loginServices.SessionLogging("USERPROFILE", "M2", req.getSession().getId(), loginuserid, req.getRemoteAddr(),
-				"ACTIVE");
-		Session hs1 = sessionFactory.getCurrentSession();
-		md.addAttribute("menu", "USER PROFILE"); // To highlight the menu
-
-		if (formmode == null || formmode.equals("list")) {
-
-			md.addAttribute("formmode", "list");// to set which form - valid values are "edit" , "add" & "list"
-			md.addAttribute("WORKCLASSAC", WORKCLASSAC);
-			md.addAttribute("ROLEIDAC", ROLEIDAC);
-			md.addAttribute("loginuserid", loginuserid);
-
-			Iterable<UserProfile> user = loginServices.getUsersList(ROLEIDAC);
-
-			md.addAttribute("userProfiles", user);
-
-		} else if (formmode.equals("edit")) {
-
-			md.addAttribute("formmode", formmode);
-			md.addAttribute("domains", reportServices.getDomainList());
-			md.addAttribute("userProfile", loginServices.getUser(userid));
-
-		} else if (formmode.equals("verify")) {
-
-			md.addAttribute("formmode", formmode);
-			md.addAttribute("domains", reportServices.getDomainList());
-			md.addAttribute("userProfile", loginServices.getUser(userid));
-
-		} else {
-
-			md.addAttribute("formmode", formmode);
-			md.addAttribute("domains", reportServices.getDomainList());
-			md.addAttribute("FinUserProfiles", loginServices.getFinUsersList());
-			md.addAttribute("userProfile", loginServices.getUser(""));
-
-		}
-
-		return "XBRLUserprofile";
 	}
 
 	@RequestMapping(value = "AccessandRoles", method = { RequestMethod.GET, RequestMethod.POST })
@@ -692,30 +612,60 @@ public class XBRLNavigationController {
 		return accessandrolesrepository.findById(roleId).orElse(null);
 	}
 
-	@RequestMapping(value = "Userlog", method = RequestMethod.GET)
-	public String userlog(Model md, HttpServletRequest req) {
+	@RequestMapping(value = "UserProfile", method = { RequestMethod.GET, RequestMethod.POST })
+	public String userprofile(@RequestParam(required = false) String formmode,
+			@RequestParam(required = false) String userid,
+			@RequestParam(value = "page", required = false) Optional<Integer> page,
+			@RequestParam(value = "size", required = false) Optional<Integer> size, Model md, HttpServletRequest req) {
 
-		String userid = (String) req.getSession().getAttribute("USERID");
+		int currentPage = page.orElse(0);
+		int pageSize = size.orElse(Integer.parseInt(pagesize));
+
+		String loginuserid = (String) req.getSession().getAttribute("USERID");
+		String WORKCLASSAC = (String) req.getSession().getAttribute("WORKCLASS");
+		String ROLEIDAC = (String) req.getSession().getAttribute("ROLEID");
+		md.addAttribute("RuleIDType", accessandrolesrepository.roleidtype());
+
+		System.out.println("work class is : " + WORKCLASSAC);
 		// Logging Navigation
-		loginServices.SessionLogging("USERLOG", "M4", req.getSession().getId(), userid, req.getRemoteAddr(), "ACTIVE");
+		loginServices.SessionLogging("USERPROFILE", "M2", req.getSession().getId(), loginuserid, req.getRemoteAddr(),
+				"ACTIVE");
+		Session hs1 = sessionFactory.getCurrentSession();
+		md.addAttribute("menu", "USER PROFILE"); // To highlight the menu
 
-		LocalDateTime localDateTime = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+		if (formmode == null || formmode.equals("list")) {
 
-		md.addAttribute("menu", "Userlog");
-		md.addAttribute("userlog", loginServices.getUserLog(
-				Date.from(localDateTime.plusDays(-5).atZone(ZoneId.systemDefault()).toInstant()), new Date()));
+			md.addAttribute("formmode", "list");// to set which form - valid values are "edit" , "add" & "list"
+			md.addAttribute("WORKCLASSAC", WORKCLASSAC);
+			md.addAttribute("ROLEIDAC", ROLEIDAC);
+			md.addAttribute("loginuserid", loginuserid);
 
-		return "XBRLUserLogs";
-	}
+			Iterable<UserProfile> user = loginServices.getUsersList(ROLEIDAC);
 
-	@RequestMapping(value = "Finuserdata", method = RequestMethod.GET)
-	public ModelAndView Finuserdata(@RequestParam String userid) {
-		ModelAndView mv = new ModelAndView("XBRLUserprofile::finuserapply");
-		mv.addObject("formmode", "add");
+			md.addAttribute("userProfiles", user);
 
-		mv.addObject("userProfile", loginServices.getFinUser(userid));
-		return mv;
+		} else if (formmode.equals("edit")) {
 
+			md.addAttribute("formmode", formmode);
+			md.addAttribute("domains", reportServices.getDomainList());
+			md.addAttribute("userProfile", loginServices.getUser(userid));
+
+		} else if (formmode.equals("verify")) {
+
+			md.addAttribute("formmode", formmode);
+			md.addAttribute("domains", reportServices.getDomainList());
+			md.addAttribute("userProfile", loginServices.getUser(userid));
+
+		} else {
+
+			md.addAttribute("formmode", formmode);
+			md.addAttribute("domains", reportServices.getDomainList());
+			md.addAttribute("FinUserProfiles", loginServices.getFinUsersList());
+			md.addAttribute("userProfile", loginServices.getUser(""));
+
+		}
+
+		return "XBRLUserprofile";
 	}
 
 	@RequestMapping(value = "createUser", method = RequestMethod.POST)
@@ -802,82 +752,64 @@ public class XBRLNavigationController {
 
 	}
 
-	@RequestMapping(value = "userLogs/Download", method = RequestMethod.GET)
+	@RequestMapping(value = "updateValidity", method = RequestMethod.POST)
 	@ResponseBody
-	public InputStreamResource UserDownload(HttpServletResponse response, @RequestParam String fromdate,
-			@RequestParam String todate) throws IOException, SQLException {
-		response.setContentType("application/octet-stream");
+	public String updateValidity(@RequestParam("reportid") String reportid, String valid, HttpServletRequest rq) {
 
-		InputStreamResource resource = null;
-
-		try {
-			Date fromdate2 = new SimpleDateFormat("dd-MM-yyyy").parse(fromdate);
-			Date todate2 = new SimpleDateFormat("dd-MM-yyyy").parse(todate);
-			File repfile = loginServices.getUserLogFile(fromdate2, todate2);
-			response.setHeader("Content-Disposition", "attachment; filename=" + repfile.getName());
-			resource = new InputStreamResource(new FileInputStream(repfile));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return resource;
-	}
-
-	@RequestMapping(value = "logoutUpdate", method = RequestMethod.POST)
-	@ResponseBody
-	public String logoutUpdate(HttpServletRequest req) {
-
-		String msg;
-
-		String userid = (String) req.getSession().getAttribute("USERID");
-
-		try {
-			logger.info("Updating Logout");
-			loginServices.SessionLogging("LOGOUT", "M0", req.getSession().getId(), userid, req.getRemoteAddr(),
-					"IN-ACTIVE");
-			msg = "success";
-		} catch (Exception e) {
-			e.printStackTrace();
-			msg = "failed";
-		}
-		return msg;
-	}
-
-	@RequestMapping(value = "createAlert", method = RequestMethod.POST)
-	@ResponseBody
-	public String createRule(@RequestParam("formmode") String formmode,
-			@ModelAttribute AlertManagementEntity alertparam, Model md, HttpServletRequest rq) {
 		String userid = (String) rq.getSession().getAttribute("USERID");
 
-		String msg = alertservices.addAlert(alertparam, formmode, userid);
-
-		return msg;
+		return reportServices.updateValidity(reportid, valid, userid);
 
 	}
 
-	@RequestMapping(value = "getchanges2", method = RequestMethod.GET)
-	@ResponseBody
-	public String getchanges2(@RequestParam("audit_ref_no") String auditRefNo) {
-		System.out.println("Received audit_ref_no: " + auditRefNo);
+	@RequestMapping(value = "AlertNotificationmodel", method = { RequestMethod.GET, RequestMethod.POST })
+	public String AlertNotificationmodel(@RequestParam(required = false) String formmode,
+			@RequestParam(required = false) String userid, @RequestParam(required = false) String report_srl,
+			@RequestParam(value = "page", required = false) Optional<Integer> page,
+			@RequestParam(value = "size", required = false) Optional<Integer> size, Model md, HttpServletRequest req) {
 
-		try {
-			List<MANUAL_Service_Entity> changes = mANUAL_Service_Rep.getServiceAudiT(auditRefNo);
+		int currentPage = page.orElse(0);
+		int pageSize = size.orElse(Integer.parseInt(pagesize));
 
-			if (changes == null || changes.isEmpty()) {
-				return ""; // No data found
-			}
+		String loginuserid = (String) req.getSession().getAttribute("USERID");
+		// Logging Navigation
+		loginServices.SessionLogging("USERPROFILE", "M2", req.getSession().getId(), loginuserid, req.getRemoteAddr(),
+				"ACTIVE");
 
-			StringBuilder sb = new StringBuilder();
-			for (MANUAL_Service_Entity entity : changes) {
-				sb.append(entity.getField_name()).append(": OldValue: ").append(entity.getOld_value())
-						.append(", NewValue: ").append(entity.getNew_value()).append("|||");
-			}
+		md.addAttribute("menu", "UserProfile"); // To highlight the menu
 
-			return sb.toString();
+		if (formmode == null || formmode.equals("list")) {
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "Error: " + e.getMessage();
+			md.addAttribute("formmode", "list"); // to set which form - valid values are "edit" , "add" & "list"
+			md.addAttribute("alertlists", loginServices.getAlertList());
+
+		} else if (formmode.equals("add")) {
+
+			md.addAttribute("formmode", formmode);
+			// md.addAttribute("domains", reportServices.getDomainList());
+			// md.addAttribute("userProfile", loginServices.getAlerter(report_srl));
+
+		} else if (formmode.equals("edit")) {
+
+			md.addAttribute("formmode", formmode);
+			md.addAttribute("domains", reportServices.getDomainList());
+			md.addAttribute("userProfile", loginServices.getAlerter(report_srl));
+
+		} else if (formmode.equals("view")) {
+
+			md.addAttribute("formmode", formmode);
+
+			md.addAttribute("userProfile", loginServices.getAlerter(report_srl));
+
+		} else if (formmode.equals("delete")) {
+
+			md.addAttribute("formmode", formmode);
+
+			md.addAttribute("userProfile", loginServices.getAlerter(report_srl));
+
 		}
+
+		return "Alertnotifymodal";
 	}
 
 	@Autowired
@@ -893,11 +825,7 @@ public class XBRLNavigationController {
 
 	@RequestMapping(value = "kyc", method = { RequestMethod.GET, RequestMethod.POST })
 	public String KYCHome(@RequestParam(required = false) String formmode,
-			@RequestParam(required = false) String customerRisk, @RequestParam(required = false) Integer age, // 'age'
-																												// here
-																												// means
-																												// pending
-																												// days
+			@RequestParam(required = false) String customerRisk, @RequestParam(required = false) Integer age, // days
 			Model md, HttpServletRequest req) {
 
 		String ROLEID = (String) req.getSession().getAttribute("ROLEID");
@@ -926,7 +854,11 @@ public class XBRLNavigationController {
 							: ecddIndividualProfileRepository.findAllIndividuals());
 			md.addAttribute("reportlist", results);
 		}
+		LocalDate today = LocalDate.now(); // Get today's date
+		Date fromDateToUse; // Declare a variable for the date to use
 
+		fromDateToUse = java.sql.Date.valueOf(today.minusDays(0));
+		md.addAttribute("datavalue", fromDateToUse);
 		md.addAttribute("formmode", formmode);
 		return "KYC_Home";
 	}
@@ -1125,14 +1057,25 @@ public class XBRLNavigationController {
 
 	@GetMapping("kyc/Reportstatus/Download")
 	@ResponseBody
-	public ResponseEntity<InputStreamResource> Downlaodkycstatus(HttpServletRequest req) {
+	public ResponseEntity<InputStreamResource> Downlaodkycstatus(
+			@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date Fromdate,
+			HttpServletRequest req) {
 
 		logger.info("Receiving Kyc status download request");
+		LocalDate today = LocalDate.now(); // Get today's date
+		Date fromDateToUse; // Declare a variable for the date to use
 
-		List<Object[]> completedstatus = ecddIndividualProfileRepository.getstatuscount();
-		List<Object[]> pendingstatus = ecddIndividualProfileRepository.getpendingstatuscount();
-		List<Object[]> corpcompletedstatus = kyc_corporate_repo.getstatuscount();
-		List<Object[]> corppendingstatus = kyc_corporate_repo.getpendingstatuscount();
+		if (Fromdate != null) {
+			fromDateToUse = Fromdate;
+		} else {
+
+			fromDateToUse = java.sql.Date.valueOf(today.minusDays(0));
+		}
+		List<Ecdd_profile_report_entity> ecddProfileReportList = Ecdd_profile_report_repo
+				.getcorporatedata(fromDateToUse);
+		List<Ecdd_profile_report_entity> ecddProfileReportListIndv = Ecdd_profile_report_repo
+				.getindividualdata(fromDateToUse);
+
 		try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
 			Sheet sheet = workbook.createSheet("ECDD Report Status");
@@ -1166,135 +1109,186 @@ public class XBRLNavigationController {
 			borderStyle.setBorderLeft(BorderStyle.THIN);
 			borderStyle.setBorderRight(BorderStyle.THIN);
 
-			// INDIVIDUAL Completed: Rows 0–10, Columns A–D
-			Row indivTitleRow = sheet.createRow(0);
+			// Corporate Completed:Columns A–J
+			Row CorpTitleRow = sheet.createRow(1);
+			CorpTitleRow.setHeightInPoints(20);
+			Cell CorpBankCell = CorpTitleRow.createCell(0);
+			CorpBankCell.setCellValue("CORPORATE ECDD");
+			CorpBankCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 9));
+
+			// SOL ID (A3:A4)
+			Row secondTitleRow = sheet.createRow(2);
+			Cell solIdCell = secondTitleRow.createCell(0);
+			solIdCell.setCellValue("SOL ID");
+			solIdCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(2, 3, 0, 0)); // Merge A3:A4
+
+			// Completed (B3:D3)
+			Cell completedCell = secondTitleRow.createCell(1);
+			completedCell.setCellValue("Completed");
+			completedCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(2, 2, 1, 3));
+
+			// Pending (E3:G3)
+			Cell pendingCell = secondTitleRow.createCell(4);
+			pendingCell.setCellValue("Pending for Verification");
+			pendingCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(2, 2, 4, 6));
+
+			// Unattended (H3:I3)
+			Cell UnattendCell = secondTitleRow.createCell(7);
+			UnattendCell.setCellValue("Not attended yet");
+			UnattendCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(2, 2, 7, 9));
+
+			Row Headerrow = sheet.createRow(3);
+			String[] subHeaders = { "HIGH", "MEDIUM", "LOW", "HIGH", "MEDIUM", "LOW", "HIGH", "MEDIUM", "LOW" };
+			int col = 1;
+			for (String subHeader : subHeaders) {
+				Cell cell = Headerrow.createCell(col++);
+				cell.setCellValue(subHeader);
+				cell.setCellStyle(titleStyle);
+
+			}
+
+			int corporaterownum = 4;
+
+			for (Ecdd_profile_report_entity entityloopdata : ecddProfileReportList) {
+
+				Row row = sheet.createRow(corporaterownum++);
+
+				Cell cell0 = row.createCell(0);
+				Cell cell1 = row.createCell(1);
+				Cell cell2 = row.createCell(2);
+				Cell cell3 = row.createCell(3);
+				Cell cell4 = row.createCell(4);
+				Cell cell5 = row.createCell(5);
+				Cell cell6 = row.createCell(6);
+				Cell cell7 = row.createCell(7);
+				Cell cell8 = row.createCell(8);
+				Cell cell9 = row.createCell(9);
+
+				cell0.setCellValue(entityloopdata.getBranch_code() != null ? entityloopdata.getBranch_code() : "");
+				cell1.setCellValue(entityloopdata.getHigh_risk_completed() != null
+						? entityloopdata.getHigh_risk_completed().toString()
+						: "");
+				cell2.setCellValue(entityloopdata.getMedium_risk_completed() != null
+						? entityloopdata.getMedium_risk_completed().toString()
+						: "");
+				cell3.setCellValue(entityloopdata.getLow_risk_completed() != null
+						? entityloopdata.getLow_risk_completed().toString()
+						: "");
+				cell4.setCellValue(
+						entityloopdata.getHigh_risk_pending() != null ? entityloopdata.getHigh_risk_pending().toString()
+								: "");
+				cell5.setCellValue(entityloopdata.getMedium_risk_pending() != null
+						? entityloopdata.getMedium_risk_pending().toString()
+						: "");
+				cell6.setCellValue(
+						entityloopdata.getLow_risk_pending() != null ? entityloopdata.getLow_risk_pending().toString()
+								: "");
+				cell7.setCellValue(entityloopdata.getHigh_risk_non_atended() != null
+						? entityloopdata.getHigh_risk_non_atended().toString()
+						: "");
+				cell8.setCellValue(entityloopdata.getMedium_risk_non_atended() != null
+						? entityloopdata.getMedium_risk_non_atended().toString()
+						: "");
+				cell9.setCellValue(entityloopdata.getLow_risk_non_atended() != null
+						? entityloopdata.getLow_risk_non_atended().toString()
+						: "");
+
+			}
+
+			// INDIVIDUAL Completed:Columns A–J
+			Row indivTitleRow = sheet.createRow(12);
 			indivTitleRow.setHeightInPoints(20);
 			Cell indivBankCell = indivTitleRow.createCell(0);
-			indivBankCell.setCellValue("Bank of Baroda");
+			indivBankCell.setCellValue("RETAIL ECDD");
 			indivBankCell.setCellStyle(titleStyle);
-			sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 3));
+			sheet.addMergedRegion(new CellRangeAddress(12, 12, 0, 9));
 
-			Row indivSubTitleRow = sheet.createRow(1);
-			indivSubTitleRow.setHeightInPoints(18);
-			Cell indivSubTitleCell = indivSubTitleRow.createCell(0);
-			indivSubTitleCell.setCellValue("Ecdd Individual Completed Status");
-			indivSubTitleCell.setCellStyle(titleStyle);
-			sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 3));
+			// SOL ID (A13:A14)
+			Row corpsecondTitleRow = sheet.createRow(13);
+			Cell corpsolIdCell = corpsecondTitleRow.createCell(0);
+			corpsolIdCell.setCellValue("SOL ID");
+			corpsolIdCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(13, 14, 0, 0)); // Merge A3:A4
 
-			Row indivHeaderRow = sheet.createRow(2);
-			String[] headers = { "Branch Name", "Low Risk", "Medium Risk", "High Risk" };
-			for (int i = 0; i < headers.length; i++) {
-				Cell cell = indivHeaderRow.createCell(i);
-				cell.setCellValue(headers[i]);
-				cell.setCellStyle(headerStyle);
+			// Completed (B13:D13)
+			Cell corpcompletedCell = corpsecondTitleRow.createCell(1);
+			corpcompletedCell.setCellValue("Completed");
+			corpcompletedCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(13, 13, 1, 3));
+
+			// Pending (E13:G13)
+			Cell corppendingCell = corpsecondTitleRow.createCell(4);
+			corppendingCell.setCellValue("Pending for Verification");
+			corppendingCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(13, 13, 4, 6));
+
+			// Unattended (H13:I13)
+			Cell corpUnattendCell = corpsecondTitleRow.createCell(7);
+			corpUnattendCell.setCellValue("Not attended yet");
+			corpUnattendCell.setCellStyle(titleStyle);
+			sheet.addMergedRegion(new CellRangeAddress(13, 13, 7, 9));
+
+			Row corpHeaderrow = sheet.createRow(14);
+			String[] corpsubHeaders = { "HIGH", "MEDIUM", "LOW", "HIGH", "MEDIUM", "LOW", "HIGH", "MEDIUM", "LOW" };
+			int col1 = 1;
+			for (String subHeader : corpsubHeaders) {
+				Cell cell = corpHeaderrow.createCell(col1++);
+				cell.setCellValue(subHeader);
+				cell.setCellStyle(titleStyle);
+
 			}
 
-			int indivRowNum = 3;
-			for (Object[] rowData : completedstatus) {
-				Row row = sheet.createRow(indivRowNum++);
-				for (int col = 0; col < rowData.length; col++) {
-					Cell cell = row.createCell(col);
-					if (rowData[col] instanceof String) {
-						cell.setCellValue((String) rowData[col]);
-					} else if (rowData[col] instanceof Number) {
-						cell.setCellValue(((Number) rowData[col]).doubleValue());
-					}
-					cell.setCellStyle(borderStyle);
-				}
-			}
+			int Indvrownum = 15;
 
-			Row indivPendingTitle = sheet.createRow(11);
-			indivPendingTitle.setHeightInPoints(18);
-			Cell pendingTitleCell = indivPendingTitle.createCell(0);
-			pendingTitleCell.setCellValue("Ecdd Individual Pending Status");
-			pendingTitleCell.setCellStyle(titleStyle);
-			sheet.addMergedRegion(new CellRangeAddress(11, 11, 0, 3));
+			for (Ecdd_profile_report_entity entityloopdata : ecddProfileReportListIndv) {
 
-			Row indivPendingHeader = sheet.createRow(12);
-			for (int i = 0; i < headers.length; i++) {
-				Cell cell = indivPendingHeader.createCell(i);
-				cell.setCellValue(headers[i]);
-				cell.setCellStyle(headerStyle);
-			}
+				Row row = sheet.createRow(Indvrownum++);
 
-			int indivPendingRowNum = 13;
-			for (Object[] rowData : pendingstatus) {
-				Row row = sheet.createRow(indivPendingRowNum++);
-				for (int col = 0; col < rowData.length; col++) {
-					Cell cell = row.createCell(col);
-					if (rowData[col] instanceof String) {
-						cell.setCellValue((String) rowData[col]);
-					} else if (rowData[col] instanceof Number) {
-						cell.setCellValue(((Number) rowData[col]).doubleValue());
-					}
-					cell.setCellStyle(borderStyle);
-				}
-			}
+				Cell cell0 = row.createCell(0);
+				Cell cell1 = row.createCell(1);
+				Cell cell2 = row.createCell(2);
+				Cell cell3 = row.createCell(3);
+				Cell cell4 = row.createCell(4);
+				Cell cell5 = row.createCell(5);
+				Cell cell6 = row.createCell(6);
+				Cell cell7 = row.createCell(7);
+				Cell cell8 = row.createCell(8);
+				Cell cell9 = row.createCell(9);
 
-			Row corpTitleRow = sheet.getRow(0);
-			Cell corpBankCell = corpTitleRow.createCell(6); // G
-			corpBankCell.setCellValue("Bank of Baroda");
-			corpBankCell.setCellStyle(titleStyle);
-			sheet.addMergedRegion(new CellRangeAddress(0, 0, 6, 9));
+				cell0.setCellValue(entityloopdata.getBranch_code() != null ? entityloopdata.getBranch_code() : "");
+				cell1.setCellValue(entityloopdata.getHigh_risk_completed() != null
+						? entityloopdata.getHigh_risk_completed().toString()
+						: "");
+				cell2.setCellValue(entityloopdata.getMedium_risk_completed() != null
+						? entityloopdata.getMedium_risk_completed().toString()
+						: "");
+				cell3.setCellValue(entityloopdata.getLow_risk_completed() != null
+						? entityloopdata.getLow_risk_completed().toString()
+						: "");
+				cell4.setCellValue(
+						entityloopdata.getHigh_risk_pending() != null ? entityloopdata.getHigh_risk_pending().toString()
+								: "");
+				cell5.setCellValue(entityloopdata.getMedium_risk_pending() != null
+						? entityloopdata.getMedium_risk_pending().toString()
+						: "");
+				cell6.setCellValue(
+						entityloopdata.getLow_risk_pending() != null ? entityloopdata.getLow_risk_pending().toString()
+								: "");
+				cell7.setCellValue(entityloopdata.getHigh_risk_non_atended() != null
+						? entityloopdata.getHigh_risk_non_atended().toString()
+						: "");
+				cell8.setCellValue(entityloopdata.getMedium_risk_non_atended() != null
+						? entityloopdata.getMedium_risk_non_atended().toString()
+						: "");
+				cell9.setCellValue(entityloopdata.getLow_risk_non_atended() != null
+						? entityloopdata.getLow_risk_non_atended().toString()
+						: "");
 
-			Row corpSubTitleRow = sheet.getRow(1);
-			Cell corpSubTitleCell = corpSubTitleRow.createCell(6);
-			corpSubTitleCell.setCellValue("Ecdd Corporate Completed Status");
-			corpSubTitleCell.setCellStyle(titleStyle);
-			sheet.addMergedRegion(new CellRangeAddress(1, 1, 6, 9));
-
-			Row corpHeaderRow = sheet.getRow(2);
-			for (int i = 0; i < headers.length; i++) {
-				Cell cell = corpHeaderRow.createCell(6 + i);
-				cell.setCellValue(headers[i]);
-				cell.setCellStyle(headerStyle);
-			}
-
-			int corpRowNum = 3;
-			for (Object[] rowData : corpcompletedstatus) {
-				Row row = sheet.getRow(corpRowNum);
-				if (row == null)
-					row = sheet.createRow(corpRowNum);
-				for (int col = 0; col < rowData.length; col++) {
-					Cell cell = row.createCell(6 + col);
-					if (rowData[col] instanceof String) {
-						cell.setCellValue((String) rowData[col]);
-					} else if (rowData[col] instanceof Number) {
-						cell.setCellValue(((Number) rowData[col]).doubleValue());
-					}
-					cell.setCellStyle(borderStyle);
-				}
-				corpRowNum++;
-			}
-
-			Row corpPendTitle = sheet.getRow(11);
-			Cell corpPendingTitleCell = corpPendTitle.createCell(6);
-			corpPendingTitleCell.setCellValue("Ecdd Corporate Pending Status");
-			corpPendingTitleCell.setCellStyle(titleStyle);
-			sheet.addMergedRegion(new CellRangeAddress(11, 11, 6, 9));
-
-			Row corpPendHeader = sheet.getRow(12);
-			for (int i = 0; i < headers.length; i++) {
-				Cell cell = corpPendHeader.createCell(6 + i);
-				cell.setCellValue(headers[i]);
-				cell.setCellStyle(headerStyle);
-			}
-
-			int corpPendRowNum = 13;
-			for (Object[] rowData : corppendingstatus) {
-				Row row = sheet.getRow(corpPendRowNum);
-				if (row == null)
-					row = sheet.createRow(corpPendRowNum);
-				for (int col = 0; col < rowData.length; col++) {
-					Cell cell = row.createCell(6 + col);
-					if (rowData[col] instanceof String) {
-						cell.setCellValue((String) rowData[col]);
-					} else if (rowData[col] instanceof Number) {
-						cell.setCellValue(((Number) rowData[col]).doubleValue());
-					}
-					cell.setCellStyle(borderStyle);
-				}
-				corpPendRowNum++;
 			}
 
 			// Write to output stream
@@ -1875,130 +1869,5 @@ public class XBRLNavigationController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
-	}
-
-	public List<AuditTablePojo> getauditListLocalvaluesbusiness(Date fromDateToUse) {
-		List<MANUAL_Service_Entity> auditList = mANUAL_Service_Rep.getauditListLocalvaluesbusiness(fromDateToUse);
-		List<AuditTablePojo> auditPojoList = new ArrayList<>();
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-
-		for (MANUAL_Service_Entity ipsAudit : auditList) {
-			boolean isUpdated = false;
-
-			// Check if an entry with the same ID and stage3 remarks already exists
-			for (AuditTablePojo existingPojo : auditPojoList) {
-				String auditRefNo = existingPojo.getAudit_ref_no();
-				String remarks = existingPojo.getRemarks();
-				String ipsAuditno = ipsAudit.getAudit_ref_no();
-
-				if (auditRefNo != null && ipsAuditno != null && auditRefNo.equals(ipsAuditno) && remarks != null
-						&& ("Login Successfully".equals(remarks) || "Logout Successfully".equals(remarks))) {
-
-					// Update existing entry's data
-					existingPojo.setAudit_table(ipsAudit.getAudit_table());
-					existingPojo.setFunc_code(ipsAudit.getFunc_code());
-					existingPojo.setEntry_user(ipsAudit.getEntry_user());
-					existingPojo.setEntry_time(ipsAudit.getEntry_time());
-					existingPojo.setAuth_user(ipsAudit.getAuth_user());
-					existingPojo.setAuth_time(ipsAudit.getAuth_time());
-					existingPojo.setRemarks(ipsAudit.getRemarks());
-
-					List<String> fieldName = new ArrayList<>();
-					List<String> oldvalue = new ArrayList<>();
-					List<String> newvalue = new ArrayList<>();
-
-					// Populate lists excluding "FIELD 4"
-					String[] oldValues = ipsAudit.getOld_value().split("\\|\\|");
-					String[] newValues = ipsAudit.getNew_value().split("\\|\\|");
-					String[] fields = ipsAudit.getField_name().split("\\|\\|");
-
-					for (int i = 0; i < fields.length; i++) {
-						if (!"FIELD 4".equals(fields[i])) {
-							fieldName.add(fields[i]);
-
-							// Format the old and new values if they are date strings
-							String oldFormatted = formatDate(oldValues[i], dateFormat);
-							String newFormatted = formatDate(newValues[i], dateFormat);
-
-							oldvalue.add(oldFormatted);
-							newvalue.add(newFormatted);
-						}
-					}
-
-					existingPojo.setField_name(fieldName);
-					existingPojo.setOld_value(oldvalue);
-					existingPojo.setNew_value(newvalue);
-
-					isUpdated = true;
-					break;
-				}
-			}
-
-			// Create a new entry if no existing entry was updated
-			if (!isUpdated) {
-				AuditTablePojo auditTablePojo = new AuditTablePojo();
-				auditTablePojo.setAudit_table(ipsAudit.getAudit_table());
-				auditTablePojo.setFunc_code(ipsAudit.getFunc_code());
-				auditTablePojo.setEntry_user(ipsAudit.getEntry_user());
-				auditTablePojo.setEntry_time(ipsAudit.getEntry_time());
-				auditTablePojo.setAuth_user(ipsAudit.getAuth_user());
-				auditTablePojo.setAuth_time(ipsAudit.getAuth_time());
-				auditTablePojo.setRemarks(ipsAudit.getRemarks());
-
-				List<String> fieldName = new ArrayList<>();
-				List<String> oldvalue = new ArrayList<>();
-				List<String> newvalue = new ArrayList<>();
-
-				if (ipsAudit != null && ipsAudit.getModi_details() != null) {
-					String[] oldValues = ipsAudit.getOld_value().split("\\|\\|");
-					String[] newValues = ipsAudit.getNew_value().split("\\|\\|");
-					String[] fields = ipsAudit.getField_name().split("\\|\\|");
-
-					for (int i = 0; i < fields.length; i++) {
-						if (!"FIELD 4".equals(fields[i])) {
-							fieldName.add(fields[i]);
-
-							// Format the old and new values if they are date strings
-							String oldFormatted = formatDate(oldValues[i], dateFormat);
-							String newFormatted = formatDate(newValues[i], dateFormat);
-
-							oldvalue.add(oldFormatted);
-							newvalue.add(newFormatted);
-						}
-					}
-				} else {
-					System.out.println("No modification details available");
-				}
-
-				auditTablePojo.setField_name(fieldName);
-				auditTablePojo.setOld_value(oldvalue);
-				auditTablePojo.setNew_value(newvalue);
-				auditPojoList.add(auditTablePojo);
-			}
-		}
-
-		return auditPojoList;
-	}
-
-	// Helper method to format date values as 'DD-MM-YYYY'
-	private String formatDate(String value, SimpleDateFormat dateFormat) {
-		try {
-			// Assuming the value is in a valid date format that SimpleDateFormat can parse
-			Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(value); // Adjust this pattern based on
-																						// your date format
-			return dateFormat.format(date); // Return formatted date as 'DD-MM-YYYY'
-		} catch (Exception e) {
-			// If parsing fails, return the original value
-			return value;
-		}
-	}
-
-	@RequestMapping(value = "Generateloginotp", method = { RequestMethod.GET, RequestMethod.POST })
-	@ResponseBody
-	public String Generateloginotp(@RequestParam("Userid") String Userid) {
-		String msg = "success";
-		System.out.println(msg);
-		return msg;
 	}
 }

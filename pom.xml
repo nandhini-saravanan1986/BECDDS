@@ -10,11 +10,11 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.bornfire</groupId>
-	<artifactId>BECCDS</artifactId>
+	<artifactId>BECDDS</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>BECCDS</name>
-	<description>BECCDS</description>
+	<name>BECDDS</name>
+	<description>BECDDS</description>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -245,9 +245,10 @@
 		<!-- <dependency> <groupId>wsdl4j</groupId> <artifactId>wsdl4j</artifactId> 
 			</dependency> -->
 
+		
 	</dependencies>
 	<build>
-		<finalName>BECCDS</finalName>
+		<finalName>BECDDS</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

@@ -1,5 +1,5 @@
 
-package com.bornfire.xbrl.entities.BECCDS;
+package com.bornfire.xbrl.entities.BECDDS;
 
 import java.math.BigDecimal;
 import java.util.List;

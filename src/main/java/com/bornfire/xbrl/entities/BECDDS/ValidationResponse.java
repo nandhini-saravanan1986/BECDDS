@@ -1,4 +1,4 @@
-package com.bornfire.xbrl.entities.BECCDS;
+package com.bornfire.xbrl.entities.BECDDS;
 
 public class ValidationResponse {
 	private String GenID;

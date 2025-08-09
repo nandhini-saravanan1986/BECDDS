@@ -135,11 +135,11 @@
 		const srlno = element.getAttribute("data-resource");
 	//	$('#loader1').modal("show");
 		requestAnimationFrame(() => {
-			window.location.href = `/BECCDS/kyc/individual?&srlno=${encodeURIComponent(srlno)}&formmode=modify`;
+			window.location.href = `/BECDDS/kyc/individual?&srlno=${encodeURIComponent(srlno)}&formmode=modify`;
 		});
 	}
 	function goHome() {
-		window.location.href = '/BECCDS/';
+		window.location.href = '/BECDDS/';
 	}
 	function goBack() {
 		window.history.back();
@@ -150,25 +150,21 @@
 	}
 	function corporatehome() {
 		const srlno = document.getElementById("srlno").value;
-		var url = "/BECCDS/kyc/individual?srlno=" + encodeURIComponent(srlno) + "&formmode=modify";
+		var url = "/BECDDS/kyc/individual?srlno=" + encodeURIComponent(srlno) + "&formmode=modify";
 		window.location.href = url;
 	}
 	function verifyrecord(a) {
 		const srlno = a.getAttribute("data-srlno");
-		const Reviewdate = document.getElementById('review_date').value;
-		const Reviewdesig = document.getElementById('reviewed_by_designation').value;
-		const Branchname = document.getElementById('branch_name').value;
-		const Approvaldate = document.getElementById('approval_date').value;
-		const entrydatefin = document.getElementById('entry_date').value;
-		const entrybyfin = document.getElementById('entered_by').value;
-		const docuploaddate = document.getElementById('doc_uploaded_date').value;
-		const docuploadby = document.getElementById('doc_uploaded_by').value;
-		alert(entrydatefin)
+		const approvdesig = document.getElementById('branch_name').value;
+	//	const Approvaldate = document.getElementById('approval_date').value;
+		
+		
+		
 	//	$('#loader1').modal('show');
-	if ((Reviewdate && Reviewdesig && Branchname && Approvaldate && entrydatefin && entrybyfin && docuploaddate && docuploadby)) {
+	if ((approvdesig)) {
 		
 		$.ajax({
-			url: '/BECCDS/kyc/individual/verify',
+			url: '/BECDDS/kyc/individual/verify',
 			type: 'POST',
 			data: {
 				formmode: 'verified',
@@ -188,7 +184,7 @@
 	//			$('#loader1').modal('hide');
 			});
 			}else{
-				alert("Oops! Some reviewer or upload information is still missing. Please double-check and complete all fields.");
+				alert("Please enter approval designation");
 			}
 	}
 	async function Downloadfn(element) {
@@ -203,7 +199,7 @@
 //		$('#loader1').modal('show');
 
 		try {
-			const response = await fetch(`/BECCDS/kyc/individual/downloadfn?srlno=${encodeURIComponent(srlno)}`);
+			const response = await fetch(`/BECDDS/kyc/individual/downloadfn?srlno=${encodeURIComponent(srlno)}`);
 
 			if (!response.ok) {
 				throw new Error(`Server responded with status: ${response.status}`);
@@ -240,6 +236,14 @@
 
 	async function modifysubmit() {
 		const form = document.getElementById('kycForm');
+	
+		const Branchname = document.getElementById('branch_name').value;
+	//	alert(Branchname)
+		
+		if ((!Branchname)) {
+			alert('Branch name detail is missing');
+			return;
+		}	
 
 		// Check for the confirmation checkbox still happens
 		const confirmationCheckbox = document.getElementById('confirm_screening_cb');
@@ -248,6 +252,8 @@
 			confirmationCheckbox.focus();
 			return;
 		}
+		
+		
 
 		// --- The validation block that was here has been removed. ---
 
@@ -300,7 +306,7 @@
 	});
 </script>
 
-<title>BECCDS</title>
+<title>BECDDS</title>
 
 <body>
 	<div class="col-sm-2">
@@ -351,7 +357,7 @@
 								<td colspan="1"><strong>Account title</strong></td>
 								<td colspan="3"><input type="text" class="form-control" th:name="ACCOUNT_TITLE"
 										th:value="${user_data.account_title}" readonly /></td>
-								<td colspan="1"><strong>ECDD Date</strong></td>
+								<td colspan="1"><strong>Last ECDD Date</strong></td>
 								<td colspan="1"><input type="date" class="form-control" name="ecdd_date"
 										th:value="${user_data.ecdd_date != null ? #dates.format(user_data.ecdd_date, 'yyyy-MM-dd') : ''}"
 										readonly /></td>
@@ -1004,9 +1010,9 @@
 										<td class="w-25"><strong>Account Title</strong></td>
 										<td><input type="text" class="form-control" name="account_title"
 												th:value="${user_data.account_title}" maxlength="200"></td>
-										<td class="w-25"><strong>ECDD Date</strong></td>
+										<td class="w-25"><strong>Last ECDD Date</strong></td>
 										<td><input type="date" class="form-control" name="ecdd_date"
-												th:value="${user_data.ecdd_date != null ? #dates.format(user_data.ecdd_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.ecdd_date != null ? #dates.format(user_data.ecdd_date, 'yyyy-MM-dd') : ''}" readonly>
 										</td>
 									</tr>
 									<tr>
@@ -1048,7 +1054,7 @@
 									<tr>
 										<td><label>Currency</label></td>
 										<td><input type="text" name="currency" class="form-control"
-												th:value="${user_data?.currency}" maxlength="10" /></td>
+												th:value="${user_data?.currency}" maxlength="12" /></td>
 										<td><label>Account Opening Date</label></td>
 										<td><input type="date" name="account_open_date" class="form-control"
 												th:value="${user_data.account_open_date != null ? #dates.format(user_data.account_open_date, 'yyyy-MM-dd') : ''}" />
@@ -1115,13 +1121,13 @@
 									<tr>
 										<td>Name</td>
 										<td><input type="text" class="form-control" name="primary_holder_name"
-												th:value="${user_data?.primary_holder_name}" maxlength="200" /></td>
+												th:value="${user_data?.primary_holder_name}" maxlength="100" /></td>
 										<td><input type="text" class="form-control" name="joint1_name"
-												th:value="${user_data?.joint1_name}" maxlength="200" /></td>
+												th:value="${user_data?.joint1_name}" maxlength="100" /></td>
 										<td><input type="text" class="form-control" name="joint2_name"
-												th:value="${user_data?.joint2_name}" maxlength="200" /></td>
+												th:value="${user_data?.joint2_name}" maxlength="100" /></td>
 										<td><input type="text" class="form-control" name="joint3_name"
-												th:value="${user_data?.joint3_name}" maxlength="200" /></td>
+												th:value="${user_data?.joint3_name}" maxlength="100" /></td>
 									</tr>
 									<tr>
 										<td>Customer ID</td>
@@ -1191,35 +1197,35 @@
 									<tr>
 										<td>Mobile Number</td>
 										<td><input type="text" class="form-control" name="primary_mobile_no"
-												th:value="${user_data?.primary_mobile_no}" maxlength="20" /></td>
+												th:value="${user_data?.primary_mobile_no}" maxlength="20" readonly/></td>
 										<td><input type="text" class="form-control" name="joint1_mobile_no"
-												th:value="${user_data?.joint1_mobile_no}" maxlength="20" /></td>
+												th:value="${user_data?.joint1_mobile_no}" maxlength="20" readonly/></td>
 										<td><input type="text" class="form-control" name="joint2_mobile_no"
-												th:value="${user_data?.joint2_mobile_no}" maxlength="20" /></td>
+												th:value="${user_data?.joint2_mobile_no}" maxlength="20" readonly/></td>
 										<td><input type="text" class="form-control" name="joint3_mobile_no"
-												th:value="${user_data?.joint3_mobile_no}" maxlength="20" /></td>
+												th:value="${user_data?.joint3_mobile_no}" maxlength="20" readonly/></td>
 									</tr>
 									<tr>
 										<td>Email Address</td>
 										<td><input type="email" class="form-control" name="primary_email"
-												th:value="${user_data?.primary_email}" maxlength="100" /></td>
+												th:value="${user_data?.primary_email}" maxlength="100" readonly/></td>
 										<td><input type="email" class="form-control" name="joint1_email"
-												th:value="${user_data?.joint1_email}" maxlength="100" /></td>
+												th:value="${user_data?.joint1_email}" maxlength="100" readonly/></td>
 										<td><input type="email" class="form-control" name="joint2_email"
-												th:value="${user_data?.joint2_email}" maxlength="100" /></td>
+												th:value="${user_data?.joint2_email}" maxlength="100" readonly/></td>
 										<td><input type="email" class="form-control" name="joint3_email"
-												th:value="${user_data?.joint3_email}" maxlength="100" /></td>
+												th:value="${user_data?.joint3_email}" maxlength="100" readonly/></td>
 									</tr>
 									<tr>
 										<td>Address</td>
 										<td><textarea class="form-control" rows="2" name="primary_address"
-												th:text="${user_data?.primary_address}" maxlength="500"></textarea></td>
+												th:text="${user_data?.primary_address}" maxlength="100"></textarea></td>
 										<td><textarea class="form-control" rows="2" name="joint1_address"
-												th:text="${user_data?.joint1_address}" maxlength="500"></textarea></td>
+												th:text="${user_data?.joint1_address}" maxlength="100"></textarea></td>
 										<td><textarea class="form-control" rows="2" name="joint2_address"
-												th:text="${user_data?.joint2_address}" maxlength="500"></textarea></td>
+												th:text="${user_data?.joint2_address}" maxlength="100"></textarea></td>
 										<td><textarea class="form-control" rows="2" name="joint3_address"
-												th:text="${user_data?.joint3_address}" maxlength="500"></textarea></td>
+												th:text="${user_data?.joint3_address}" maxlength="100"></textarea></td>
 									</tr>
 									<tr>
 										<td>Latest Passport No.</td>
@@ -1436,8 +1442,8 @@
 												minlength="30"></textarea>-->
 												
 												<input list="branchRemarksList" class="form-control" name="branch_remarks"
-													       th:value="${user_data?.branch_remarks}" required minlength="30"
-													       placeholder="Type or select a remark" />
+													       th:value="${user_data?.branch_remarks}" required
+													       placeholder="Type or select a remark" maxlength="500"/>
 
 													<datalist id="branchRemarksList">
 														<option value="Nothing adverse found">
@@ -1502,7 +1508,7 @@
 										<td>Annual Income</td>
 										<td><input type="text" class="form-control text-right format-as-number"
 												name="annual_income_primary"
-												th:value="${user_data?.annual_income_primary}" /></td>
+												th:value="${user_data?.annual_income_primary}" maxlength="20"/></td>
 									</tr>
 									<tr>
 										<td>Source of Income</td>
@@ -1553,7 +1559,7 @@
 									<tr>
 										<td colspan="7"><textarea class="form-control" name="unusual_txn_details"
 												rows="2" th:text="${user_data?.unusual_txn_details}"
-												maxlength="100"></textarea>
+												maxlength="300"></textarea>
 										</td>
 									</tr>
 									<tr>
@@ -1564,7 +1570,7 @@
 									<tr>
 										<td colspan="7"><textarea class="form-control" name="suspicious_activity"
 												rows="2" th:text="${user_data?.suspicious_activity}"
-												maxlength="100"></textarea>
+												maxlength="300"></textarea>
 										</td>
 									</tr>
 									<tr>
@@ -1572,11 +1578,11 @@
 												thousand)</strong></td>
 										<td colspan="2">No. of Transaction: <input type="text"
 												class="form-control text-right format-as-number"
-												name="high_value_txn_count"
+												name="high_value_txn_count" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												th:value="${user_data?.high_value_txn_count}" /></td>
 										<td colspan="2">Volume: <input type="text"
 												class="form-control text-right format-as-number"
-												name="high_value_txn_volume"
+												name="high_value_txn_volume" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												th:value="${user_data?.high_value_txn_volume}" /></td>
 									</tr>
 									<tr class="text-center">
@@ -1594,36 +1600,36 @@
 									</tr>
 									<tr>
 										<td><strong>No. of Transaction (%)</strong></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="cash_txn_count" th:value="${user_data?.cash_txn_count}" /></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="cheque_txn_count" th:value="${user_data?.cheque_txn_count}" />
 										</td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="local_txn_count" th:value="${user_data?.local_txn_count}" /></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="intl_txn_count" th:value="${user_data?.intl_txn_count}" /></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="curr_txn_count" th:value="${user_data?.curr_txn_count}" /></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="expected_txn_count" th:value="${user_data?.expected_txn_count}" />
 										</td>
 									</tr>
 									<tr>
 										<td><strong>Volume (%)</strong></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="cash_txn_volume" th:value="${user_data?.cash_txn_volume}" /></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="cheque_txn_volume" th:value="${user_data?.cheque_txn_volume}" />
 										</td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="local_txn_volume" th:value="${user_data?.local_txn_volume}" />
 										</td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="intl_txn_volume" th:value="${user_data?.intl_txn_volume}" /></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="curr_txn_volume" th:value="${user_data?.curr_txn_volume}" /></td>
-										<td><input type="text" class="form-control text-right format-as-number"
+										<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 												name="expected_txn_volume"
 												th:value="${user_data?.expected_txn_volume}" /></td>
 									</tr>
@@ -1647,7 +1653,7 @@
 											<em>(if No, please provide your justification, recommendations, and
 												comments)</em>
 											<textarea class="form-control" name="profile_mismatch_remarks" rows="2"
-												th:text="${user_data?.profile_mismatch_remarks}" required minlength="30"
+												th:text="${user_data?.profile_mismatch_remarks}" required maxlength="200"
 												></textarea>
 										</td>
 									</tr>
@@ -1694,7 +1700,7 @@
 											<small>(Any downgrade from system-driven risk must be approved by Territory
 												Compliance Department)</small>
 											<textarea class="form-control" name="customer_risk_reason" rows="2"
-												th:text="${user_data?.customer_risk_reason}" maxlength="100"></textarea>
+												th:text="${user_data?.customer_risk_reason}" maxlength="200"></textarea>
 										</td>
 									</tr>
 								</tbody>
@@ -1742,7 +1748,7 @@
 													class="form-check-label" for="aof_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="aof_remarks" rows="1"
-												th:text="${user_data?.aof_remarks}" required minlength="30"></textarea>
+												th:text="${user_data?.aof_remarks}" maxlength="150" required></textarea>
 										</td>
 									</tr>
 									<tr>
@@ -1759,7 +1765,7 @@
 													class="form-check-label" for="kycdoc_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="kyc_doc_remarks" rows="1"
-												th:text="${user_data?.kyc_doc_remarks}" required minlength="30"
+												th:text="${user_data?.kyc_doc_remarks}" maxlength="150" required
 												></textarea></td>
 									</tr>
 									<tr>
@@ -1777,7 +1783,7 @@
 													class="form-check-label" for="sof_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="source_of_funds_remarks" rows="1"
-												th:text="${user_data?.source_of_funds_remarks}" required minlength="30"
+												th:text="${user_data?.source_of_funds_remarks}" maxlength="150" required
 												></textarea>
 										</td>
 									</tr>
@@ -1846,39 +1852,40 @@
 										<td style="vertical-align: top; width: 33%;">
 											<strong>Review Date</strong>
 											<input type="date" class="form-control" name="review_date" id="review_date"
-												th:value="${user_data.review_date != null ? #dates.format(user_data.review_date, 'yyyy-MM-dd') : ''}" />
+												th:value="${user_data.review_date != null ? #dates.format(user_data.review_date, 'yyyy-MM-dd') :
+												 #dates.format(#dates.createNow(), 'yyyy-MM-dd')}" />
 											<br />
 											<strong>Reviewed by - (Name, EC No & Designation<span
 													style="color: red;">*</span>)</strong>
 											<input type="text" class="form-control" name="reviewed_by_name"
-												th:value="${session.WORKCLASS == null ? session.USERNAME : user_data?.reviewed_by_name}"
+												th:value="${user_data?.reviewed_by_name}"
 												readonly="readonly" />
 											<input type="text" class="form-control mt-1" name="reviewed_by_ec_no"
-												th:value="${session.WORKCLASS == 'M' ? session.USERID : user_data?.reviewed_by_ec_no}"
+												th:value="${user_data?.reviewed_by_ec_no}"
 												readonly="readonly" />
 											<input type="text" class="form-control mt-1" name="reviewed_by_designation" id="reviewed_by_designation"
-												th:value="${user_data?.reviewed_by_designation}" required
-												maxlength="100" />
+												th:value="${user_data?.reviewed_by_designation}" readonly />
 											<br />
 											<strong>Branch -</strong>
 											<input type="text" class="form-control" name="branch_name" id="branch_name"
-												th:value="${user_data?.branch_name}" maxlength="100" />
+												th:value="${user_data?.branch_name}" maxlength="15" required/>
 										</td>
 
 										<!-- Column 2: Approver (Width adjusted) -->
 										<td style="vertical-align: top; width: 33%;">
 											<strong>Approval Date</strong>
 											<input type="date" class="form-control" name="approval_date" id="approval_date"
-												th:value="${user_data.approval_date != null ? #dates.format(user_data.approval_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.approval_date != null ? #dates.format(user_data.approval_date, 'yyyy-MM-dd') :
+												 #dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
 											<br />
 											<strong>Approved by - (Name, EC No & Designation<span
 													style="color: red;">*</span>)</strong>
 											<input type="text" class="form-control" name="approved_by_name"
-												th:value="${user_data?.approved_by_name}" readonly="readonly" />
+											th:value="${user_data?.approved_by_name}" readonly />
 											<input type="text" class="form-control mt-1" name="approved_by_ec_no" 
-												th:value="${user_data?.approved_by_ec_no}" readonly="readonly" />
-											<input type="text" class="form-control mt-1" name="approved_by_designation" id="doc_uploaded_by"
-												th:value="${user_data?.approved_by_designation}" required
+											th:value="${user_data?.approved_by_ec_no}" readonly />
+											<input type="text" class="form-control mt-1" name="approved_by_designation" id="approved_by_designation"
+												th:value="${user_data?.approved_by_designation}" readonly
 												maxlength="100" />
 										</td>
 
@@ -1926,18 +1933,18 @@
 									<tr>
 										<td><strong>Data Entered in Finacle</strong></td>
 										<td><input type="date" class="form-control" name="entry_date" id="entry_date"
-												th:value="${#dates.format(user_data.entry_date, 'yyyy-MM-dd')}" required/>
+												th:value="${#dates.format(user_data.entry_date, 'yyyy-MM-dd')}"/>
 										</td>
 										<td><input type="text" class="form-control" name="entered_by" id="entered_by"
-												th:value="${user_data?.entered_by}" maxlength="100" required/></td>
+												th:value="${user_data?.entered_by}" maxlength="100"/></td>
 									</tr>
 									<tr>
 										<td><strong>Document(s) Uploaded in DMS</strong></td>
 										<td><input type="date" class="form-control" name="doc_uploaded_date" id="doc_uploaded_date"
-												th:value="${#dates.format(user_data.doc_uploaded_date, 'yyyy-MM-dd')}" required/>
+												th:value="${#dates.format(user_data.doc_uploaded_date, 'yyyy-MM-dd')}"/>
 										</td>
 										<td><input type="text" class="form-control" name="doc_uploaded_by" id="doc_uploaded_by"
-												th:value="${user_data?.doc_uploaded_by}" maxlength="100" required/></td>
+												th:value="${user_data?.doc_uploaded_by}" maxlength="100"/></td>
 									</tr>
 								</tbody>
 							</table>
@@ -2493,7 +2500,7 @@
 
 		try {
 			// IMPORTANT: Ensure this URL uses your correct context path (e.g., /BCDRS)
-			const response = await fetch('/BECCDS/kyc/individual/upload-document', {
+			const response = await fetch('/BECDDS/kyc/individual/upload-document', {
 				method: 'POST',
 				body: formData
 				// If using Spring Security with CSRF, add CSRF headers here
@@ -2528,7 +2535,7 @@
 
 		try {
 			// 3. Fetch the list of documents from your backend controller.
-			const response = await fetch(`/BECCDS/kyc/individual/list-documents?customerId=${customerId}`);
+			const response = await fetch(`/BECDDS/kyc/individual/list-documents?customerId=${customerId}`);
 			if (!response.ok) {
 				throw new Error('Failed to fetch documents from the server.');
 			}
@@ -2555,7 +2562,7 @@
 	                     <td>${formattedDate}</td>
 	                     <td class="text-center">
 	                         <!-- This link now uses a Font Awesome icon instead of text -->
-	                         <a href="/BECCDS/kyc/individual/download-doc/${doc.docId}" 
+	                         <a href="/BECDDS/kyc/individual/download-doc/${doc.docId}" 
 	                            class="btn btn-sm btn-success" 
 	                            title="Download ${doc.documentName}" 
 	                            download>

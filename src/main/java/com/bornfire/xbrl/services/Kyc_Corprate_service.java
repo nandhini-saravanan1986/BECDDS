@@ -169,21 +169,21 @@ public class Kyc_Corprate_service {
 			kycEntity.setSource_of_funds_remarks(data.getSource_of_funds_remarks());
 			kycEntity.setObservations(data.getObservations());
 			kycEntity.setReview_date(data.getReview_date());
-			kycEntity.setApproval_date(data.getApproval_date());
+		//	kycEntity.setApproval_date(data.getApproval_date());
 
 			Optional<UserProfile> Userdetails = userProfileRep.findById(userId);
 			System.out.println(Userdetails.get().getUsername());
 			System.out.println(Userdetails.get().getEmail_id());
 			kycEntity.setReviewed_by_name(Userdetails.get().getUsername());
 			kycEntity.setReviewed_by_ec_no(Userdetails.get().getEmpid());
-			kycEntity.setReviewed_by_designation(data.getReviewed_by_designation());
+			kycEntity.setReviewed_by_designation(Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
 			/*
 			 * kycEntity.setApproved_by_name(data.getApproved_by_name());
 			 * kycEntity.setApproved_by_ec_no(data.getApproved_by_ec_no());
 			 */
 			kycEntity.setApproved_by_designation(data.getApproved_by_designation());
 			kycEntity.setBranch_name(data.getBranch_name());
-			kycEntity.setBranch_code(BRANCHCODE);
+			kycEntity.setBranch_code(kycEntity.getBranch_code());
 			kycEntity.setData_entry_date(data.getData_entry_date());
 			kycEntity.setData_entry_employee_name(data.getData_entry_employee_name());
 			kycEntity.setDocument_uploaded_date(data.getDocument_uploaded_date());
@@ -202,6 +202,12 @@ public class Kyc_Corprate_service {
 			kycEntity.setModify_user(userId);
 			kycEntity.setModify_time(Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant()));
 			kycEntity.setAuth_flg("Y");
+			}else {
+				kycEntity.setEntity_flg("N"); // Assuming this should be set on modification
+				kycEntity.setAuth_flg("N");
+				kycEntity.setModify_flg("N");
+				kycEntity.setModify_user(userId);
+				kycEntity.setModify_time(new Date());
 			}
 			Kyc_Corprate_Repo.save(kycEntity);
 			// Generate audit entry
@@ -251,8 +257,10 @@ public class Kyc_Corprate_service {
 		if (optionalKyc.isPresent()) {
 
 			EcddCorporateEntity kycEntity = optionalKyc.get();
+			kycEntity.setApproval_date(new Date());
 			kycEntity.setApproved_by_name(Userdetails.get().getUsername());
 			kycEntity.setApproved_by_ec_no(Userdetails.get().getEmpid());
+			kycEntity.setApproved_by_designation(Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
 			kycEntity.setModify_flg("N");
 			kycEntity.setEntity_flg("Y");
 			kycEntity.setVerify_user(userId);

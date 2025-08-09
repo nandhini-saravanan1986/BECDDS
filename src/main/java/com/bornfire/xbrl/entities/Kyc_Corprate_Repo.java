@@ -86,5 +86,18 @@ public interface Kyc_Corprate_Repo extends JpaRepository<EcddCorporateEntity, St
 			+ ")\r\n"
 			+ "ORDER BY branch_code", nativeQuery = true)
 	List<Object[]> getpendingstatuscount();
+	
+	@Query(value = "SELECT *\r\n"
+			+ "FROM (\r\n"
+			+ "    SELECT branch_code, system_risk\r\n"
+			+ "    FROM ECDD_CORPORATE_TABLE\r\n"
+			+ "    WHERE entity_flg = 'N' AND modify_flg = 'N'\r\n"
+			+ ")\r\n"
+			+ "PIVOT (\r\n"
+			+ "    COUNT(system_risk)\r\n"
+			+ "    FOR system_risk IN ('Low' AS LOW_RISK, 'Medium' AS MEDIUM_RISK, 'High' AS HIGH_RISK)\r\n"
+			+ ")\r\n"
+			+ "ORDER BY branch_code", nativeQuery = true)
+	List<Object[]> getunattendstatuscount();
 
 }

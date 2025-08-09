@@ -96,6 +96,7 @@ public class UserProfile implements UserDetails {
     private String brf181_login;
     private String	pass_exp_days;
     private String	log_in_count;
+    private String	designation;
 
     
     
@@ -562,6 +563,15 @@ public class UserProfile implements UserDetails {
 	}
 	public void setLog_in_count(String log_in_count) {
 		this.log_in_count = log_in_count;
+	}
+	
+	
+	
+	public String getDesignation() {
+		return designation;
+	}
+	public void setDesignation(String designation) {
+		this.designation = designation;
 	}
 	@Override
 	@JsonIgnore

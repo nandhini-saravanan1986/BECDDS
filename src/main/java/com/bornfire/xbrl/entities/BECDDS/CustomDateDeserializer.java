@@ -1,4 +1,4 @@
-package com.bornfire.xbrl.entities.BECCDS;
+package com.bornfire.xbrl.entities.BECDDS;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

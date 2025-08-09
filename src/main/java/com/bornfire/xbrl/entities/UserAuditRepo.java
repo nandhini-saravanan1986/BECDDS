@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.bornfire.xbrl.entities.BECCDS.AuditServicesEntity;
-import com.bornfire.xbrl.entities.BECCDS.UserAuditLevel_Entity;
+import com.bornfire.xbrl.entities.BECDDS.AuditServicesEntity;
+import com.bornfire.xbrl.entities.BECDDS.UserAuditLevel_Entity;
 
 public interface UserAuditRepo extends JpaRepository<UserAuditLevel_Entity, String> {
 

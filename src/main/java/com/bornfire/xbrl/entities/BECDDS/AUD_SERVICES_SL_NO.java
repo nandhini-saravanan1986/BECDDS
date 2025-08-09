@@ -1,12 +1,10 @@
-  package com.bornfire.xbrl.entities.BECCDS;
+package com.bornfire.xbrl.entities.BECDDS;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Id;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 
 @Embeddable
 public class AUD_SERVICES_SL_NO implements Serializable {

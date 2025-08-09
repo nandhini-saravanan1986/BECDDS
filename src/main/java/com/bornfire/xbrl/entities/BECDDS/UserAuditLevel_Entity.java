@@ -1,7 +1,7 @@
 
 
 
-package com.bornfire.xbrl.entities.BECCDS;
+package com.bornfire.xbrl.entities.BECDDS;
 
 
 

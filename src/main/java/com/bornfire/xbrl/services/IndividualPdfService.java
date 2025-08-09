@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import com.bornfire.xbrl.entities.BECCDS.EcddIndividualProfileRepository;
-import com.bornfire.xbrl.entities.BECCDS.Ecdd_Individual_Profile_Entity;
+import com.bornfire.xbrl.entities.BECDDS.EcddIndividualProfileRepository;
+import com.bornfire.xbrl.entities.BECDDS.Ecdd_Individual_Profile_Entity;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
