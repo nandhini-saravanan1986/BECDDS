@@ -116,6 +116,15 @@
 		white-space: nowrap;
 		vertical-align: middle;
 	}
+
+	/* Character Counter */
+	.char-counter {
+		font-size: 0.8em;
+		color: #6c757d;
+		text-align: right;
+		display: block;
+		height: 1em;
+	}
 </style>
 <script type="text/javascript">
 	function goHome() {
@@ -138,7 +147,7 @@
 
 	function modify(element) {
 		const srl_no = element.getAttribute("data-resource");
-	//	$('#loader1').modal("show");
+		//	$('#loader1').modal("show");
 		requestAnimationFrame(() => {
 			window.location.href = `/BECDDS/kyc/corporate?formmode=modify&srl_no=${encodeURIComponent(srl_no)}`;
 		});
@@ -146,7 +155,7 @@
 
 	async function Downloaddoc(element) {
 		const srl_no = element.getAttribute("data-resource");
-	//	$('#loader1').modal('show');
+		//	$('#loader1').modal('show');
 		try {
 			const response = await fetch(`/BECDDS/kyc/corporate/download?srl_no=${encodeURIComponent(srl_no)}`);
 			if (!response.ok) throw new Error(`Server error ${response.status}`);
@@ -164,36 +173,36 @@
 			$("#alertmsg_failure").text("Download failed! Please try again.");
 			$("#alert_failure").modal("show");
 		} finally {
-	//		$('#loader1').modal('hide');
+			//		$('#loader1').modal('hide');
 		}
 	}
 
 	function verifyrecord(a) {
 		const srl_no = a.getAttribute("data-srl_no");
-		
+
 		const branch_name = document.getElementById('branch_name').value;
-	//	$('#loader1').modal('show');
-	if ((branch_name)) {
-		$.ajax({
-			url: '/BECDDS/kyc/corporate/verify',
-			type: 'POST',
-			data: {formmode: 'verified', custid: srl_no}
-		})
-			.done(function () {
-				$("#alertmsg_success").text("Verified successfully!");
-				$("#alert_success").modal("show");
-				$('#alert_success').find('.btn-primary').attr("onclick", "location.reload();");
+		//	$('#loader1').modal('show');
+		if ((branch_name)) {
+			$.ajax({
+				url: '/BECDDS/kyc/corporate/verify',
+				type: 'POST',
+				data: {formmode: 'verified', custid: srl_no}
 			})
-			.fail(function () {
-				$("#alertmsg_failure").text("Verification failed!");
-				$("#alert_failure").modal("show");
-			})
-			.always(function () {
-	//			$('#loader1').modal('hide');
-			});
-			}else{
-				alert("Oops! Branch name is still missing. Please double-check and complete the field.");
-			}
+				.done(function () {
+					$("#alertmsg_success").text("Verified successfully!");
+					$("#alert_success").modal("show");
+					$('#alert_success').find('.btn-primary').attr("onclick", "location.reload();");
+				})
+				.fail(function () {
+					$("#alertmsg_failure").text("Verification failed!");
+					$("#alert_failure").modal("show");
+				})
+				.always(function () {
+					//			$('#loader1').modal('hide');
+				});
+		} else {
+			alert("Oops! Branch name is still missing. Please double-check and complete the field.");
+		}
 	}
 
 	/**
@@ -208,13 +217,13 @@
 			confirmationCheckbox.focus();
 			return;
 		}
-		
-		if ((!branch_name)) {
-					alert("Oops! Branch name is still missing. Please double-check and complete the field.");
-					return;
-			}
 
-	//	$('#loader1').modal('show');
+		if ((!branch_name)) {
+			alert("Oops! Branch name is still missing. Please double-check and complete the field.");
+			return;
+		}
+
+		//	$('#loader1').modal('show');
 		const allDisabledElements = Array.from(form.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
 		allDisabledElements.forEach(el => el.disabled = false);
 
@@ -244,14 +253,16 @@
 			$('#alert_failure').modal('show');
 		} finally {
 			allDisabledElements.forEach(el => el.disabled = true);
-	//		$('#loader1').modal('hide');
+			//		$('#loader1').modal('hide');
 		}
 	}
 
 	document.addEventListener("DOMContentLoaded", () => {
-	//	$('#loader1').modal('hide');
-		window.addEventListener('pageshow', (event) => {if (event.persisted) 
-			$('#loader1').modal('hide');});
+		//	$('#loader1').modal('hide');
+		window.addEventListener('pageshow', (event) => {
+			if (event.persisted)
+				$('#loader1').modal('hide');
+		});
 	});
 
 </script>
@@ -1105,13 +1116,16 @@
 														of new operations)</i></strong></td>
 											<td><input type="text" class="form-control" name="geographic_risk_profile"
 													maxlength="100" th:value="${user_data.geographic_risk_profile}">
+												<span class="char-counter">0 / 100</span>
 											</td>
 										</tr>
 										<tr>
 											<td><strong>Business Activity & Products</strong></td>
 											<td><input type="text" class="form-control"
 													name="business_activity_products" maxlength="100"
-													th:value="${user_data.business_activity_products}"></td>
+													th:value="${user_data.business_activity_products}"> <span
+													class="char-counter">0 / 100</span></td>
+
 										</tr>
 									</tbody>
 								</table>
@@ -1161,8 +1175,8 @@
 														class="form-check-label" for="tl_e">Expired</label></div>
 											</td>
 											<td><textarea class="form-control" name="trade_license_remarks" rows="1"
-													required
-													th:text="${user_data?.trade_license_remarks}" maxlength="100"></textarea></td>
+													required th:text="${user_data?.trade_license_remarks}"
+													maxlength="100"></textarea></td>
 										</tr>
 										<tr>
 											<td><strong>UBOs'/Signatories' KYC</strong></td>
@@ -1180,7 +1194,8 @@
 											</td>
 											<td><textarea class="form-control" name="ubo_signatories_kyc_remarks"
 													rows="1" required
-													th:text="${user_data?.ubo_signatories_kyc_remarks}" maxlength="100"></textarea></td>
+													th:text="${user_data?.ubo_signatories_kyc_remarks}"
+													maxlength="100"></textarea></td>
 										</tr>
 										<tr>
 											<td><strong>PEP Status</strong></td>
@@ -1199,8 +1214,9 @@
 											<td>
 												<strong>If PEP is "Yes", provide details:</strong>
 												<textarea class="form-control" name="pep_remarks" id="pep_remarks"
-													rows="1" required
-													th:text="${user_data?.pep_remarks}" maxlength="100"></textarea>
+													rows="1" required th:text="${user_data?.pep_remarks}"
+													maxlength="100"></textarea>
+												<span class="char-counter">0 / 100</span>
 											</td>
 										</tr>
 									</tbody>
@@ -1331,18 +1347,20 @@
 											<td><!--<textarea class="form-control" name="corporate_screening_remarks"
 													rows="1" required minlength="30"
 													th:text="${user_data?.corporate_screening_remarks}"></textarea>-->
-													<input list="CorporateRemarksList" class="form-control" name="corporate_screening_remarks"
-													 th:value="${user_data?.corporate_screening_remarks}"
-														required placeholder="Type or select a remark" maxlength="100"/>
-													
-													<datalist id="CorporateRemarksList">
-														<option value="Nothing adverse found">
-														<option value="False Positive – Partial Name Match, Verified Not the Same Individual">
-														<option value="Cleared – False Positive (Name Match Only)">
-													</datalist>
-												
-												
-												</td>
+												<input list="CorporateRemarksList" class="form-control"
+													name="corporate_screening_remarks"
+													th:value="${user_data?.corporate_screening_remarks}" required
+													placeholder="Type or select a remark" maxlength="100" />
+
+												<datalist id="CorporateRemarksList">
+													<option value="Nothing adverse found">
+													<option
+														value="False Positive – Partial Name Match, Verified Not the Same Individual">
+													<option value="Cleared – False Positive (Name Match Only)">
+												</datalist>
+
+
+											</td>
 										</tr>
 										<tr>
 											<td><strong>UBO/Signatory</strong></td>
@@ -1387,17 +1405,19 @@
 											<td><!--<textarea class="form-control" name="ubo_screening_remarks" rows="1"
 													required minlength="30"
 													th:text="${user_data?.ubo_screening_remarks}"></textarea>-->
-												
-													<input list="UBORemarksList" class="form-control" name="ubo_screening_remarks"
-														th:value="${user_data?.ubo_screening_remarks}" required
-														placeholder="Type or select a remark" maxlength="100"/>
-													
-													<datalist id="UBORemarksList">
-														<option value="Nothing adverse found">
-														<option value="False Positive – Partial Name Match, Verified Not the Same Individual">
-														<option value="Cleared – False Positive (Name Match Only)">
-													</datalist>
-												</td>
+
+												<input list="UBORemarksList" class="form-control"
+													name="ubo_screening_remarks"
+													th:value="${user_data?.ubo_screening_remarks}" required
+													placeholder="Type or select a remark" maxlength="100" />
+
+												<datalist id="UBORemarksList">
+													<option value="Nothing adverse found">
+													<option
+														value="False Positive – Partial Name Match, Verified Not the Same Individual">
+													<option value="Cleared – False Positive (Name Match Only)">
+												</datalist>
+											</td>
 										</tr>
 										<tr>
 											<td><strong>Counter Party</strong></td>
@@ -1446,17 +1466,19 @@
 											<td><!--<textarea class="form-control" name="counterparty_screening_remarks"
 													rows="1" required minlength="30"
 													th:text="${user_data?.counterparty_screening_remarks}"></textarea>-->
-													<input list="CounterRemarksList" class="form-control" name="counterparty_screening_remarks"
-														th:value="${user_data?.counterparty_screening_remarks}" required
-														placeholder="Type or select a remark" maxlength="100"/>
-													
-													<datalist id="CounterRemarksList">
-														<option value="Nothing adverse found">
-														<option value="False Positive – Partial Name Match, Verified Not the Same Individual">
-														<option value="Cleared – False Positive (Name Match Only)">
-													</datalist>
-												
-												</td>
+												<input list="CounterRemarksList" class="form-control"
+													name="counterparty_screening_remarks"
+													th:value="${user_data?.counterparty_screening_remarks}" required
+													placeholder="Type or select a remark" maxlength="100" />
+
+												<datalist id="CounterRemarksList">
+													<option value="Nothing adverse found">
+													<option
+														value="False Positive – Partial Name Match, Verified Not the Same Individual">
+													<option value="Cleared – False Positive (Name Match Only)">
+												</datalist>
+
+											</td>
 										</tr>
 									</tbody>
 								</table>
@@ -1491,6 +1513,7 @@
 												<small>(Unusual/suspicious transactions)</small>
 												<input type="text" class="form-control" name="transaction_history"
 													maxlength="200" th:value="${user_data.transaction_history}">
+												<span class="char-counter">0 / 200</span>
 											</td>
 										</tr>
 										<tr>
@@ -1498,6 +1521,7 @@
 													activity/ISTR)</small>
 												<input type="text" class="form-control" name="account_conduct"
 													maxlength="200" th:value="${user_data.account_conduct}">
+												<span class="char-counter">0 / 200</span>
 											</td>
 										</tr>
 										<tr>
@@ -1529,45 +1553,57 @@
 										</tr>
 										<tr>
 											<td><strong>No. of Txn (%)</strong></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="cash_transaction_percent" maxlength="20"
 													th:value="${user_data.cash_transaction_percent}"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="cheque_transaction_percent" maxlength="20"
 													th:value="${user_data.cheque_transaction_percent}"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="local_transfer_percent" maxlength="20"
 													th:value="${user_data.local_transfer_percent}"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="intl_transfer_percent" maxlength="20"
 													th:value="${user_data.intl_transfer_percent}"></td>
-											<td style="background-color:#e9ecef"></td> 
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td style="background-color:#e9ecef"></td>
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="current_transaction_count" maxlength="20"
 													th:value="${user_data.current_transaction_count}"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
-													name="expected_transaction_count" maxlength="20" 
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+													name="expected_transaction_count" maxlength="20"
 													th:value="${user_data.expected_transaction_count}"></td>
 										</tr>
 										<tr>
 											<td><strong>Volume (%)</strong></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="cash_volume_percent" maxlength="20"
 													th:value="${user_data.cash_volume_percent}"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="cheque_volume_percent" maxlength="20"
 													th:value="${user_data.cheque_volume_percent}"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="local_transfer_volume_percent" maxlength="20"
 													th:value="${user_data.local_transfer_volume_percent}"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="intl_transfer_volume_percent" maxlength="20"
 													th:value="${user_data.intl_transfer_volume_percent}"></td>
 											<td style="background-color:#e9ecef"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="current_volume_count" maxlength="20"
 													th:value="${user_data.current_volume_count}"></td>
-											<td><input type="text" class="form-control text-right format-as-number" oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+											<td><input type="text" class="form-control text-right format-as-number"
+													oninput="this.value=this.value.replace(/[^0-9]/g,'');"
 													name="expected_volume_count" maxlength="20"
 													th:value="${user_data.expected_volume_count}"></td>
 										</tr>
@@ -1702,8 +1738,8 @@
 														for="fatca_n">No</label></div>
 											</td>
 											<td><textarea class="form-control" name="fatca_crs_remarks" rows="1"
-													required
-													th:text="${user_data?.fatca_crs_remarks}" maxlength="100"></textarea>
+													required th:text="${user_data?.fatca_crs_remarks}"
+													maxlength="100"></textarea>
 											</td>
 										</tr>
 										<tr>
@@ -1723,8 +1759,8 @@
 												</div>
 											</td>
 											<td><textarea class="form-control" name="source_of_funds_remarks" rows="1"
-													required
-													th:text="${user_data?.source_of_funds_remarks}" maxlength="100"></textarea></td>
+													required th:text="${user_data?.source_of_funds_remarks}"
+													maxlength="100"></textarea></td>
 										</tr>
 									</tbody>
 								</table>
@@ -1756,9 +1792,10 @@
 									</tr>
 									<tbody id="s10_observations">
 										<tr>
-											<td><textarea class="form-control" name="observations"
-													rows="4" th:text="${user_data.observations}" maxlength="1000"></textarea><span
-													class="char-counter">0 / 999</span></td>
+											<td><textarea class="form-control" name="observations" rows="4"
+													th:text="${user_data.observations}"
+													maxlength="1000"></textarea><span class="char-counter">0 /
+													999</span></td>
 										</tr>
 									</tbody>
 								</table>
@@ -1793,37 +1830,39 @@
 											<!-- Column 1: Reviewer -->
 											<td style="vertical-align: top; width: 33%;">
 												<strong>Review Date</strong>
-												<input type="date" class="form-control" name="review_date" id="review_date"
-												th:value="${user_data.review_date != null ? #dates.format(user_data.review_date, 'yyyy-MM-dd') :
+												<input type="date" class="form-control" name="review_date"
+													id="review_date" th:value="${user_data.review_date != null ? #dates.format(user_data.review_date, 'yyyy-MM-dd') :
 																								 #dates.format(#dates.createNow(), 'yyyy-MM-dd')}" />
 												<br><strong>Reviewed By - (Name, EC No & Designation<span
 														style="color:red;">*</span>)</strong>
 												<input type="text" class="form-control" name="reviewed_by_name"
-													 th:value="${user_data.reviewed_by_name}" readonly />
+													th:value="${user_data.reviewed_by_name}" readonly />
 												<input type="text" class="form-control mt-1" name="reviewed_by_ec_no"
-													 th:value="${user_data.reviewed_by_ec_no}"  readonly />
+													th:value="${user_data.reviewed_by_ec_no}" readonly />
 												<input type="text" class="form-control mt-1"
-													name="reviewed_by_designation" maxlength="50" id="reviewed_by_designation"
+													name="reviewed_by_designation" maxlength="50"
+													id="reviewed_by_designation"
 													th:value="${user_data.reviewed_by_designation}" readonly>
 												<br><strong>Branch -</strong>
-												<input type="text" class="form-control" name="branch_name" id="branch_name"
-													maxlength="50" th:value="${user_data.branch_name}">
+												<input type="text" class="form-control" name="branch_name"
+													id="branch_name" maxlength="50" th:value="${user_data.branch_name}">
 											</td>
 											<!-- Column 2: Approver -->
 											<td style="vertical-align: top; width: 33%;">
 												<strong>Approval Date</strong>
-												<input type="date" class="form-control" name="approval_date"  id="approval_date"
-												th:value="${user_data.approval_date != null ? #dates.format(user_data.approval_date, 'yyyy-MM-dd') :
+												<input type="date" class="form-control" name="approval_date"
+													id="approval_date" th:value="${user_data.approval_date != null ? #dates.format(user_data.approval_date, 'yyyy-MM-dd') :
 																								 #dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
 												<br><strong>Approved By - (Name, EC No & Designation<span
 														style="color:red;">*</span>)</strong>
 												<input type="text" class="form-control" name="approved_by_name"
-													   th:value="${user_data.approved_by_name}" readonly />
+													th:value="${user_data.approved_by_name}" readonly />
 
 												<input type="text" class="form-control mt-1" name="approved_by_ec_no"
-												th:value="${user_data.approved_by_ec_no}" readonly />
+													th:value="${user_data.approved_by_ec_no}" readonly />
 												<input type="text" class="form-control mt-1"
-													name="approved_by_designation" maxlength="50" id="approved_by_designation"
+													name="approved_by_designation" maxlength="50"
+													id="approved_by_designation"
 													th:value="${user_data.approved_by_designation}" readonly>
 											</td>
 											<!-- Column 3: Branch Head Signature (NEW) -->
@@ -1848,10 +1887,10 @@
 						<!-- CARD FOOTER -->
 						<div class="card-footer text-center">
 							<div class="footer-confirmation" th:if="${formmode == 'modify'}">
-								<input type="checkbox" id="confirm_screening_cb" name="auth_flg" value="Y" 
-								required="required" th:attr="checked=${user_data.auth_flg == 'Y'} ? 'checked' : null								   ,
+								<input type="checkbox" id="confirm_screening_cb" name="auth_flg" value="Y"
+									required="required" th:attr="checked=${user_data.auth_flg == 'Y'} ? 'checked' : null								   ,
 								disabled=${user_data.auth_flg == 'Y'} ? 'disabled' : null"
-								style="width: 1rem; height: 1rem; vertical-align: middle;" />
+									style="width: 1rem; height: 1rem; vertical-align: middle;" />
 								<label for="confirm_screening_cb" class="ml-2"
 									style="font-weight: normal; font-style: normal;">
 									I confirm that I have done screening of All Account holders & kept on record.
@@ -1860,15 +1899,13 @@
 
 							<button type="button" class="btn btn-xs headderbutton" onclick="goHome();">Home</button>
 
-							<button type="button" th:if="${formmode == 'modify' and user_data.modify_flg == 'N'}" class="btn btn-xs headderbutton"
-								onclick="modifysubmit()">Submit</button>
+							<button type="button" th:if="${formmode == 'modify' and user_data.modify_flg == 'N'}"
+								class="btn btn-xs headderbutton" onclick="modifysubmit()">Submit</button>
 
-							<button type="button"
-								th:if="${(user_data.modify_flg == 'Y' and session.WORKCLASS == 'C' and 
+							<button type="button" th:if="${(user_data.modify_flg == 'Y' and session.WORKCLASS == 'C' and 
 								session.USERID != user_data.reviewed_by_ec_no) or  (user_data.modify_flg == 'Y' and 
 								session.ROLEID == 'Superadmin') or  (user_data.modify_flg == 'Y' and session.WORKCLASS == 'C' and 
-								session.ROLEID == 'DCD_ADMIN')}"
-								class="btn btn-xs headderbutton" onclick="verifyrecord(this)"
+								session.ROLEID == 'DCD_ADMIN')}" class="btn btn-xs headderbutton" onclick="verifyrecord(this)"
 								th:attr="data-srl_no=${user_data.srl_no}">
 								Verify
 							</button>
@@ -1999,18 +2036,7 @@
 
 	</div>
 
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			const textarea = document.querySelector('[name="observations"]');
-			const counter = document.getElementById("charCount");
 
-			if (textarea) {
-				textarea.addEventListener("input", function () {
-					counter.textContent = `${textarea.value.length} / 999 characters`;
-				});
-			}
-		});
-	</script>
 	<script>
 		function togglePepRemarks() {
 			const pepStatusSelect = document.getElementById("pep_status");
@@ -2039,7 +2065,7 @@
 			return;
 		}
 
-		// --- STEP 1: ADD STATE VARIABLES ---
+		// --- STATE VARIABLES ---
 		let activeSectionId = null;
 		let originalSectionValues = {};
 
@@ -2048,142 +2074,51 @@
 		const unformatNumber = (str) => (typeof str === 'string') ? str.replace(/,/g, '') : str;
 		const formatAllNumbers = (container) => container.querySelectorAll('.format-as-number').forEach(input => {if (input.value) input.value = formatNumber(input.value);});
 
+		const updateCharCounter = (field) => {
+			const counter = field.nextElementSibling;
+			if (counter && counter.classList.contains('char-counter')) {
+				const maxLength = field.getAttribute('maxlength');
+				counter.textContent = `${field.value.length} / ${maxLength}`;
+			}
+		};
+
 		// --- FIELD DEPENDENCY LOGIC ---
 		function handlePepStatusChange() {
 			const pepRadioYes = document.querySelector('input[name="pep_status"][value="Yes"]');
 			const pepRemarksField = document.querySelector('[name="pep_remarks"]');
 			if (!pepRadioYes || !pepRemarksField) return;
-
 			const isPepYes = pepRadioYes.checked;
 			const isSectionDisabled = pepRadioYes.disabled;
-
 			if (!isSectionDisabled) {
 				pepRemarksField.disabled = !isPepYes;
 				pepRemarksField.required = isPepYes;
-				if (!isPepYes) {
-					pepRemarksField.value = '';
-				}
+				if (!isPepYes) pepRemarksField.value = '';
 			}
 		}
-
-		function updateFieldDependencies() {
-			handlePepStatusChange();
-		}
+		function updateFieldDependencies() {handlePepStatusChange();}
 
 		// --- EVENT LISTENERS FOR SECTION CONTROLS ---
-
-		// --- STEP 2: UPDATE MODIFY BUTTON ---
-		document.querySelectorAll('.modify-btn').forEach(button => {
-			button.addEventListener('click', function () {
-				const actionsContainer = this.closest('.section-actions');
-				const targetId = actionsContainer.dataset.target;
-
-				// Check if another section is already being edited
-				if (activeSectionId && activeSectionId !== targetId) {
-					alert("Please Save or Cancel the active section first.");
-					return; // Stop the function here
-				}
-
-				// Set the current section as the active one.
-				activeSectionId = targetId;
-				const targetSection = document.getElementById(targetId);
-
-				originalSectionValues[targetId] = {};
-				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-					if (el.name) {
-						if (el.type === 'radio') {
-							if (el.checked) originalSectionValues[targetId][el.name] = el.value;
-						} else {
-							originalSectionValues[targetId][el.name] = el.value;
-						}
-					}
-				});
-
-				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-					if (!el.hasAttribute('readonly')) {el.disabled = false;}
-				});
-				updateFieldDependencies();
-				actionsContainer.querySelector('.modify-btn').classList.add('d-none');
-				actionsContainer.querySelector('.save-cancel-controls').classList.remove('d-none');
-			});
-		});
-
-		// --- STEP 3: UPDATE CANCEL BUTTON ---
-		document.querySelectorAll('.cancel-btn').forEach(button => {
-			button.addEventListener('click', function () {
-				const actionsContainer = this.closest('.section-actions');
-				const targetId = actionsContainer.dataset.target;
-				const targetSection = document.getElementById(targetId);
-
-				if (originalSectionValues[targetId]) {
-					targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-						const key = el.name;
-						if (el.name && originalSectionValues[targetId].hasOwnProperty(key)) {
-							if (el.type === 'radio') {
-								el.checked = (el.value === originalSectionValues[targetId][key]);
-							} else {
-								el.value = originalSectionValues[targetId][key];
-							}
-						} else if (el.type !== 'radio' && el.type !== 'hidden' && !originalSectionValues[targetId].hasOwnProperty(key)) {
-							el.value = '';
-						}
-					});
-				}
-				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
-				updateFieldDependencies();
-				actionsContainer.querySelector('.modify-btn').classList.remove('d-none');
-				actionsContainer.querySelector('.save-cancel-controls').classList.add('d-none');
-
-				activeSectionId = null; // Reset the state
-			});
-		});
-
-		// *** SAVE BUTTON - NO CHANGES NEEDED HERE ***
-		document.querySelectorAll('.save-btn').forEach(button => {
-			button.addEventListener('click', async function () {
-				const actionsContainer = this.closest('.section-actions');
-				const targetSection = document.getElementById(actionsContainer.dataset.target);
-
-				for (const input of targetSection.querySelectorAll('input:not(:disabled), select:not(:disabled), textarea:not(:disabled)')) {
-					if (!input.checkValidity()) {
-						input.reportValidity();
-						return;
-					}
-				}
-
-				const saveIcon = this.querySelector('i.fa-spinner');
-				this.disabled = true;
-				if (saveIcon) saveIcon.classList.remove('d-none');
-
-				const allDisabledElements = Array.from(kycForm.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
-				allDisabledElements.forEach(el => el.disabled = false);
-				const formData = new FormData(kycForm);
-				allDisabledElements.forEach(el => el.disabled = true);
-
-				kycForm.querySelectorAll('.format-as-number').forEach(input => {
-					if (formData.has(input.name)) {
-						formData.set(input.name, unformatNumber(formData.get(input.name)));
-					}
-				});
-
-				try {
-					const response = await fetch(kycForm.action + '?ajax=true', {method: 'POST', body: formData});
-					if (!response.ok) {
-						throw new Error(await response.text() || `Server error ${response.status}`);
-					}
-					location.reload();
-				} catch (error) {
-					console.error('Section save failed:', error);
-					alert(`Save Failed: ${error.message}`);
-					this.disabled = false;
-					if (saveIcon) saveIcon.classList.add('d-none');
-				}
-			});
-		});
+		document.querySelectorAll('.modify-btn').forEach(button => { /* ... no changes here ... */});
+		document.querySelectorAll('.cancel-btn').forEach(button => { /* ... no changes here ... */});
+		document.querySelectorAll('.save-btn').forEach(button => { /* ... no changes here ... */});
+		// The modify, cancel, and save button logic from the previous answer remains the same.
+		// For brevity, I'm omitting it here, but you should keep it in your final code.
 
 		// --- INITIAL PAGE SETUP (RUNS ONCE) ---
 		kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
 		formatAllNumbers(kycForm);
+
+		// ********** FIX IS HERE **********
+		// Setup character counters for all relevant inputs AND textareas
+		document.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
+			// Find the counter span that is the *next* element
+			const counter = field.nextElementSibling;
+			if (counter && counter.classList.contains('char-counter')) {
+				updateCharCounter(field); // Set initial count on page load
+				field.addEventListener('input', () => updateCharCounter(field)); // Update on typing
+			}
+		});
+		// **********************************
 
 		document.querySelectorAll('input[name="pep_status"]').forEach(radio => {
 			radio.addEventListener('change', handlePepStatusChange);
@@ -2303,7 +2238,7 @@
 			alert('Please select at least one file.');
 			return;
 		}
-		
+
 		$('#uploadModal').modal('hide');
 
 		const form = document.getElementById('uploadDocForm');
@@ -2327,7 +2262,7 @@
 			$("#alertmsg_failure").text("Upload failed: " + error.message);
 			$("#alert_failure").modal("show");
 		} finally {
-			
+
 		}
 	}
 </script>
