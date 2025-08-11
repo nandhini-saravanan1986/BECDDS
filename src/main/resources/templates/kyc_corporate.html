@@ -2098,12 +2098,115 @@
 		function updateFieldDependencies() {handlePepStatusChange();}
 
 		// --- EVENT LISTENERS FOR SECTION CONTROLS ---
-		document.querySelectorAll('.modify-btn').forEach(button => { /* ... no changes here ... */});
-		document.querySelectorAll('.cancel-btn').forEach(button => { /* ... no changes here ... */});
-		document.querySelectorAll('.save-btn').forEach(button => { /* ... no changes here ... */});
-		// The modify, cancel, and save button logic from the previous answer remains the same.
-		// For brevity, I'm omitting it here, but you should keep it in your final code.
 
+		// --- STEP 2: UPDATE MODIFY BUTTON ---
+		document.querySelectorAll('.modify-btn').forEach(button => {
+			button.addEventListener('click', function () {
+				const actionsContainer = this.closest('.section-actions');
+				const targetId = actionsContainer.dataset.target;
+
+				// Check if another section is already being edited
+				if (activeSectionId && activeSectionId !== targetId) {
+					alert("Please Save or Cancel the active section first.");
+					return; // Stop the function here
+				}
+
+				// Set the current section as the active one.
+				activeSectionId = targetId;
+				const targetSection = document.getElementById(targetId);
+
+				originalSectionValues[targetId] = {};
+				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+					if (el.name) {
+						if (el.type === 'radio') {
+							if (el.checked) originalSectionValues[targetId][el.name] = el.value;
+						} else {
+							originalSectionValues[targetId][el.name] = el.value;
+						}
+					}
+				});
+
+				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+					if (!el.hasAttribute('readonly')) {el.disabled = false;}
+				});
+				updateFieldDependencies();
+				actionsContainer.querySelector('.modify-btn').classList.add('d-none');
+				actionsContainer.querySelector('.save-cancel-controls').classList.remove('d-none');
+			});
+		});
+
+		// --- STEP 3: UPDATE CANCEL BUTTON ---
+		document.querySelectorAll('.cancel-btn').forEach(button => {
+			button.addEventListener('click', function () {
+				const actionsContainer = this.closest('.section-actions');
+				const targetId = actionsContainer.dataset.target;
+				const targetSection = document.getElementById(targetId);
+
+				if (originalSectionValues[targetId]) {
+					targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+						const key = el.name;
+						if (el.name && originalSectionValues[targetId].hasOwnProperty(key)) {
+							if (el.type === 'radio') {
+								el.checked = (el.value === originalSectionValues[targetId][key]);
+							} else {
+								el.value = originalSectionValues[targetId][key];
+							}
+						} else if (el.type !== 'radio' && el.type !== 'hidden' && !originalSectionValues[targetId].hasOwnProperty(key)) {
+							el.value = '';
+						}
+					});
+				}
+				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
+				updateFieldDependencies();
+				actionsContainer.querySelector('.modify-btn').classList.remove('d-none');
+				actionsContainer.querySelector('.save-cancel-controls').classList.add('d-none');
+
+				activeSectionId = null; // Reset the state
+			});
+		});
+
+		// *** SAVE BUTTON - NO CHANGES NEEDED HERE ***
+		document.querySelectorAll('.save-btn').forEach(button => {
+			button.addEventListener('click', async function () {
+				const actionsContainer = this.closest('.section-actions');
+				const targetSection = document.getElementById(actionsContainer.dataset.target);
+
+				for (const input of targetSection.querySelectorAll('input:not(:disabled), select:not(:disabled), textarea:not(:disabled)')) {
+					if (!input.checkValidity()) {
+						input.reportValidity();
+						return;
+					}
+				}
+
+				const saveIcon = this.querySelector('i.fa-spinner');
+				this.disabled = true;
+				if (saveIcon) saveIcon.classList.remove('d-none');
+
+				const allDisabledElements = Array.from(kycForm.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
+				allDisabledElements.forEach(el => el.disabled = false);
+				const formData = new FormData(kycForm);
+				allDisabledElements.forEach(el => el.disabled = true);
+
+				kycForm.querySelectorAll('.format-as-number').forEach(input => {
+					if (formData.has(input.name)) {
+						formData.set(input.name, unformatNumber(formData.get(input.name)));
+					}
+				});
+
+				try {
+					const response = await fetch(kycForm.action + '?ajax=true', {method: 'POST', body: formData});
+					if (!response.ok) {
+						throw new Error(await response.text() || `Server error ${response.status}`);
+					}
+					location.reload();
+				} catch (error) {
+					console.error('Section save failed:', error);
+					alert(`Save Failed: ${error.message}`);
+					this.disabled = false;
+					if (saveIcon) saveIcon.classList.add('d-none');
+				}
+			});
+		});
 		// --- INITIAL PAGE SETUP (RUNS ONCE) ---
 		kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
 		formatAllNumbers(kycForm);

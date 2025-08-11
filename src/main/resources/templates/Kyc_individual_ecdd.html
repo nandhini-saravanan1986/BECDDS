@@ -2151,36 +2151,56 @@
 	</div>
 </body>
 
-<!-- SCRIPT FOR VIEW MODE    -->
+<!-- SCRIPT FOR VIEW MODE -->
 <script th:if="${formmode == 'view'}">
 	document.addEventListener("DOMContentLoaded", function () {
+        const viewContainer = document.querySelector('.card-body[th\\:if="${formmode == \'view\'}"]');
+        if (!viewContainer) return;
+
 		// Disable all form elements to make them read-only
-		document.querySelectorAll('#kycViewForm input, #kycViewForm select, #kycViewForm textarea').forEach(el => {
+		viewContainer.querySelectorAll('input, select, textarea, button').forEach(el => {
 			el.disabled = true;
 		});
 
 		// Helper function to format numbers
-		const formatNumber = (num) => (num === null || num === undefined || num === '') ? '' : new Intl.NumberFormat('en-US').format(num);
+		const formatNumber = (num) => (num === null || num === undefined || String(num).trim() === '') ? '' : new Intl.NumberFormat('en-US').format(String(num).replace(/,/g, ''));
 
 		// Format all number fields
-		document.querySelectorAll('.format-as-number, input[type="number"][value]').forEach(input => {
+		viewContainer.querySelectorAll('.format-as-number').forEach(input => {
 			if (input.value) {
 				input.value = formatNumber(input.value);
 			}
 		});
 
-		// Ensure character counters are updated on load for textareas in view mode
-		document.querySelectorAll('#kycViewForm textarea[maxlength]').forEach(textarea => {
-			const counter = textarea.nextElementSibling;
+		// Ensure character counters are updated on load for view mode
+		viewContainer.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
+			const counter = field.nextElementSibling;
 			if (counter && counter.classList.contains('char-counter')) {
-				const maxLength = textarea.getAttribute('maxlength');
-				counter.textContent = `${textarea.value.length} / ${maxLength}`;
+				const maxLength = field.getAttribute('maxlength');
+				counter.textContent = `${field.value.length} / ${maxLength}`;
 			}
 		});
+        
+        // --- Toggleable sections logic for view mode ---
+        document.querySelectorAll('a.btn-link[data-toggle="collapse"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const icon = this.querySelector('.collapse-icon');
+                const targetId = this.getAttribute('href');
+                const targetBody = document.querySelector(targetId);
+                
+                if (targetBody) {
+                    const isOpening = !targetBody.classList.contains('show');
+                    if (icon) {
+                        icon.textContent = isOpening ? '−' : '+';
+                    }
+                }
+            });
+        });
 	});
 </script>
 
-<!-- SCRIPT FOR MODIFY MODE (Corrected Logic) -->
+<!-- SCRIPT FOR MODIFY MODE -->
 <script th:if="${formmode == 'modify'}">
 	document.addEventListener("DOMContentLoaded", function () {
 		const kycForm = document.getElementById('kycForm');
@@ -2195,79 +2215,48 @@
 		// ===================================================================
 		//                          HELPER FUNCTIONS
 		// ===================================================================
-
 		const formatNumber = (num) => (num === null || num === undefined || String(num).trim() === '') ? '' : new Intl.NumberFormat('en-US').format(String(num).replace(/,/g, ''));
 		const unformatNumber = (str) => (typeof str === 'string') ? str.replace(/,/g, '') : str;
 
-		const updateCharCounter = (textarea) => {
-			const counter = textarea.nextElementSibling;
+		const updateCharCounter = (field) => {
+			const counter = field.nextElementSibling;
 			if (counter && counter.classList.contains('char-counter')) {
-				const maxLength = textarea.getAttribute('maxlength');
-				counter.textContent = `${textarea.value.length} / ${maxLength}`;
+				const maxLength = field.getAttribute('maxlength');
+				counter.textContent = `${field.value.length} / ${maxLength}`;
 			}
 		};
 
-
 		// ===================================================================
-		//                       FIELD DEPENDENCY MANAGEMENT (FINAL VERSION)
+		//                       FIELD DEPENDENCY MANAGEMENT
 		// ===================================================================
-
 		function updateFieldDependencies() {
-			// --- Loop through each holder type ---
 			['primary', 'joint1', 'joint2', 'joint3'].forEach(prefix => {
 				let isSectionEnabled = true;
-
-				// For joint holders, the entire section depends on their Customer ID
 				if (prefix !== 'primary') {
 					const custIdInput = document.querySelector(`[name="${prefix}_customer_id"]`);
-					if (custIdInput) {
-						isSectionEnabled = !custIdInput.disabled && custIdInput.value.trim() !== '';
-					} else {
-						isSectionEnabled = false;
-					}
+					isSectionEnabled = custIdInput && !custIdInput.disabled && custIdInput.value.trim() !== '';
 				}
 
-				// --- Define all fields for the holder ---
-				const fieldsToToggle = [
-					`${prefix}_name`, `${prefix}_nationality`, `${prefix}_mobile_no`, `${prefix}_email`,
-					`${prefix}_address`, `${prefix}_passport_no`, `${prefix}_emirates_id_no`,
-					`${prefix}_annual_income_${prefix === 'primary' ? 'primary' : prefix}`, // Handle specific name for primary
-					`${prefix}_source_of_income_${prefix === 'primary' ? 'primary' : prefix}`,
-					`${prefix}_non_resident_yn`, `${prefix}_pep_yn`,
-					`${prefix}_passport_exp_date`, `${prefix}_emirates_exp_date`,
-					`${prefix}_pep_approval` // Handle this last as a special case
-				];
-
-				fieldsToToggle.forEach(fieldName => {
-					document.querySelectorAll(`[name="${fieldName}"]`).forEach(el => {
-						if (el.name.endsWith('_pep_approval')) return; // Skip pep_approval for now
+				document.querySelectorAll(`[name^="${prefix}_"]`).forEach(el => {
+					if (!el.name.endsWith('_pep_approval')) {
 						el.disabled = !isSectionEnabled;
 						if (!isSectionEnabled) {
-							if (el.type === 'radio' || el.type === 'checkbox') {
-								el.checked = false;
-							} else {
-								el.value = '';
-							}
+							if (el.type === 'radio' || el.type === 'checkbox') el.checked = false;
+							else el.value = '';
 						}
-					});
+					}
 				});
 
-				// --- Handle the special case for "Approval if PEP" ---
 				const pepYesRadio = document.querySelector(`input[name="${prefix}_pep_yn"][value="Yes"]`);
 				const pepApprovalRadios = document.querySelectorAll(`input[name="${prefix}_pep_approval"]`);
-
-				// Approval is only possible if the section is enabled AND PEP status is 'Yes'
 				const allowPepApproval = isSectionEnabled && pepYesRadio && pepYesRadio.checked;
 
 				pepApprovalRadios.forEach(radio => {
 					radio.disabled = !allowPepApproval;
-					if (!allowPepApproval) {
-						radio.checked = false;
-					}
+					if (!allowPepApproval) radio.checked = false;
 				});
 			});
 
-			// --- Handle other form-wide dependencies ---
 			const profileNo = document.querySelector('input[name="profile_match_yn"][value="No"]');
 			const remarks = document.querySelector('[name="profile_mismatch_remarks"]');
 			if (profileNo && remarks && !profileNo.disabled) {
@@ -2276,12 +2265,9 @@
 			}
 		}
 
-
 		// ===================================================================
 		//                      EVENT LISTENERS
 		// ===================================================================
-
-		// --------- MODIFY BUTTON LOGIC ----------
 		document.querySelectorAll('.modify-btn').forEach(button => {
 			button.addEventListener('click', function () {
 				const actions = this.closest('.section-actions');
@@ -2290,40 +2276,30 @@
 					alert("Please Save or Cancel the active section first.");
 					return;
 				}
-
 				activeSectionId = targetId;
 				const section = document.getElementById(targetId);
 				originalSectionValues[targetId] = {};
-
 				section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
 					if (el.name) {
 						if (el.type === 'radio') {
-							if (el.checked) {
-								originalSectionValues[targetId][el.name] = el.value;
-							}
+							if (el.checked) originalSectionValues[targetId][el.name] = el.value;
 						} else {
 							originalSectionValues[targetId][el.name] = el.value;
 						}
 					}
-					if (!el.hasAttribute('readonly')) {
-						el.disabled = false;
-					}
+					if (!el.hasAttribute('readonly')) el.disabled = false;
 				});
-
 				actions.querySelector('.modify-btn').classList.add('d-none');
 				actions.querySelector('.save-cancel-controls').classList.remove('d-none');
 				updateFieldDependencies();
 			});
 		});
 
-
-		// --------- CANCEL BUTTON LOGIC ----------
 		document.querySelectorAll('.cancel-btn').forEach(button => {
 			button.addEventListener('click', function () {
 				const actions = this.closest('.section-actions');
 				const targetId = actions.dataset.target;
 				const section = document.getElementById(targetId);
-
 				if (originalSectionValues[targetId]) {
 					section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
 						const originalValue = originalSectionValues[targetId][el.name];
@@ -2334,48 +2310,33 @@
 						}
 					});
 				}
-
-				section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-					el.disabled = true;
-				});
-
+				section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
 				updateFieldDependencies();
-
 				actions.querySelector('.modify-btn').classList.remove('d-none');
 				actions.querySelector('.save-cancel-controls').classList.add('d-none');
 				activeSectionId = null;
 			});
 		});
 
-
-		// --------- SAVE BUTTON LOGIC (FINAL CORRECTED VERSION) ----------
 		document.querySelectorAll('.save-btn').forEach(button => {
 			button.addEventListener('click', async function () {
 				const actions = this.closest('.section-actions');
 				const targetSection = document.getElementById(actions.dataset.target);
-
-				// Standard Validation
 				for (const el of targetSection.querySelectorAll('input:not(:disabled), select:not(:disabled), textarea:not(:disabled)')) {
 					if (!el.checkValidity()) {
 						el.reportValidity();
 						return;
 					}
 				}
-
 				this.disabled = true;
 				const spinner = this.querySelector('i.fa-spinner');
 				if (spinner) spinner.classList.remove('d-none');
-
-				// Build FormData with ONLY the fields from the current section
 				const formData = new FormData();
-
 				formData.append('srlno', kycForm.querySelector('input[name="srlno"]').value);
 				formData.append('formmode', 'submit');
-
 				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
 					const wasDisabled = el.disabled;
 					el.disabled = false;
-
 					if (el.type === 'radio') {
 						if (el.checked) formData.append(el.name, el.value);
 					} else if (el.type === 'checkbox') {
@@ -2386,221 +2347,162 @@
 					}
 					el.disabled = wasDisabled;
 				});
-
 				try {
-					const response = await fetch(kycForm.action + '?ajax=true', {
-						method: 'POST',
-						body: formData
-					});
-					if (!response.ok) {
-						throw new Error(await response.text() || 'Server error');
-					}
-
-					// Force a hard reload from the server to bypass browser cache
+					const response = await fetch(kycForm.action + '?ajax=true', { method: 'POST', body: formData });
+					if (!response.ok) throw new Error(await response.text() || 'Server error');
 					location.reload(true);
-
 				} catch (err) {
 					alert("Save Failed: " + err.message);
-					console.error(err);
-				} finally {
 					this.disabled = false;
 					if (spinner) spinner.classList.add('d-none');
 				}
 			});
 		});
+        
+        document.querySelectorAll('a.btn-link[data-toggle="collapse"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const icon = this.querySelector('.collapse-icon');
+                const targetId = this.getAttribute('href');
+                const targetBody = document.querySelector(targetId);
+                if (targetBody && icon) {
+                    const isOpening = !targetBody.classList.contains('show');
+                    icon.textContent = isOpening ? '−' : '+';
+                }
+            });
+        });
 
 		// ===================================================================
 		//                       INITIAL PAGE SETUP
 		// ===================================================================
-
 		kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
-		kycForm.querySelectorAll('.format-as-number').forEach(input => {if (input.value) input.value = formatNumber(input.value);});
-		kycForm.querySelectorAll('textarea[maxlength]').forEach(updateCharCounter);
+		kycForm.querySelectorAll('.format-as-number').forEach(input => { if (input.value) input.value = formatNumber(input.value); });
 
-		// Use a short timeout to allow Thymeleaf to render values before our script runs.
-		setTimeout(() => {
-			updateFieldDependencies();
-		}, 100);
-
-		kycForm.addEventListener('input', () => {
-			if (activeSectionId) {
-				updateFieldDependencies();
+		// +++ THIS IS THE CORRECTED CHARACTER COUNTER LOGIC +++
+		// It now selects both inputs and textareas and adds an event listener.
+		kycForm.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
+			const counter = field.nextElementSibling;
+			if (counter && counter.classList.contains('char-counter')) {
+				updateCharCounter(field); // Set initial count on page load
+				field.addEventListener('input', () => updateCharCounter(field)); // Update on typing
 			}
 		});
+
+		setTimeout(() => { updateFieldDependencies(); }, 100);
+		kycForm.addEventListener('input', () => { if (activeSectionId) { updateFieldDependencies(); } });
 	});
-	// A global array to store the files the user selects. This is our "staging area".
+</script>
+
+<!-- SCRIPT FOR UPLOAD/DOWNLOAD MODALS -->
+<script>
 	let fileListStore = [];
 
-	/**
-	 * UPDATED: This function now accepts the customer's data as arguments.
-	 */
 	function openUploadModal(srlNo, customerId, customerType) {
-		fileListStore = []; // Clear any previously selected files
-		updateSelectedFilesDisplay(); // Update the visual list to show "No files"
-
-		// **THE KEY FIX**: Find the single upload form and populate its hidden fields with the correct customer data.
+		fileListStore = [];
+		updateSelectedFilesDisplay();
 		const form = document.getElementById('uploadDocForm');
 		form.querySelector('input[name="srl_no"]').value = srlNo;
 		form.querySelector('input[name="customer_id"]').value = customerId;
 		form.querySelector('input[name="customer_type"]').value = customerType;
-
-		// Now, show the modal which is now correctly prepared.
 		$('#uploadModal').modal('show');
 	}
 
-	/**
-	 * Adds newly selected files to our staging array.
-	 */
 	function addFilesToList(event) {
-		const newFiles = event.target.files;
-		for (const file of newFiles) {
-			// Prevent adding the same file twice
+		for (const file of event.target.files) {
 			if (!fileListStore.some(existingFile => existingFile.name === file.name)) {
 				fileListStore.push(file);
 			}
 		}
-		event.target.value = null; // Clear the input to allow selecting the same file again if removed
+		event.target.value = null;
 		updateSelectedFilesDisplay();
 	}
 
-	/**
-	 * Removes a specific file from the staging array by its index.
-	 */
 	function removeFileFromList(index) {
 		fileListStore.splice(index, 1);
 		updateSelectedFilesDisplay();
 	}
 
-	/**
-	 * Updates the HTML list in the modal to show the staged files.
-	 */
 	function updateSelectedFilesDisplay() {
 		const listElement = document.getElementById('selectedFilesList');
 		if (!listElement) return;
-
 		if (fileListStore.length === 0) {
 			listElement.innerHTML = '<li class="list-group-item text-muted">No files selected.</li>';
 			return;
 		}
-
-		let html = '';
-		fileListStore.forEach((file, index) => {
-			html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-	                   <span class="text-truncate">${file.name}</span>
-	                   <button type="button" class="btn btn-sm btn-danger ml-2" title="Remove file" onclick="removeFileFromList(${index})">×</button>
-	                 </li>`;
-		});
-		listElement.innerHTML = html;
+		listElement.innerHTML = fileListStore.map((file, index) => `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+               <span class="text-truncate" title="${file.name}">${file.name}</span>
+               <button type="button" class="btn btn-sm btn-danger ml-2" title="Remove file" onclick="removeFileFromList(${index})">×</button>
+            </li>`).join('');
 	}
 
-	/**
-	 * Handles the final submission by sending all staged files to the server.
-	 */
 	async function handleUploadSubmit() {
 		if (fileListStore.length === 0) {
 			alert('Please select at least one file to upload.');
 			return;
 		}
-
-
 		$('#uploadModal').modal('hide');
-
 		const form = document.getElementById('uploadDocForm');
 		const formData = new FormData();
-
-		// 1. Append the hidden values that were set by openUploadModal()
 		formData.append('srl_no', form.querySelector('input[name="srl_no"]').value);
 		formData.append('customer_id', form.querySelector('input[name="customer_id"]').value);
 		formData.append('customer_type', form.querySelector('input[name="customer_type"]').value);
-
-		// 2. Append all the files from our staging array.
 		fileListStore.forEach(file => {
 			formData.append('files', file, file.name);
 		});
-
 		try {
-			// IMPORTANT: Ensure this URL uses your correct context path (e.g., /BCDRS)
 			const response = await fetch('/BECDDS/kyc/individual/upload-document', {
 				method: 'POST',
 				body: formData
-				// If using Spring Security with CSRF, add CSRF headers here
 			});
-
 			if (!response.ok) {
-				const errorText = await response.text();
-				throw new Error(errorText || 'Server responded with an error');
+				throw new Error(await response.text() || 'Server responded with an error');
 			}
-
 			$("#alertmsg_success").text("Documents uploaded successfully!");
 			$("#alert_success").modal("show");
-			$('#alert_success .btn-primary').attr("onclick", "location.reload();");
+			$('#alert_success .btn-primary').attr("onclick", "location.reload(true);");
 		} catch (error) {
-			console.error("Upload failed:", error);
 			$("#alertmsg_failure").text("Upload failed: " + error.message);
 			$("#alert_failure").modal("show");
-		} finally {
-
 		}
 	}
-	/**
-	 * Opens the download modal and fetches the list of documents for the specified customer.
-	 */
+
 	async function openDownloadModal(customerId) {
 		const tableBody = document.getElementById('docListTableBody');
-		// 1. Show a loading message immediately for good user experience.
-		tableBody.innerHTML = '<tr><td colspan="4" class="text-center"><div class="spinner-border spinner-border-sm"></div> Loading documents...</td></tr>';
-
-		// 2. Open the modal window.
+		tableBody.innerHTML = '<tr><td colspan="4" class="text-center"><div class="spinner-border spinner-border-sm"></div> Loading...</td></tr>';
 		$('#downloadModal').modal('show');
-
 		try {
-			// 3. Fetch the list of documents from your backend controller.
 			const response = await fetch(`/BECDDS/kyc/individual/list-documents?customerId=${customerId}`);
 			if (!response.ok) {
 				throw new Error('Failed to fetch documents from the server.');
 			}
-
 			const documents = await response.json();
-
-			// 4. Handle the case where no documents are found.
 			if (documents.length === 0) {
-				tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No documents have been uploaded for this customer.</td></tr>';
+				tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No documents have been uploaded.</td></tr>';
 				return;
 			}
-
-			// 5. Build the HTML for the table rows dynamically.
 			let rowsHtml = '';
 			documents.forEach(doc => {
-				// +++ CORRECTED CODE +++
-				const formattedDate = new Date(doc.uploadedDate).toLocaleDateString('en-GB'); // Formats date as DD-MM-YYYY
-
-				// +++ THIS IS THE CORRECTED PART +++
+				const formattedDate = new Date(doc.uploadedDate).toLocaleDateString('en-GB');
 				rowsHtml += `
-	                 <tr>
-	                     <td>${doc.documentName || 'N/A'}</td>
-	                     <td>${doc.uploadedBy || 'N/A'}</td>
-	                     <td>${formattedDate}</td>
-	                     <td class="text-center">
-	                         <!-- This link now uses a Font Awesome icon instead of text -->
-	                         <a href="/BECDDS/kyc/individual/download-doc/${doc.docId}" 
-	                            class="btn btn-sm btn-success" 
-	                            title="Download ${doc.documentName}" 
-	                            download>
-	                             <i class="fas fa-download"></i>
-	                         </a>
-	                     </td>
-	                 </tr>
-	             `;
+                 <tr>
+                     <td>${doc.documentName || 'N/A'}</td>
+                     <td>${doc.uploadedBy || 'N/A'}</td>
+                     <td>${formattedDate}</td>
+                     <td class="text-center">
+                         <a href="/BECDDS/kyc/individual/download-doc/${doc.docId}" 
+                            class="btn btn-sm btn-success" 
+                            title="Download ${doc.documentName}" 
+                            download>
+                             <i class="fas fa-download"></i>
+                         </a>
+                     </td>
+                 </tr>`;
 			});
-
-			// 6. Insert the new rows into the table.
 			tableBody.innerHTML = rowsHtml;
 		} catch (error) {
-			console.error("Failed to load documents:", error);
 			tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Error: ${error.message}</td></tr>`;
 		}
 	}
-
 </script>
 
 </html>
