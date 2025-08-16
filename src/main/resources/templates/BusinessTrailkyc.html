@@ -409,7 +409,7 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 	
 	
 </script>
-<title>XBRL</title>
+<title>BECDDS</title>
 
 <body>
 	<div class="col-sm-2">
@@ -448,6 +448,7 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 						<thead>
 							<tr>
 								<th>Cust ID</th>
+								<th>Branch Code</th>
 								<th>Table Name</th>
 								<th>Function</th>
 								<th>Entry User</th>
@@ -462,6 +463,7 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 								th:attr="data-custid=${auditdata.audit_ref_no ?: 'N/A'}"
 								onclick="navigateToid(this)">
 								<td th:text="${auditdata.report_id ?: 'N/A'}"></td>
+								<td th:text="${auditdata.remarks ?: 'N/A'}"></td>
 								<td th:text="${auditdata.audit_table ?: 'N/A'}"></td>
 								<td th:text="${auditdata.func_code ?: 'N/A'}"></td>
 								<td

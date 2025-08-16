@@ -16,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import com.bornfire.xbrl.config.SequenceGenerator;
+import com.bornfire.xbrl.entities.KYC_Audit_Entity;
+import com.bornfire.xbrl.entities.KYC_Audit_Rep;
+import com.bornfire.xbrl.entities.UserProfileRep;
 import com.bornfire.xbrl.entities.BECDDS.EcddIndividualProfileRepository;
 import com.bornfire.xbrl.entities.BECDDS.Ecdd_Individual_Profile_Entity;
 import com.itextpdf.text.BaseColor;
@@ -48,6 +52,11 @@ public class IndividualPdfService {
 	@Autowired
 	private Environment env;
 
+	@Autowired
+	SequenceGenerator sequence;
+
+	@Autowired
+	KYC_Audit_Rep KYC_Audit_Rep;
 	// --- Custom Fonts and Colors for PDF content ---
 	private static BaseFont TIMES_NORMAL;
 	private static BaseFont TIMES_BOLD;
@@ -497,6 +506,42 @@ public class IndividualPdfService {
 		}
 
 		logger.info("PDF generated successfully: {}", outputFile.getAbsolutePath());
+		try {
+			String auditID = sequence.generateRequestUUId();
+			String userId = (String) req.getSession().getAttribute("USERID");
+			String username = (String) req.getSession().getAttribute("USERNAME");
+			String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
+
+			// Create and populate audit entity
+			KYC_Audit_Entity audit = new KYC_Audit_Entity();
+			Date currentDate = new Date();
+			audit.setAudit_date(currentDate);
+			audit.setEntry_time(currentDate);
+			audit.setEntry_user(userId);
+			audit.setEntry_user_name(username);
+			audit.setAuth_time(currentDate);
+			audit.setAuth_user(userId);
+			audit.setAuth_user_name(username);
+			audit.setFunc_code("Downloaded");
+			audit.setAudit_table("KYC_individual");
+			audit.setAudit_screen("ECDD Individual Report Generation");
+			audit.setEvent_id(userId);
+			audit.setEvent_name(username);
+			audit.setReport_id(entity.getCustomer_id()); // Use the actual Customer ID for reference
+			audit.setRemarks(branchcode);
+			audit.setModi_details("ECDD Individual report PDF generated for Customer ID: " + entity.getCustomer_id());
+			audit.setAudit_ref_no(auditID);
+
+			// Save the audit entity
+			KYC_Audit_Rep.save(audit);
+			logger.info("Audit log saved for PDF generation of Customer ID: {}", entity.getCustomer_id());
+
+		} catch (Exception auditException) {
+			// Log the audit failure critically, but do not throw the exception
+			// This ensures the user still gets the PDF even if auditing fails.
+			logger.error("CRITICAL: Failed to save audit log for PDF generation! Customer ID: {}",
+					entity.getCustomer_id(), auditException);
+		}
 		return outputFile;
 	}
 

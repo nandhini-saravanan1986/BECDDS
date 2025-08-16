@@ -33,9 +33,9 @@ public interface KYC_Audit_Rep extends JpaRepository<KYC_Audit_Entity, String>{
 	@Query(value = "select * from KYC_AUDIT_TABLE where AUDIT_TABLE = 'XBRLUSERPROFILETABLE' AND TRUNC(AUDIT_DATE) = ?1", nativeQuery = true)
 	List<KYC_Audit_Entity> getauditListLocalvaluesbusiness(Date fromDateToUse);
 	
-	@Query(value = "SELECT * FROM KYC_AUDIT_TABLE WHERE AUDIT_TABLE IN ('Kyc_corporate', 'KYC_indidual') AND TRUNC(AUDIT_DATE) = TRUNC(?1)", nativeQuery = true)
+	@Query(value = "SELECT * FROM KYC_AUDIT_TABLE WHERE AUDIT_TABLE IN ('Kyc_corporate', 'KYC_individual') AND TRUNC(AUDIT_DATE) = TRUNC(?1)", nativeQuery = true)
 	List<KYC_Audit_Entity> getauditListLocalvaluesbusiness1(Date fromDateToUse);
-	@Query(value = "SELECT change_details FROM KYC_AUDIT_TABLE WHERE AUDIT_TABLE IN ('Kyc_corporate', 'KYC_indidual') and audit_ref_no = ?1", nativeQuery = true)
+	@Query(value = "SELECT change_details FROM KYC_AUDIT_TABLE WHERE AUDIT_TABLE IN ('Kyc_corporate', 'KYC_individual') and audit_ref_no = ?1", nativeQuery = true)
 	String getchanges(String audit_ref_no);
 	
 }

@@ -254,14 +254,14 @@ public class XBRLWebSecurity extends WebSecurityConfigurerAdapter {
 
 				System.out.println(" Your Log in otp is :" + otp);
 
-				loginServices.sendclientotp(otp, user.getRole_id(), user);
+				//loginServices.sendclientotp(otp, user.getRole_id(), user);
 
 				// Store OTP in session or Redis (secure option)
 				request.getSession().setAttribute("otp", otp);
 
 				String roleId = user.getRole_id();
 				System.out.println("THE LOGIN ROLE ID IS " + roleId);
-				if (roleId.equals("DCD")) {
+				if (roleId.equals("DCD") || roleId.equals("DCD_ADMIN")) {
 					KYC_Audit_Entity audit = new KYC_Audit_Entity();
 					LocalDateTime currentDateTime = LocalDateTime.now();
 					Date dateValue = Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant());
@@ -324,7 +324,7 @@ public class XBRLWebSecurity extends WebSecurityConfigurerAdapter {
 					UserProfile user1 = up.get();
 					String roleId = user1.getRole_id();
 					System.out.println("THE LOGOUT ROLE ID IS " + roleId);
-					if (roleId.equals("DCD")) {
+					if (roleId.equals("DCD") || roleId.equals("DCD_ADMIN")) {
 						UserProfile user = up.get();
 						KYC_Audit_Entity audit = new KYC_Audit_Entity();
 						String Number1 = sequence.generateRequestUUId();

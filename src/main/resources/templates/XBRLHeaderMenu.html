@@ -416,7 +416,7 @@
 			<div class="d-flex align-items-center">
 				<!-- <img th:src="@{/images/client_Logo_bkp.png}" alt="Client Logo"
 					style="height: 65px; margin-right: 15px;"> -->
-				<img th:src="@{/images/Bornfire_header_BECCDS.png}" alt="Bornfire Logo"
+				<img th:src="@{/images/Bornfire_header_BECDDS.png}" alt="Bornfire Logo"
 					style="height: 65px;margin-left: 800px;">
 			</div>
 
@@ -488,6 +488,9 @@
 								th:if="${session.ROLEID == 'Superadmin'or session.ROLEID == 'BRC'}">Audit
 								Service</a>
 						</li>
+						<li class="nav-item"><a class="nav-link" id="auditlogs" style="padding-left: 30px;" href="#"
+								onclick="contentLoad(this)" th:if="${session.ROLEID == 'DCD_ADMIN'}">Audit
+								Logs</a></li>
 						<li><a class="nav-link" id="auditlogs" style="padding-left: 30px;" href="#"
 								onclick="contentLoad(this)" th:if="${session.ROLEID == 'Superadmin'}">Audit
 								Logs</a></li>

@@ -267,7 +267,7 @@
 
 </script>
 
-<title>XBRL</title>
+<title>BECDDS</title>
 
 <body>
 	<div class="col-sm-2">
@@ -1214,7 +1214,7 @@
 											<td>
 												<strong>If PEP is "Yes", provide details:</strong>
 												<textarea class="form-control" name="pep_remarks" id="pep_remarks"
-													rows="1" required th:text="${user_data?.pep_remarks}" minlength="30"
+													rows="1" required th:text="${user_data?.pep_remarks}" 
 													maxlength="100"></textarea>
 												<span class="char-counter">0 / 100</span>
 											</td>
@@ -1345,12 +1345,12 @@
 												</div>
 											</td>
 											<td><!--<textarea class="form-control" name="corporate_screening_remarks"
-													rows="1" required minlength="30"
+													rows="1" required 
 													th:text="${user_data?.corporate_screening_remarks}"></textarea>-->
 												<input list="CorporateRemarksList" class="form-control"
 													name="corporate_screening_remarks"
 													th:value="${user_data?.corporate_screening_remarks}" required
-													placeholder="Type or select a remark" minlength="30"
+													placeholder="Type or select a remark"
 													maxlength="100" />
 
 												<datalist id="CorporateRemarksList">
@@ -1404,13 +1404,13 @@
 												</div>
 											</td>
 											<td><!--<textarea class="form-control" name="ubo_screening_remarks" rows="1"
-													required minlength="30"
+													required 
 													th:text="${user_data?.ubo_screening_remarks}"></textarea>-->
 
 												<input list="UBORemarksList" class="form-control"
 													name="ubo_screening_remarks"
 													th:value="${user_data?.ubo_screening_remarks}" required
-													placeholder="Type or select a remark" minlength="30"
+													placeholder="Type or select a remark" 
 													maxlength="100" />
 
 												<datalist id="UBORemarksList">
@@ -1466,12 +1466,12 @@
 												</div>
 											</td>
 											<td><!--<textarea class="form-control" name="counterparty_screening_remarks"
-													rows="1" required minlength="30"
+													rows="1" required 
 													th:text="${user_data?.counterparty_screening_remarks}"></textarea>-->
 												<input list="CounterRemarksList" class="form-control"
 													name="counterparty_screening_remarks"
 													th:value="${user_data?.counterparty_screening_remarks}" required
-													placeholder="Type or select a remark" minlength="30"
+													placeholder="Type or select a remark" 
 													maxlength="100" />
 
 												<datalist id="CounterRemarksList">
@@ -1724,7 +1724,7 @@
 														for="aof_n">No</label></div>
 											</td>
 											<td><textarea class="form-control" name="aof_remarks" rows="1" required
-													th:text="${user_data?.aof_remarks}" minlength="30"
+													th:text="${user_data?.aof_remarks}" 
 													maxlength="100"></textarea></td>
 										</tr>
 										<tr>
@@ -1742,7 +1742,7 @@
 														for="fatca_n">No</label></div>
 											</td>
 											<td><textarea class="form-control" name="fatca_crs_remarks" rows="1"
-													required th:text="${user_data?.fatca_crs_remarks}" minlength="30"
+													required th:text="${user_data?.fatca_crs_remarks}" 
 													maxlength="100"></textarea>
 											</td>
 										</tr>
@@ -1764,7 +1764,7 @@
 											</td>
 											<td><textarea class="form-control" name="source_of_funds_remarks" rows="1"
 													required th:text="${user_data?.source_of_funds_remarks}"
-													minlength="30" maxlength="100"></textarea></td>
+													 maxlength="100"></textarea></td>
 										</tr>
 									</tbody>
 								</table>

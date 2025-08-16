@@ -395,20 +395,26 @@ public class Kyc_individual_service {
 			String auditID = sequence.generateRequestUUId();
 			String user1 = (String) req.getSession().getAttribute("USERID");
 			String username = (String) req.getSession().getAttribute("USERNAME");
+			String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
 
 			// Create and populate audit entity
 			KYC_Audit_Entity audit = new KYC_Audit_Entity();
 			Date currentDate = new Date();
 			audit.setAudit_date(currentDate);
+			audit.setEntry_time(currentDate);
+			audit.setEntry_user(userId);
+			audit.setEntry_user_name(username);
 			audit.setAuth_user(user1);
 			audit.setAuth_time(currentDate);
 			audit.setAuth_user_name(username);
-			audit.setFunc_code("VERIFIED");
-			audit.setAudit_table("KYC_indidual");
-			audit.setAudit_screen("VERIFY");
+			audit.setFunc_code("Verified");
+			audit.setAudit_table("KYC_individual");
+			audit.setAudit_screen("Verify");
 			audit.setEvent_id(user1);
 			audit.setEvent_name(username);
-			audit.setModi_details("VERIFIED Successfully");
+			audit.setRemarks(branchcode); // This now has the correct value
+			audit.setReport_id(kycEntity.getCustomer_id());
+			audit.setModi_details("Verified Successfully");
 			audit.setAudit_ref_no(auditID);
 
 			audit.setReport_id(customerId);
@@ -723,7 +729,6 @@ public class Kyc_individual_service {
 		// Step 1: Find the existing record to update.
 		Optional<Ecdd_Individual_Profile_Entity> optionalEntity = ecddIndividualProfileRepository.findById(srlno);
 		if (!optionalEntity.isPresent()) {
-			System.err.println("UPDATE FAILED: No record found for srlno: " + srlno);
 			return false;
 		}
 		Ecdd_Individual_Profile_Entity existingEntity = optionalEntity.get();
@@ -748,9 +753,14 @@ public class Kyc_individual_service {
 		for (String propertyName : submittedPropertyNames) {
 			Object newValue = src.getPropertyValue(propertyName);
 			Object oldValue = dest.getPropertyValue(propertyName);
+
 			if (!Objects.equals(oldValue, newValue)) {
-				changes.put(propertyName,
-						String.format("'%s' -> '%s'", String.valueOf(oldValue), String.valueOf(newValue)));
+				// --- FIX IS HERE: Format the change string for the JavaScript regex ---
+				String formattedFieldName = formatFieldName(propertyName);
+				String oldValStr = oldValue != null ? String.valueOf(oldValue) : "N/A";
+				String newValStr = String.valueOf(newValue);
+
+				changes.put(formattedFieldName, "OldValue: " + oldValStr + ", NewValue: " + newValStr);
 			}
 		}
 
@@ -758,46 +768,43 @@ public class Kyc_individual_service {
 		// STEP 3: PERFORM THE PARTIAL UPDATE LOGIC
 		// =================================================================================
 
-		// This single line copies all properties that were not null in the incoming
-		// data.
-		// It correctly handles both updating fields and setting them to null if an
-		// empty string was sent.
-		BeanUtils.copyProperties(incomingData, existingEntity, getNullPropertyNames(incomingData));
+		BeanUtils.copyProperties(incomingData, existingEntity, getNullAndEmptyPropertyNames(incomingData));
 
 		// =================================================================================
 		// STEP 4: HANDLE SPECIAL CASES & SET METADATA
 		// =================================================================================
 		String userId = (String) req.getSession().getAttribute("USERID");
+		String username = (String) req.getSession().getAttribute("USERNAME");
+		String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
 
-		// Special logic for reviewer details (this is correct)
+		
 		if (incomingData.getReviewed_by_designation() != null) {
 			userProfileRep.findById(userId).ifPresent(userProfile -> {
-				existingEntity.setReview_date(
-						incomingData.getReview_date() != null ? incomingData.getReview_date() : new Date());
+				existingEntity.setReview_date(incomingData.getReview_date() != null ? incomingData.getReview_date() : new Date());
 				existingEntity.setReviewed_by_name(userProfile.getUsername());
 				existingEntity.setReviewed_by_ec_no(userProfile.getEmpid());
-				existingEntity.setReviewed_by_designation(
-						userProfile.getDesignation() != null ? userProfile.getDesignation() : "");
-
+				existingEntity.setReviewed_by_designation(userProfile.getDesignation() != null ? userProfile.getDesignation() : "" );
+				
 			});
 		}
-		incomingData.setAuth_flg(incomingData.getAuth_flg() == null ? "N" : incomingData.getAuth_flg());
-		if (incomingData.getAuth_flg().equals("Y")) {
-			System.out.println(incomingData.getAuth_flg());
-			// Set mandatory metadata
-
-			existingEntity.setEntity_flg("N"); // Assuming this should be set on modification
-			existingEntity.setAuth_flg("Y");
-			existingEntity.setModify_flg("Y");
-			existingEntity.setModify_user(userId);
-			existingEntity.setModify_time(new Date());
-		} else {
+		incomingData.setAuth_flg(incomingData.getAuth_flg()==null ? "N" : incomingData.getAuth_flg());
+		if(incomingData.getAuth_flg().equals("Y")) {
+		System.out.println(incomingData.getAuth_flg());
+		// Set mandatory metadata
+		
+		existingEntity.setEntity_flg("N"); // Assuming this should be set on modification
+		existingEntity.setAuth_flg("Y");
+		existingEntity.setModify_flg("Y");
+		existingEntity.setModify_user(userId);
+		existingEntity.setModify_time(new Date());
+		}else {
 			existingEntity.setEntity_flg("N"); // Assuming this should be set on modification
 			existingEntity.setAuth_flg("N");
 			existingEntity.setModify_flg("N");
 			existingEntity.setModify_user(userId);
 			existingEntity.setModify_time(new Date());
 		}
+
 		// =================================================================================
 		// STEP 5: SAVE THE UPDATED ENTITY
 		// =================================================================================
@@ -806,48 +813,72 @@ public class Kyc_individual_service {
 		// =================================================================================
 		// STEP 6: CREATE AND SAVE THE DETAILED AUDIT LOG
 		// =================================================================================
-		// This logic is excellent and doesn't need to change.
 		String userName = (String) req.getSession().getAttribute("USERNAME");
 		KYC_Audit_Entity audit = new KYC_Audit_Entity();
 		Date currentDate = new Date();
+
 		audit.setAudit_ref_no(sequence.generateRequestUUId());
 		audit.setAudit_date(currentDate);
 		audit.setEntry_time(currentDate);
 		audit.setEntry_user(userId);
-		audit.setEntry_user_name(userName);
+		audit.setEntry_user_name(username);
 		audit.setFunc_code("Modified");
-		audit.setAudit_table("Kyc_Individual");
+		audit.setAudit_table("KYC_individual");
 		audit.setAudit_screen("Modify");
+		audit.setModi_details("Modified Successfully");
+		audit.setAuth_user(userId);
+		audit.setAuth_time(currentDate);
+		audit.setAuth_user_name(username);
+		audit.setRemarks(branchcode); // This now has the correct value
+		audit.setReport_id(existingEntity.getCustomer_id());
 		audit.setModi_details("Successfully modified section for record SRL No: " + srlno);
 
 		if (changes.isEmpty()) {
 			audit.setChange_details("No data fields were changed (metadata update only).");
 		} else {
-			String changeDetailsString = changes.entrySet().stream()
-					.map(entry -> entry.getKey() + ": " + entry.getValue()).collect(Collectors.joining(" ||| "));
-			audit.setChange_details(changeDetailsString);
+			// FIX #2: Format the final string to be parsed correctly by the JavaScript.
+			StringBuilder changeDetails = new StringBuilder();
+			changes.forEach((field, value) -> changeDetails.append(field).append(": ").append(value).append("|||"));
+			if (changeDetails.length() > 3) {
+				changeDetails.setLength(changeDetails.length() - 3);
+			}
+			audit.setChange_details(changeDetails.toString());
 		}
 
 		KYC_Audit_Rep.save(audit);
-
 		return true;
 	}
 
+	// ... (getNullPropertyNames and formatFieldName helper methods) ...
 	/**
-	 * Helper method to get the names of all properties that are null in the source
-	 * object. This is used by BeanUtils.copyProperties to avoid overwriting
-	 * existing data with nulls.
+	 * Helper method to get the names of all properties that are null OR empty
+	 * strings in the source object. This is a more robust way to handle partial
+	 * updates from web forms.
 	 */
-	private String[] getNullPropertyNames(Object source) {
+	private String[] getNullAndEmptyPropertyNames(Object source) {
 		final BeanWrapper src = new BeanWrapperImpl(source);
-		PropertyDescriptor[] pds = src.getPropertyDescriptors();
+		java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
 
 		Set<String> emptyNames = new HashSet<>();
-		for (PropertyDescriptor pd : pds) {
+		for (java.beans.PropertyDescriptor pd : pds) {
 			Object srcValue = src.getPropertyValue(pd.getName());
-			if (srcValue == null)
+			if (srcValue == null || (srcValue instanceof String && ((String) srcValue).trim().isEmpty())) {
 				emptyNames.add(pd.getName());
+			}
 		}
 		return emptyNames.toArray(new String[0]);
 	}
+
+	/**
+	 * Helper method to format field names for display (e.g., "camelCase" to "Camel
+	 * Case").
+	 */
+	private String formatFieldName(String camelCaseString) {
+		if (camelCaseString == null || camelCaseString.isEmpty()) {
+			return "";
+		}
+		String result = camelCaseString.replaceAll("(?<=[a-z])(?=[A-Z])", " ");
+		return result.substring(0, 1).toUpperCase() + result.substring(1);
+	}
+
 }

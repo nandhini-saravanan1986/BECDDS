@@ -889,8 +889,7 @@ public class XBRLNavigationController {
 
 		if ("verified".equals(formmode)) {
 			kyc_individual_service.verified(custid, req);
-		} else if ("download".equals(formmode)) {
-			kyc_individual_service.GrtPdf(custid);
+		
 		} else if ("view".equals(formmode)) {
 			model.addAttribute("formmode", "view");
 			Ecdd_Individual_Profile_Entity user_data = ecddIndividualProfileRepository.GetUserBySrlNo(srlno);
@@ -1305,18 +1304,6 @@ public class XBRLNavigationController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
-	}
-
-	@PostMapping("/kyc/individual/verify")
-	@ResponseBody
-	public String verifyindRecord(@RequestParam String custid, HttpServletRequest req) {
-		try {
-			kyc_individual_service.verified(custid, req);
-			return "Verification successful";
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "Verification failed";
 		}
 	}
 
@@ -1775,15 +1762,19 @@ public class XBRLNavigationController {
 		return "DataQuality.html";
 	}
 
-	@PostMapping("/kyc/indivdual/verify")
+	@PostMapping("/kyc/individual/verify")
 	@ResponseBody
 	public String verifyRecord1(@RequestParam String custid, HttpServletRequest req) {
 		try {
-			kyc_individual_service.verified(custid, req);
-			return "Verification successful";
+			boolean isSuccess = kyc_individual_service.verified(custid, req);
+			if (isSuccess) {
+				return "Verification successful";
+			} else {
+				return "Verification failed: Record not found.";
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return "Verification failed";
+			return "Verification failed: An internal error occurred.";
 		}
 	}
 

@@ -3,15 +3,19 @@ package com.bornfire.xbrl.services;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,22 +76,40 @@ public class Kyc_Corprate_service {
 	KYC_Audit_Rep KYC_Audit_Rep;
 
 	public boolean updateKycData(String srl_no, EcddCorporateEntity data, HttpServletRequest req) {
-		// Find the existing KYC record
-
 		Optional<EcddCorporateEntity> optionalKyc = Kyc_Corprate_Repo.findById(srl_no);
-		String userId = (String) session.getAttribute("USERID");
-		String BRANCHCODE = (String) session.getAttribute("BRANCHCODE");
-		LocalDateTime currentDateTime = LocalDateTime.now();
+		String userId = (String) req.getSession().getAttribute("USERID");
 
 		if (optionalKyc.isPresent()) {
-
 			EcddCorporateEntity kycEntity = optionalKyc.get();
-
-			Set<String> skipFields = new HashSet<>(Arrays.asList("CustomerId", "EntityFlg", "ModifyFlg", "DelFlg",
-					"ModifyUser", "VerifyUser", "ModifyTime", "VerifyTime"));
-
 			Map<String, String> changes = new LinkedHashMap<>();
 
+			Set<String> skipFields = new HashSet<>(Arrays.asList("srl_no", "entity_flg", "auth_flg", "modify_flg",
+					"del_flg", "entry_user", "entry_time", "auth_user", "auth_time", "modify_user", "modify_time",
+					"verify_user", "verify_time", "branch_code", "reviewed_by_name", "reviewed_by_ec_no", "approval_date",
+					"reviewed_by_designation"));
+			List<Field> allFields = getAllFields(EcddCorporateEntity.class);
+
+			for (Field field : allFields) {
+				try {
+					if (skipFields.contains(field.getName())) {
+						continue;
+					}
+
+					field.setAccessible(true);
+					Object oldValue = field.get(kycEntity);
+					Object newValue = field.get(data);
+
+					if (!Objects.equals(oldValue, newValue)) {
+						String formattedFieldName = formatFieldName(field.getName());
+						String oldValStr = oldValue != null ? oldValue.toString() : "N/A";
+						String newValStr = newValue != null ? newValue.toString() : "N/A";
+						changes.put(formattedFieldName, "OldValue: " + oldValStr + ", NewValue: " + newValStr);
+					}
+				} catch (IllegalAccessException e) {
+					System.err.println("Error accessing field: " + field.getName());
+					e.printStackTrace();
+				}
+			}
 			kycEntity.setCompany_name(data.getCompany_name());
 			kycEntity.setCustomer_id(data.getCustomer_id());
 			kycEntity.setCompany_address(data.getCompany_address());
@@ -169,21 +191,18 @@ public class Kyc_Corprate_service {
 			kycEntity.setSource_of_funds_remarks(data.getSource_of_funds_remarks());
 			kycEntity.setObservations(data.getObservations());
 			kycEntity.setReview_date(data.getReview_date());
-		//	kycEntity.setApproval_date(data.getApproval_date());
 
+			// --- Set fields programmatically ---
 			Optional<UserProfile> Userdetails = userProfileRep.findById(userId);
-			System.out.println(Userdetails.get().getUsername());
-			System.out.println(Userdetails.get().getEmail_id());
-			kycEntity.setReviewed_by_name(Userdetails.get().getUsername());
-			kycEntity.setReviewed_by_ec_no(Userdetails.get().getEmpid());
-			kycEntity.setReviewed_by_designation(Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
-			/*
-			 * kycEntity.setApproved_by_name(data.getApproved_by_name());
-			 * kycEntity.setApproved_by_ec_no(data.getApproved_by_ec_no());
-			 */
+			if (Userdetails.isPresent()) {
+				kycEntity.setReviewed_by_name(Userdetails.get().getUsername());
+				kycEntity.setReviewed_by_ec_no(Userdetails.get().getEmpid());
+				kycEntity.setReviewed_by_designation(
+						Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
+			}
+
 			kycEntity.setApproved_by_designation(data.getApproved_by_designation());
 			kycEntity.setBranch_name(data.getBranch_name());
-			kycEntity.setBranch_code(kycEntity.getBranch_code());
 			kycEntity.setData_entry_date(data.getData_entry_date());
 			kycEntity.setData_entry_employee_name(data.getData_entry_employee_name());
 			kycEntity.setDocument_uploaded_date(data.getDocument_uploaded_date());
@@ -191,59 +210,79 @@ public class Kyc_Corprate_service {
 			kycEntity.setCurrent_date(data.getCurrent_date());
 			kycEntity.setReport_date(data.getReport_date());
 			kycEntity.setSrl_no(data.getSrl_no());
-			
-			data.setAuth_flg(data.getAuth_flg() == null ? "N":data.getAuth_flg());
-			
-			if(data.getAuth_flg().equals("Y")) {
 
-			// Metadata / system fields
-			kycEntity.setModify_flg("Y");
-			kycEntity.setEntity_flg("N");
-			kycEntity.setModify_user(userId);
-			kycEntity.setModify_time(Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant()));
-			kycEntity.setAuth_flg("Y");
-			}else {
-				kycEntity.setEntity_flg("N"); // Assuming this should be set on modification
+			// --- Set system flags for modification ---
+			data.setAuth_flg(data.getAuth_flg() == null ? "N" : data.getAuth_flg());
+			if (data.getAuth_flg().equals("Y")) {
+				kycEntity.setModify_flg("Y");
+				kycEntity.setAuth_flg("Y");
+			} else {
 				kycEntity.setAuth_flg("N");
 				kycEntity.setModify_flg("N");
-				kycEntity.setModify_user(userId);
-				kycEntity.setModify_time(new Date());
 			}
+			kycEntity.setModify_user(userId);
+			kycEntity.setModify_time(new Date());
+
 			Kyc_Corprate_Repo.save(kycEntity);
-			// Generate audit entry
-			String auditID = sequence.generateRequestUUId();
-			String user1 = (String) req.getSession().getAttribute("USERID");
-			String username = (String) req.getSession().getAttribute("USERNAME");
 
-			// Create and populate audit entity
-			KYC_Audit_Entity audit = new KYC_Audit_Entity();
-			Date currentDate = new Date();
-			audit.setAudit_date(currentDate);
-			audit.setEntry_time(currentDate);
-			audit.setEntry_user(user1);
-			audit.setEntry_user_name(username);
-			audit.setFunc_code("Modified");
-			audit.setAudit_table("Kyc_corporate");
-			audit.setAudit_screen("Modify");
-			audit.setEvent_id(user1);
-			audit.setEvent_name(username);
-			audit.setModi_details("Modified Successfully");
+			// --- Create a clean audit log entry if changes were made ---
+			if (!changes.isEmpty()) {
+				String auditID = sequence.generateRequestUUId();
+				String user1 = (String) req.getSession().getAttribute("USERID");
+				String username = (String) req.getSession().getAttribute("USERNAME");
+				String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
 
-			// Append field changes to the audit details
-			StringBuilder changeDetails = new StringBuilder();
-			// changes.forEach((field, value) -> changeDetails.append(field).append(":
-			// ").append(value).append("||| "));
-			audit.setChange_details(changeDetails.toString()); // New field in the audit table for storing changes
+				KYC_Audit_Entity audit = new KYC_Audit_Entity();
+				Date currentDate = new Date();
+				audit.setAudit_date(currentDate);
+				audit.setEntry_time(currentDate);
+				audit.setEntry_user(user1);
+				audit.setEntry_user_name(username);
+				audit.setFunc_code("Modified");
+				audit.setAudit_table("Kyc_corporate");
+				audit.setAudit_screen("Modify");
+				audit.setModi_details("Modified Successfully");
+				audit.setAuth_user(user1);
+				audit.setAuth_time(currentDate);
+				audit.setAuth_user_name(username);
+				audit.setRemarks(branchcode); // This now has the correct value
+				audit.setReport_id(kycEntity.getCustomer_id());
 
-			audit.setAudit_ref_no(auditID);
+				StringBuilder changeDetails = new StringBuilder();
+				changes.forEach((field, value) -> changeDetails.append(field).append(": ").append(value).append("|||"));
+				if (changeDetails.length() > 3) {
+					changeDetails.setLength(changeDetails.length() - 3);
+				}
+				audit.setChange_details(changeDetails.toString());
+				audit.setAudit_ref_no(auditID);
 
-			// Save audit entity
-			KYC_Audit_Rep.save(audit);
+				KYC_Audit_Rep.save(audit);
+			}
+
 			return true;
-		} else {
 
+		} else {
 			return false;
 		}
+	}
+
+	private List<Field> getAllFields(Class<?> clazz) {
+		List<Field> fields = new ArrayList<>();
+		while (clazz != null && clazz != Object.class) {
+			fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+			clazz = clazz.getSuperclass();
+		}
+		return fields;
+	}
+
+	private String formatFieldName(String camelCaseString) {
+		if (camelCaseString == null || camelCaseString.isEmpty()) {
+			return "";
+		}
+		// Add a space before each uppercase letter
+		String result = camelCaseString.replaceAll("(?<=[a-z])(?=[A-Z])", " ");
+		// Capitalize the first letter of the resulting string
+		return result.substring(0, 1).toUpperCase() + result.substring(1);
 	}
 
 	public Boolean verified(String customerId, HttpServletRequest req) {
@@ -260,7 +299,8 @@ public class Kyc_Corprate_service {
 			kycEntity.setApproval_date(new Date());
 			kycEntity.setApproved_by_name(Userdetails.get().getUsername());
 			kycEntity.setApproved_by_ec_no(Userdetails.get().getEmpid());
-			kycEntity.setApproved_by_designation(Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
+			kycEntity.setApproved_by_designation(
+					Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
 			kycEntity.setModify_flg("N");
 			kycEntity.setEntity_flg("Y");
 			kycEntity.setVerify_user(userId);
@@ -271,6 +311,7 @@ public class Kyc_Corprate_service {
 			String auditID = sequence.generateRequestUUId();
 			String user1 = (String) req.getSession().getAttribute("USERID");
 			String username = (String) req.getSession().getAttribute("USERNAME");
+			String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
 
 			// Create and populate audit entity
 			KYC_Audit_Entity audit = new KYC_Audit_Entity();
@@ -279,18 +320,19 @@ public class Kyc_Corprate_service {
 			audit.setEntry_time(currentDate);
 			audit.setEntry_user(user1);
 			audit.setEntry_user_name(username);
-			audit.setFunc_code("VERIFIED");
+			audit.setFunc_code("Verified");
 			audit.setAudit_table("Kyc_corporate");
-			audit.setAudit_screen("VERIFY");
+			audit.setAudit_screen("Verify");
 			audit.setEvent_id(user1);
 			audit.setEvent_name(username);
-			audit.setModi_details("VERIFIED Successfully");
+			audit.setModi_details("Verify Successfully");
 			audit.setAuth_user(user1);
 			audit.setAuth_time(currentDate);
 			audit.setAuth_user_name(username);
+			audit.setRemarks(branchcode); // This now has the correct value
+			audit.setReport_id(kycEntity.getCustomer_id());
 
 			audit.setAudit_ref_no(auditID);
-			audit.setReport_id(customerId);
 			// Save audit entity
 			KYC_Audit_Rep.save(audit);
 			return true;
@@ -394,8 +436,8 @@ public class Kyc_Corprate_service {
 
 				PdfPCell cell4 = new PdfPCell(new Phrase(EcddCorporateEntity.getEcdd_date() != null
 						? new SimpleDateFormat("dd/MM/yyyy").format(EcddCorporateEntity.getEcdd_date())
-						: "", Responsesize)); 
-				cell4.setMinimumHeight(16f); 
+						: "", Responsesize));
+				cell4.setMinimumHeight(16f);
 				cell4.setVerticalAlignment(Element.ALIGN_LEFT);
 				cell4.setVerticalAlignment(Element.ALIGN_MIDDLE);
 				cell4.setBorderWidth((float) 0.8);
@@ -568,8 +610,9 @@ public class Kyc_Corprate_service {
 				Devdetailcell.setBorderWidth((float) 0.8);
 				DEVELOPMENTDetails.addCell(Devdetailcell);
 
-				PdfPCell Devdetailcell2 = new PdfPCell(new Phrase(
-						"(if No Change, mention and Proceed) - \r\n" + "" + (EcddCorporateEntity.getNo_change_reason() == null ? "" : EcddCorporateEntity.getNo_change_reason() ),
+				PdfPCell Devdetailcell2 = new PdfPCell(new Phrase("(if No Change, mention and Proceed) - \r\n" + ""
+						+ (EcddCorporateEntity.getNo_change_reason() == null ? ""
+								: EcddCorporateEntity.getNo_change_reason()),
 						Responsesize)); // Empty for now, but can hold dynamic content
 				Devdetailcell2.setMinimumHeight(16f); // Base row height, but will expand if needed
 				Devdetailcell2.setVerticalAlignment(Element.ALIGN_TOP); // Set once
@@ -2006,7 +2049,7 @@ public class Kyc_Corprate_service {
 
 				PdfPTable OBSERVATIONDESCROW1 = new PdfPTable(3);
 				OBSERVATIONDESCROW1.setWidthPercentage(100);
-				OBSERVATIONDESCROW1.setWidths(new float[] { 1, 1,1 });
+				OBSERVATIONDESCROW1.setWidths(new float[] { 1, 1, 1 });
 
 				String reviewDateStr = EcddCorporateEntity.getReview_date() != null
 						? new SimpleDateFormat("dd/MM/yyyy").format(EcddCorporateEntity.getReview_date())
@@ -2031,7 +2074,7 @@ public class Kyc_Corprate_service {
 				OBSERVATIONDESCROW1CELL2.setBorderWidth(0.8f);
 				OBSERVATIONDESCROW1CELL2.setBorderWidthBottom(0);
 				OBSERVATIONDESCROW1.addCell(OBSERVATIONDESCROW1CELL2);
-				
+
 				PdfPCell OBSERVATIONDESCROW1CELL3 = new PdfPCell(
 						new Phrase("Branch Head/Operation Head", Responsesize));
 				OBSERVATIONDESCROW1CELL3.setMinimumHeight(15f);
@@ -2044,7 +2087,7 @@ public class Kyc_Corprate_service {
 
 				PdfPTable OBSERVATIONDESCROW2 = new PdfPTable(3);
 				OBSERVATIONDESCROW2.setWidthPercentage(100);
-				OBSERVATIONDESCROW2.setWidths(new float[] { 1, 1,1 });
+				OBSERVATIONDESCROW2.setWidths(new float[] { 1, 1, 1 });
 
 				// Reviewed By Phrase
 				Phrase reviewedPhrase = new Phrase();
@@ -2093,7 +2136,7 @@ public class Kyc_Corprate_service {
 				OBSERVATIONDESCROW2CELL2.setBorderWidthBottom(0);
 				OBSERVATIONDESCROW2CELL2.setBorderWidthTop(0);
 				OBSERVATIONDESCROW2.addCell(OBSERVATIONDESCROW2CELL2);
-				
+
 				PdfPCell OBSERVATIONDESCROW2CELL3 = new PdfPCell();
 				OBSERVATIONDESCROW2CELL3.setFixedHeight(50f);
 				OBSERVATIONDESCROW2CELL3.setVerticalAlignment(Element.ALIGN_TOP);
@@ -2108,7 +2151,7 @@ public class Kyc_Corprate_service {
 				////
 				PdfPTable OBSERVATIONDESCROW3 = new PdfPTable(3);
 				OBSERVATIONDESCROW3.setWidthPercentage(100);
-				OBSERVATIONDESCROW3.setWidths(new float[] { 1, 1,1 });
+				OBSERVATIONDESCROW3.setWidths(new float[] { 1, 1, 1 });
 
 				PdfPCell OBSERVATIONDESCROW3CELL1 = new PdfPCell(
 						new Phrase("Branch -" + EcddCorporateEntity.getBranch_name(), Responsesize));
@@ -2126,7 +2169,7 @@ public class Kyc_Corprate_service {
 				OBSERVATIONDESCROW3CELL2.setBorderWidth((float) 0.8);
 				OBSERVATIONDESCROW3CELL2.setBorderWidthTop(0);
 				OBSERVATIONDESCROW3.addCell(OBSERVATIONDESCROW3CELL2);
-				
+
 				PdfPCell OBSERVATIONDESCROW3CELL3 = new PdfPCell(new Phrase("Name & Signature"));
 				OBSERVATIONDESCROW3CELL3.setFixedHeight(25f); // Row height
 				OBSERVATIONDESCROW3CELL3.setVerticalAlignment(Element.ALIGN_LEFT);
@@ -2269,6 +2312,7 @@ public class Kyc_Corprate_service {
 				String auditID = sequence.generateRequestUUId();
 				String user1 = (String) req.getSession().getAttribute("USERID");
 				String username = (String) req.getSession().getAttribute("USERNAME");
+				String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
 
 				// Create and populate audit entity
 				KYC_Audit_Entity audit = new KYC_Audit_Entity();
@@ -2277,12 +2321,17 @@ public class Kyc_Corprate_service {
 				audit.setEntry_time(currentDate);
 				audit.setEntry_user(user1);
 				audit.setEntry_user_name(username);
-				audit.setFunc_code("Download");
+				audit.setFunc_code("Downloaded");
 				audit.setAudit_table("Kyc_corporate");
-				audit.setAudit_screen("Modify");
+				audit.setAudit_screen("Download");
 				audit.setEvent_id(user1);
 				audit.setEvent_name(username);
-				audit.setModi_details(
+				audit.setAuth_user(user1);
+				audit.setAuth_time(currentDate);
+				audit.setAuth_user_name(username);
+				audit.setRemarks(branchcode); // This now has the correct value
+				audit.setReport_id(EcddCorporateEntity.getCustomer_id());
+				audit.setChange_details(
 						EcddCorporateEntity.getCustomer_id() + " - Document downloaded by user - " + user1);
 
 				audit.setAudit_ref_no(auditID);
@@ -2308,10 +2357,10 @@ public class Kyc_Corprate_service {
 		cell.setBorderWidth((float) 0.8);
 		return cell;
 	}
-	
-	public String uploadrelateddocs(MultipartFile Securityfile,String Userid) {
+
+	public String uploadrelateddocs(MultipartFile Securityfile, String Userid) {
 		return Userid;
-		
+
 	}
 
 }
