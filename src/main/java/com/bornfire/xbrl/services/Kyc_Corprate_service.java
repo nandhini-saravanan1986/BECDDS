@@ -2331,8 +2331,8 @@ public class Kyc_Corprate_service {
 				audit.setAuth_user_name(username);
 				audit.setRemarks(branchcode); // This now has the correct value
 				audit.setReport_id(EcddCorporateEntity.getCustomer_id());
-				audit.setChange_details(
-						EcddCorporateEntity.getCustomer_id() + " - Document downloaded by user - " + user1);
+				//audit.setChange_details(
+						//EcddCorporateEntity.getCustomer_id() + " - Document downloaded by user - " + user1);
 
 				audit.setAudit_ref_no(auditID);
 
