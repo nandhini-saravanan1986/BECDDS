@@ -6,15 +6,17 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -726,94 +728,94 @@ public class Kyc_individual_service {
 	@Transactional
 	public boolean updateKycData(String srlno, Ecdd_Individual_Profile_Entity incomingData, HttpServletRequest req) {
 
-		// Step 1: Find the existing record to update.
 		Optional<Ecdd_Individual_Profile_Entity> optionalEntity = ecddIndividualProfileRepository.findById(srlno);
 		if (!optionalEntity.isPresent()) {
-			return false;
+			return false; // Record not found
 		}
 		Ecdd_Individual_Profile_Entity existingEntity = optionalEntity.get();
 
-		// =================================================================================
-		// STEP 2: CAPTURE DETAILED FIELD-LEVEL CHANGES FOR AUDITING
-		// =================================================================================
+		String sectionId = req.getParameter("sectionId");
+		// Check 'auth_flg' from the request as it's more reliable for AJAX calls
+		final boolean isPartialSave = !"Y".equals(req.getParameter("auth_flg"));
+
 		final Map<String, String> changes = new LinkedHashMap<>();
 		final BeanWrapper src = new BeanWrapperImpl(incomingData);
 		final BeanWrapper dest = new BeanWrapperImpl(existingEntity);
 
-		// Create a map of the property names that were submitted in this specific AJAX
-		// request.
-		Set<String> submittedPropertyNames = new HashSet<>();
-		for (PropertyDescriptor pd : src.getPropertyDescriptors()) {
-			if (src.isReadableProperty(pd.getName()) && src.getPropertyValue(pd.getName()) != null) {
-				submittedPropertyNames.add(pd.getName());
+		// --- CORE FIX: Precise Update Logic ---
+		if (isPartialSave && sectionId != null) {
+			// This is a section-by-section save from the 'modify' page
+			List<String> fieldsToUpdate = getFieldsForSection(sectionId);
+
+			for (String fieldName : fieldsToUpdate) {
+				Object newValue = src.getPropertyValue(fieldName);
+				Object oldValue = dest.getPropertyValue(fieldName);
+
+				// Record changes for audit trail
+				if (!Objects.equals(oldValue, newValue)) {
+					String formattedFieldName = formatFieldName(fieldName);
+					String oldValStr = oldValue != null ? String.valueOf(oldValue) : "N/A";
+					String newValStr = newValue != null ? String.valueOf(newValue) : ""; // Treat null new value as
+																							// empty
+					changes.put(formattedFieldName, "OldValue: " + oldValStr + ", NewValue: " + newValStr);
+				}
+
+				// Perform the update. This will correctly copy nulls and empty strings for the
+				// specified fields.
+				dest.setPropertyValue(fieldName, newValue);
 			}
+
+		} else {
+			// This is the final 'Submit' from the main button.
+			// Copy all non-null properties from the incoming data. This preserves existing
+			// values
+			// for fields that weren't part of the final submission form.
+			String[] nullPropertyNames = getNullPropertyNames(incomingData);
+			BeanUtils.copyProperties(incomingData, existingEntity, nullPropertyNames);
 		}
 
-		// Now, only check for changes on the fields that were part of this save action.
-		for (String propertyName : submittedPropertyNames) {
-			Object newValue = src.getPropertyValue(propertyName);
-			Object oldValue = dest.getPropertyValue(propertyName);
-
-			if (!Objects.equals(oldValue, newValue)) {
-				// --- FIX IS HERE: Format the change string for the JavaScript regex ---
-				String formattedFieldName = formatFieldName(propertyName);
-				String oldValStr = oldValue != null ? String.valueOf(oldValue) : "N/A";
-				String newValStr = String.valueOf(newValue);
-
-				changes.put(formattedFieldName, "OldValue: " + oldValStr + ", NewValue: " + newValStr);
-			}
+		// --- Save Audit Trail ---
+		if (isPartialSave) {
+			createAndSaveAudit(existingEntity, changes, req);
 		}
 
-		// =================================================================================
-		// STEP 3: PERFORM THE PARTIAL UPDATE LOGIC
-		// =================================================================================
+		// --- Set User Info and Metadata Flags ---
+		String userId = (String) req.getSession().getAttribute("USERID");
 
-		BeanUtils.copyProperties(incomingData, existingEntity, getNullAndEmptyPropertyNames(incomingData));
+		// This logic seems tied to the approver section, let's keep it.
+		if (incomingData.getReviewed_by_designation() != null) {
+			userProfileRep.findById(userId).ifPresent(userProfile -> {
+				existingEntity.setReview_date(
+						incomingData.getReview_date() != null ? incomingData.getReview_date() : new Date());
+				existingEntity.setReviewed_by_name(userProfile.getUsername());
+				existingEntity.setReviewed_by_ec_no(userProfile.getEmpid());
+				existingEntity.setReviewed_by_designation(
+						userProfile.getDesignation() != null ? userProfile.getDesignation() : "");
+			});
+		}
 
-		// =================================================================================
-		// STEP 4: HANDLE SPECIAL CASES & SET METADATA
-		// =================================================================================
+		if (!isPartialSave) {
+			existingEntity.setEntity_flg("N");
+			existingEntity.setAuth_flg("Y");
+			existingEntity.setModify_flg("Y");
+		} else {
+			existingEntity.setEntity_flg("N");
+			existingEntity.setAuth_flg("N");
+			existingEntity.setModify_flg("N");
+		}
+		existingEntity.setModify_user(userId);
+		existingEntity.setModify_time(new Date());
+
+		ecddIndividualProfileRepository.save(existingEntity);
+		return true;
+	}
+
+	private void createAndSaveAudit(Ecdd_Individual_Profile_Entity entity, Map<String, String> changes,
+			HttpServletRequest req) {
 		String userId = (String) req.getSession().getAttribute("USERID");
 		String username = (String) req.getSession().getAttribute("USERNAME");
 		String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
 
-		
-		if (incomingData.getReviewed_by_designation() != null) {
-			userProfileRep.findById(userId).ifPresent(userProfile -> {
-				existingEntity.setReview_date(incomingData.getReview_date() != null ? incomingData.getReview_date() : new Date());
-				existingEntity.setReviewed_by_name(userProfile.getUsername());
-				existingEntity.setReviewed_by_ec_no(userProfile.getEmpid());
-				existingEntity.setReviewed_by_designation(userProfile.getDesignation() != null ? userProfile.getDesignation() : "" );
-				
-			});
-		}
-		incomingData.setAuth_flg(incomingData.getAuth_flg()==null ? "N" : incomingData.getAuth_flg());
-		if(incomingData.getAuth_flg().equals("Y")) {
-		System.out.println(incomingData.getAuth_flg());
-		// Set mandatory metadata
-		
-		existingEntity.setEntity_flg("N"); // Assuming this should be set on modification
-		existingEntity.setAuth_flg("Y");
-		existingEntity.setModify_flg("Y");
-		existingEntity.setModify_user(userId);
-		existingEntity.setModify_time(new Date());
-		}else {
-			existingEntity.setEntity_flg("N"); // Assuming this should be set on modification
-			existingEntity.setAuth_flg("N");
-			existingEntity.setModify_flg("N");
-			existingEntity.setModify_user(userId);
-			existingEntity.setModify_time(new Date());
-		}
-
-		// =================================================================================
-		// STEP 5: SAVE THE UPDATED ENTITY
-		// =================================================================================
-		ecddIndividualProfileRepository.save(existingEntity);
-
-		// =================================================================================
-		// STEP 6: CREATE AND SAVE THE DETAILED AUDIT LOG
-		// =================================================================================
-		String userName = (String) req.getSession().getAttribute("USERNAME");
 		KYC_Audit_Entity audit = new KYC_Audit_Entity();
 		Date currentDate = new Date();
 
@@ -825,58 +827,112 @@ public class Kyc_individual_service {
 		audit.setFunc_code("Modified");
 		audit.setAudit_table("KYC_individual");
 		audit.setAudit_screen("Modify");
-		audit.setModi_details("Modified Successfully");
+		audit.setModi_details("Modified section for SRL No: " + entity.getSrlno());
 		audit.setAuth_user(userId);
 		audit.setAuth_time(currentDate);
 		audit.setAuth_user_name(username);
-		audit.setRemarks(branchcode); // This now has the correct value
-		audit.setReport_id(existingEntity.getCustomer_id());
-		audit.setModi_details("Successfully modified section for record SRL No: " + srlno);
+		audit.setRemarks(branchcode);
+		audit.setReport_id(entity.getCustomer_id());
 
 		if (changes.isEmpty()) {
 			audit.setChange_details("No data fields were changed (metadata update only).");
 		} else {
-			// FIX #2: Format the final string to be parsed correctly by the JavaScript.
 			StringBuilder changeDetails = new StringBuilder();
-			changes.forEach((field, value) -> changeDetails.append(field).append(": ").append(value).append("|||"));
-			if (changeDetails.length() > 3) {
-				changeDetails.setLength(changeDetails.length() - 3);
+			changes.forEach((field, value) -> changeDetails.append(field).append(": ").append(value).append(" ||| "));
+			if (changeDetails.length() > 5) {
+				changeDetails.setLength(changeDetails.length() - 5);
 			}
 			audit.setChange_details(changeDetails.toString());
 		}
 
 		KYC_Audit_Rep.save(audit);
-		return true;
 	}
 
-	// ... (getNullPropertyNames and formatFieldName helper methods) ...
 	/**
-	 * Helper method to get the names of all properties that are null OR empty
-	 * strings in the source object. This is a more robust way to handle partial
-	 * updates from web forms.
+	 * Maps a section ID from the front-end to a list of database field names (from
+	 * your Entity). IMPORTANT: This list MUST be kept in sync with the input `name`
+	 * attributes in your HTML file.
 	 */
-	private String[] getNullAndEmptyPropertyNames(Object source) {
-		final BeanWrapper src = new BeanWrapperImpl(source);
-		java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+	private List<String> getFieldsForSection(String sectionId) {
+		switch (sectionId) {
+		case "s0_main_info":
+			return Arrays.asList("account_title", "associated_accounts");
+		case "s1_other_details":
+			return Arrays.asList("currency", "account_open_date", "currency_approval_yn");
+		case "s2_account_holders":
+			return Arrays.asList("primary_holder_name", "joint1_name", "joint2_name", "joint3_name",
+					"primary_customer_id", "joint1_customer_id", "joint2_customer_id", "joint3_customer_id",
+					"primary_non_resident_yn", "joint1_non_resident_yn", "joint2_non_resident_yn",
+					"joint3_non_resident_yn", "primary_nationality", "joint1_nationality", "joint2_nationality",
+					"joint3_nationality", "primary_mobile_no", "joint1_mobile_no", "joint2_mobile_no",
+					"joint3_mobile_no", "primary_email", "joint1_email", "joint2_email", "joint3_email",
+					"primary_address", "joint1_address", "joint2_address", "joint3_address", "primary_passport_no",
+					"joint1_passport_no", "joint2_passport_no", "joint3_passport_no", "primary_passport_exp_date",
+					"joint1_passport_exp_date", "joint2_passport_exp_date", "joint3_passport_exp_date",
+					"primary_emirates_id_no", "joint1_emirates_id_no", "joint2_emirates_id_no", "joint3_emirates_id_no",
+					"primary_emirates_exp_date", "joint1_emirates_exp_date", "joint2_emirates_exp_date",
+					"joint3_emirates_exp_date", "primary_pep_yn", "joint1_pep_yn", "joint2_pep_yn", "joint3_pep_yn",
+					"primary_pep_approval", "joint1_pep_approval", "joint2_pep_approval", "joint3_pep_approval");
+		case "s3_due_diligence_body":
+			return Arrays.asList("screen_google_primary", "screen_dowjones_primary", "branch_remarks");
+		case "s4_risk_assessment_body":
+			return Arrays.asList("kyc_valid_yn_primary", "annual_income_primary", "source_of_income_primary");
+		case "s5_txn_monitoring_body":
+			return Arrays.asList("unusual_txn_details", "suspicious_activity", "high_value_txn_count",
+					"high_value_txn_volume", "cash_txn_count", "cheque_txn_count", "local_txn_count", "intl_txn_count",
+					"curr_txn_count", "expected_txn_count", "cash_txn_volume", "cheque_txn_volume", "local_txn_volume",
+					"intl_txn_volume", "curr_txn_volume", "expected_txn_volume", "profile_match_yn",
+					"profile_mismatch_remarks");
+		case "s6_customer_risk":
+			return Arrays.asList("system_risk", "customer_risk_reason");
+		case "s7_docs_availability":
+			return Arrays.asList("aof_available_yn", "aof_remarks", "kyc_doc_available_yn", "kyc_doc_remarks",
+					"source_of_funds_available_yn", "source_of_funds_remarks");
+		case "s8_observation":
+			return Collections.singletonList("branch_observations");
+		case "s9_approver":
+			return Arrays.asList("review_date", "reviewed_by_name", "reviewed_by_ec_no", "reviewed_by_designation",
+					"branch_name", "approval_date", "approved_by_name", "approved_by_ec_no", "approved_by_designation",
+					"head_signature_name");
+		case "s10_finacle_upload":
+			return Arrays.asList("entry_date", "entered_by", "doc_uploaded_date", "doc_uploaded_by");
+		default:
+			// Return empty list if sectionId is unknown to prevent accidental updates
+			return Collections.emptyList();
+		}
+	}
 
-		Set<String> emptyNames = new HashSet<>();
-		for (java.beans.PropertyDescriptor pd : pds) {
+	/**
+	 * Gets the names of all properties in the source object that are strictly null.
+	 * This is safer than the old method because it DOES NOT ignore empty strings
+	 * ("").
+	 * 
+	 * @param source The source object.
+	 * @return An array of property names that are null.
+	 */
+	private String[] getNullPropertyNames(Object source) {
+		final BeanWrapper src = new BeanWrapperImpl(source);
+		PropertyDescriptor[] pds = src.getPropertyDescriptors();
+		Set<String> nullNames = new HashSet<>();
+		for (PropertyDescriptor pd : pds) {
 			Object srcValue = src.getPropertyValue(pd.getName());
-			if (srcValue == null || (srcValue instanceof String && ((String) srcValue).trim().isEmpty())) {
-				emptyNames.add(pd.getName());
+			if (srcValue == null) {
+				nullNames.add(pd.getName());
 			}
 		}
-		return emptyNames.toArray(new String[0]);
+		return nullNames.toArray(new String[0]);
 	}
 
 	/**
-	 * Helper method to format field names for display (e.g., "camelCase" to "Camel
-	 * Case").
+	 * Helper method to format a camelCase field name into a more readable format
+	 * for the audit trail. e.g., "joint1CustomerName" becomes "Joint1 Customer
+	 * Name"
 	 */
 	private String formatFieldName(String camelCaseString) {
 		if (camelCaseString == null || camelCaseString.isEmpty()) {
 			return "";
 		}
+		// Add space before capital letters, then capitalize the first letter.
 		String result = camelCaseString.replaceAll("(?<=[a-z])(?=[A-Z])", " ");
 		return result.substring(0, 1).toUpperCase() + result.substring(1);
 	}

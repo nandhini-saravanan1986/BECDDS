@@ -531,6 +531,7 @@ public class IndividualPdfService {
 			audit.setRemarks(branchcode);
 			audit.setModi_details("ECDD Individual report PDF generated for Customer ID: " + entity.getCustomer_id());
 			audit.setAudit_ref_no(auditID);
+			audit.setChange_details("Dowloaded Successfully");
 
 			// Save the audit entity
 			KYC_Audit_Rep.save(audit);

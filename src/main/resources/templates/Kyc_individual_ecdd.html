@@ -149,9 +149,9 @@
 		window.location.reload();
 	}
 	function corporatehome() {
-		const srlno = document.getElementById("srlno").value;
-		var url = "/BECDDS/kyc/individual?srlno=" + encodeURIComponent(srlno) + "&formmode=modify";
-		window.location.href = url;
+	    const srlno = document.getElementById("srlno").value;
+	    const url = `/BECDDS/kyc/individual?srlno=${encodeURIComponent(srlno)}&formmode=modify&ts=${Date.now()}`;
+	    window.location.href = url;
 	}
 	function verifyrecord(a) {
 		const srlno = a.getAttribute("data-srlno");
@@ -235,75 +235,62 @@
 	// Handles the main "Submit" button click.
 
 	async function modifysubmit() {
-		const form = document.getElementById('kycForm');
+	    const form = document.getElementById('kycForm');
 
-		const Branchname = document.getElementById('branch_name').value;
-		//	alert(Branchname)
+	    // --- Validation (Unchanged) ---
+	    const Branchname = document.getElementById('branch_name').value;
+	    if (!Branchname) {
+	        alert('Branch name detail is missing');
+	        return;
+	    }
+	    const confirmationCheckbox = document.getElementById('confirm_screening_cb');
+	    if (confirmationCheckbox && !confirmationCheckbox.checked) {
+	        alert('Please confirm that you have done screening of all account holders by checking the box.');
+	        confirmationCheckbox.focus();
+	        return;
+	    }
 
-		if ((!Branchname)) {
-			alert('Branch name detail is missing');
-			return;
-		}
+	    // --- THE FIX: We NO LONGER re-enable disabled elements. ---
+	    // The following problematic lines have been REMOVED:
+	    // const allDisabledElements = Array.from(form.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
+	    // allDisabledElements.forEach(el => el.disabled = false);
 
-		// Check for the confirmation checkbox still happens
-		const confirmationCheckbox = document.getElementById('confirm_screening_cb');
-		if (confirmationCheckbox && !confirmationCheckbox.checked) {
-			alert('Please confirm that you have done screening of all account holders by checking the box.');
-			confirmationCheckbox.focus();
-			return;
-		}
+	    try {
+	        // This now correctly gathers data ONLY from enabled fields.
+	        const formData = new FormData(form); 
+	        formData.set("auth_flg", "Y"); // This flag signals a full submission
 
+	        // Unformat numbers (this part is correct and should remain)
+	        form.querySelectorAll('.format-as-number').forEach(input => {
+	            if (formData.has(input.name)) {
+	                const unformattedValue = String(formData.get(input.name)).replace(/,/g, '');
+	                formData.set(input.name, unformattedValue);
+	            }
+	        });
 
+	        const response = await fetch(form.action, {
+	            method: 'POST',
+	            body: formData
+	        });
 
-		// --- The validation block that was here has been removed. ---
+	        if (!response.ok) {
+	            const errorText = await response.text();
+	            throw new Error(errorText || `Server responded with status: ${response.status}`);
+	        }
 
-		//		$('#loader1').modal('show');
-		// Temporarily enable all fields to gather their data for submission.
-		const allDisabledElements = Array.from(form.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
-		allDisabledElements.forEach(el => el.disabled = false);
+	        $('#alertmsg_success').text("All changes submitted successfully!");
+	        $('#alert_success .btn-primary').attr("onclick", "corporatehome();");
+	        $('#alert_success').modal('show');
 
-		try {
-			const formData = new FormData(form);
-			formData.set("auth_flg", "Y");
-
-			form.querySelectorAll('.format-as-number').forEach(input => {
-				if (formData.has(input.name)) {
-					const unformattedValue = String(formData.get(input.name)).replace(/,/g, '');
-					formData.set(input.name, unformattedValue);
-				}
-			});
-
-			const response = await fetch(form.action, {
-				method: 'POST',
-				body: formData
-			});
-
-			if (!response.ok) {
-				const errorText = await response.text();
-				throw new Error(errorText || `Server responded with status: ${response.status}`);
-			}
-
-			// SUCCESS: Show the success modal and set the button to go back.
-			$('#alertmsg_success').text("All changes submitted successfully!");
-			$('#alert_success').modal('show');
-			$('#alert_success .btn-primary').attr("onclick", "goBack();");
-
-		} catch (error) {
-			// FAILURE: Show the failure modal. This is where you will now see errors from the server.
-			console.error("Submit failed:", error);
-			$('#alertmsg_failure').text(`Error: ${error.message}`);
-			$('#alert_failure').modal('show');
-		} finally {
-			// IMPORTANT: Re-disable the elements to return the form to its previous state.
-			allDisabledElements.forEach(el => el.disabled = true);
-			//		$('#loader1').modal('hide');
-		}
+	    } catch (error) {
+	        console.error("Submit failed:", error);
+	        $('#alertmsg_failure').text(`Error: ${error.message}`);
+	        $('#alert_failure').modal('show');
+	    } finally {
+	        // We no longer need to re-disable elements, so the `finally` block
+	        // for that purpose is also removed.
+	    }
 	}
-
-	document.addEventListener("DOMContentLoaded", () => {
-		//		$('#loader1').modal('hide');
-		window.addEventListener('pageshow', (event) => {if (event.persisted) $('#loader1').modal('hide');});
-	});
 </script>
 
 <title>BECDDS</title>
@@ -1198,28 +1185,28 @@
 									<tr>
 										<td>Mobile Number</td>
 										<td><input type="text" class="form-control" name="primary_mobile_no"
-												th:value="${user_data?.primary_mobile_no}" maxlength="20" readonly />
+												th:value="${user_data?.primary_mobile_no}" maxlength="20" />
 										</td>
 										<td><input type="text" class="form-control" name="joint1_mobile_no"
-												th:value="${user_data?.joint1_mobile_no}" maxlength="20" readonly />
+												th:value="${user_data?.joint1_mobile_no}" maxlength="20" />
 										</td>
 										<td><input type="text" class="form-control" name="joint2_mobile_no"
-												th:value="${user_data?.joint2_mobile_no}" maxlength="20" readonly />
+												th:value="${user_data?.joint2_mobile_no}" maxlength="20" />
 										</td>
 										<td><input type="text" class="form-control" name="joint3_mobile_no"
-												th:value="${user_data?.joint3_mobile_no}" maxlength="20" readonly />
+												th:value="${user_data?.joint3_mobile_no}" maxlength="20" />
 										</td>
 									</tr>
 									<tr>
 										<td>Email Address</td>
 										<td><input type="email" class="form-control" name="primary_email"
-												th:value="${user_data?.primary_email}" maxlength="100" readonly /></td>
+												th:value="${user_data?.primary_email}" maxlength="100" /></td>
 										<td><input type="email" class="form-control" name="joint1_email"
-												th:value="${user_data?.joint1_email}" maxlength="100" readonly /></td>
+												th:value="${user_data?.joint1_email}" maxlength="100" /></td>
 										<td><input type="email" class="form-control" name="joint2_email"
-												th:value="${user_data?.joint2_email}" maxlength="100" readonly /></td>
+												th:value="${user_data?.joint2_email}" maxlength="100" /></td>
 										<td><input type="email" class="form-control" name="joint3_email"
-												th:value="${user_data?.joint3_email}" maxlength="100" readonly /></td>
+												th:value="${user_data?.joint3_email}" maxlength="100" /></td>
 									</tr>
 									<tr>
 										<td>Address</td>
@@ -1447,7 +1434,7 @@
 												></textarea>-->
 
 											<input list="branchRemarksList" class="form-control" name="branch_remarks"
-												th:value="${user_data?.branch_remarks}" required 
+												th:value="${user_data?.branch_remarks}" required
 												placeholder="Type or select a remark" maxlength="500" />
 											<span class="char-counter">0 / 500</span>
 
@@ -1674,7 +1661,7 @@
 											<em>(if No, please provide your justification, recommendations, and
 												comments)</em>
 											<textarea class="form-control" name="profile_mismatch_remarks" rows="2"
-												th:text="${user_data?.profile_mismatch_remarks}" required 
+												th:text="${user_data?.profile_mismatch_remarks}" required
 												maxlength="200"></textarea><span class="char-counter">0 / 200</span>
 										</td>
 									</tr>
@@ -1770,8 +1757,7 @@
 													class="form-check-label" for="aof_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="aof_remarks" rows="1"
-												th:text="${user_data?.aof_remarks}"  maxlength="150"
-												required></textarea>
+												th:text="${user_data?.aof_remarks}" maxlength="150" required></textarea>
 										</td>
 									</tr>
 									<tr>
@@ -1788,7 +1774,7 @@
 													class="form-check-label" for="kycdoc_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="kyc_doc_remarks" rows="1"
-												th:text="${user_data?.kyc_doc_remarks}"  maxlength="150"
+												th:text="${user_data?.kyc_doc_remarks}" maxlength="150"
 												required></textarea></td>
 									</tr>
 									<tr>
@@ -1806,8 +1792,8 @@
 													class="form-check-label" for="sof_n">No</label></div>
 										</td>
 										<td><textarea class="form-control" name="source_of_funds_remarks" rows="1"
-												th:text="${user_data?.source_of_funds_remarks}" 
-												maxlength="150" required></textarea>
+												th:text="${user_data?.source_of_funds_remarks}" maxlength="150"
+												required></textarea>
 										</td>
 									</tr>
 								</tbody>
@@ -2154,8 +2140,8 @@
 <!-- SCRIPT FOR VIEW MODE -->
 <script th:if="${formmode == 'view'}">
 	document.addEventListener("DOMContentLoaded", function () {
-        const viewContainer = document.querySelector('.card-body[th\\:if="${formmode == \'view\'}"]');
-        if (!viewContainer) return;
+		const viewContainer = document.querySelector('.card-body[th\\:if="${formmode == \'view\'}"]');
+		if (!viewContainer) return;
 
 		// Disable all form elements to make them read-only
 		viewContainer.querySelectorAll('input, select, textarea, button').forEach(el => {
@@ -2180,218 +2166,297 @@
 				counter.textContent = `${field.value.length} / ${maxLength}`;
 			}
 		});
+
+		// --- Toggleable sections logic for view mode ---
+		document.querySelectorAll('a.btn-link[data-toggle="collapse"]').forEach(button => {
+			button.addEventListener('click', function (e) {
+				e.preventDefault();
+				const icon = this.querySelector('.collapse-icon');
+				const targetId = this.getAttribute('href');
+				const targetBody = document.querySelector(targetId);
+
+				if (targetBody) {
+					const isOpening = !targetBody.classList.contains('show');
+					if (icon) {
+						icon.textContent = isOpening ? '−' : '+';
+					}
+				}
+			});
+		});
+	});
+</script>
+
+<!-- SCRIPT FOR MODIFY MODE (FINAL VERSION) -->
+<script th:if="${formmode == 'modify'}">
+document.addEventListener("DOMContentLoaded", function () {
+    const kycForm = document.getElementById('kycForm');
+    if (!kycForm) {
+        console.error("CRITICAL: Form with id 'kycForm' not found.");
+        return;
+    }
+
+    let originalSectionValues = {};
+    let activeSectionId = null;
+
+    // ===================================================================
+    //                          HELPER FUNCTIONS
+    // ===================================================================
+
+    const formatNumber = (num) => (num === null || num === undefined || String(num).trim() === '') ? '' : new Intl.NumberFormat('en-US').format(String(num).replace(/,/g, ''));
+    const unformatNumber = (str) => (typeof str === 'string') ? str.replace(/,/g, '') : str;
+    const updateCharCounter = (field) => {
+        const counter = field.nextElementSibling;
+        if (counter && counter.classList.contains('char-counter')) {
+            const maxLength = field.getAttribute('maxlength');
+            counter.textContent = `${field.value.length} / ${maxLength}`;
+        }
+    };
+
+    // ===================================================================
+    //       FUNCTION TO APPLY SAVED STATUS FROM BROWSER STORAGE
+    // ===================================================================
+    
+    function applyPersistedStatuses() {
+        document.querySelectorAll('.section-actions').forEach(actions => {
+            const targetId = actions.dataset.target;
+            const storageKey = 'savedStatus_' + targetId;
+            if (sessionStorage.getItem(storageKey) === 'true') {
+                const saveStatus = actions.querySelector('.save-status');
+                if (saveStatus) {
+                    saveStatus.textContent = "Saved!";
+                    saveStatus.style.color = 'green';
+                    saveStatus.classList.remove('d-none');
+                }
+            }
+        });
+    }
+
+    // ===================================================================
+    //                       FIELD DEPENDENCY MANAGEMENT
+    // ===================================================================
+
+    function updateFieldDependencies() {
+        kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
+
+        if (!activeSectionId) {
+            return;
+        }
+
+        const activeSection = document.getElementById(activeSectionId);
+        if (activeSection) {
+            activeSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+                if (!el.hasAttribute('readonly')) {
+                    el.disabled = false;
+                }
+            });
+        }
+
+        const isAccountHolderSectionActive = (activeSectionId === 's2_account_holders');
+
+        if (isAccountHolderSectionActive) {
+            ['joint1', 'joint2', 'joint3'].forEach(prefix => {
+                const custIdInput = document.querySelector(`[name="${prefix}_customer_id"]`);
+                const hasCustomerId = custIdInput && custIdInput.value.trim() !== '';
+                const otherFieldsInGroup = document.querySelectorAll(`[name^="${prefix}_"]:not([name$="_customer_id"])`);
+
+                otherFieldsInGroup.forEach(field => {
+                    field.disabled = !hasCustomerId;
+                    if (!hasCustomerId) {
+                        if (field.type === 'radio' || field.type === 'checkbox') field.checked = false;
+                        else if (field.tagName !== 'SELECT') field.value = '';
+                    }
+                });
+            });
+        }
         
-        // --- Toggleable sections logic for view mode ---
-        document.querySelectorAll('a.btn-link[data-toggle="collapse"]').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const icon = this.querySelector('.collapse-icon');
-                const targetId = this.getAttribute('href');
-                const targetBody = document.querySelector(targetId);
-                
-                if (targetBody) {
-                    const isOpening = !targetBody.classList.contains('show');
-                    if (icon) {
-                        icon.textContent = isOpening ? '−' : '+';
+        ['primary', 'joint1', 'joint2', 'joint3'].forEach(prefix => {
+            const pepYesRadio = document.querySelector(`input[name="${prefix}_pep_yn"][value="Yes"]`);
+            const pepApprovalRadios = document.querySelectorAll(`input[name="${prefix}_pep_approval"]`);
+            const groupFields = document.querySelector(`[name^="${prefix}_"]`);
+            const groupIsEnabled = groupFields && !groupFields.disabled;
+
+            const allowPepApprovalEditing = groupIsEnabled && pepYesRadio && pepYesRadio.checked;
+            pepApprovalRadios.forEach(radio => {
+                radio.disabled = !allowPepApprovalEditing;
+                if (!allowPepApprovalEditing) radio.checked = false;
+            });
+        });
+
+        const profileNoRadio = document.querySelector('input[name="profile_match_yn"][value="No"]');
+        const remarksTextarea = document.querySelector('[name="profile_mismatch_remarks"]');
+        if (profileNoRadio && remarksTextarea && !profileNoRadio.disabled) {
+            remarksTextarea.disabled = !profileNoRadio.checked;
+            if (remarksTextarea.disabled) remarksTextarea.value = '';
+        }
+    }
+
+
+    // ===================================================================
+    //                      EVENT LISTENERS
+    // ===================================================================
+    
+    document.querySelectorAll('.modify-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            if (activeSectionId) {
+                alert("Please Save or Cancel the active section first.");
+                return;
+            }
+            
+            const actions = this.closest('.section-actions');
+            const targetId = actions.dataset.target;
+            
+            actions.querySelector('.save-status').textContent = '';
+            sessionStorage.removeItem('savedStatus_' + targetId);
+
+            activeSectionId = targetId;
+            const section = document.getElementById(targetId);
+
+            originalSectionValues[targetId] = {};
+            section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+                if (el.name) {
+                    if (el.type === 'radio') {
+                        if (el.checked) originalSectionValues[targetId][el.name] = el.value;
+                    } else {
+                        originalSectionValues[targetId][el.name] = el.value;
                     }
                 }
             });
+
+            actions.querySelector('.modify-btn').classList.add('d-none');
+            actions.querySelector('.save-cancel-controls').classList.remove('d-none');
+            
+            updateFieldDependencies();
         });
-	});
-</script>
+    });
 
-<!-- SCRIPT FOR MODIFY MODE -->
-<script th:if="${formmode == 'modify'}">
-	document.addEventListener("DOMContentLoaded", function () {
-		const kycForm = document.getElementById('kycForm');
-		if (!kycForm) {
-			console.error("CRITICAL: Form with id 'kycForm' not found.");
-			return;
-		}
+    document.querySelectorAll('.cancel-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const actions = this.closest('.section-actions');
+            const targetId = actions.dataset.target;
+            
+            const section = document.getElementById(targetId);
+            if (originalSectionValues[targetId]) {
+                section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+                    const originalValue = originalSectionValues[targetId][el.name];
+                    if (el.type === 'radio') {
+                        el.checked = (originalValue === el.value);
+                    } else {
+                        el.value = originalValue !== undefined ? originalValue : '';
+                    }
+                });
+            }
+            
+            activeSectionId = null;
+            updateFieldDependencies();
+            
+            actions.querySelector('.modify-btn').classList.remove('d-none');
+            actions.querySelector('.save-cancel-controls').classList.add('d-none');
+        });
+    });
 
-		let originalSectionValues = {};
-		let activeSectionId = null;
+	document.querySelectorAll('.save-btn').forEach(button => {
+	    button.addEventListener('click', async function () {
+	        this.disabled = true;
+	        const spinner = this.querySelector('i.fa-spinner');
+	        if (spinner) spinner.classList.remove('d-none');
 
-		// ===================================================================
-		//                          HELPER FUNCTIONS
-		// ===================================================================
-		const formatNumber = (num) => (num === null || num === undefined || String(num).trim() === '') ? '' : new Intl.NumberFormat('en-US').format(String(num).replace(/,/g, ''));
-		const unformatNumber = (str) => (typeof str === 'string') ? str.replace(/,/g, '') : str;
+	        const actions = this.closest('.section-actions');
+	        const targetId = actions.dataset.target;
+	        const targetSection = document.getElementById(targetId);
 
-		const updateCharCounter = (field) => {
-			const counter = field.nextElementSibling;
-			if (counter && counter.classList.contains('char-counter')) {
-				const maxLength = field.getAttribute('maxlength');
-				counter.textContent = `${field.value.length} / ${maxLength}`;
-			}
-		};
+            // --- VALIDATION (on enabled fields only) ---
+	        for (const el of targetSection.querySelectorAll('input:not(:disabled), select:not(:disabled), textarea:not(:disabled)')) {
+	            if (!el.checkValidity()) {
+	                el.reportValidity();
+                    this.disabled = false;
+                    if(spinner) spinner.classList.add('d-none');
+	                return;
+	            }
+	        }
+	        
+	        // --- DATA SUBMISSION (on ALL fields in the section) ---
+	        const formData = new FormData();
+	        formData.append('srlno', kycForm.querySelector('input[name="srlno"]').value);
+	        formData.append('formmode', 'submit');
+			formData.append('sectionId', targetId);
 
-		// ===================================================================
-		//                       FIELD DEPENDENCY MANAGEMENT
-		// ===================================================================
-		function updateFieldDependencies() {
-			['primary', 'joint1', 'joint2', 'joint3'].forEach(prefix => {
-				let isSectionEnabled = true;
-				if (prefix !== 'primary') {
-					const custIdInput = document.querySelector(`[name="${prefix}_customer_id"]`);
-					isSectionEnabled = custIdInput && !custIdInput.disabled && custIdInput.value.trim() !== '';
-				}
-
-				document.querySelectorAll(`[name^="${prefix}_"]`).forEach(el => {
-					if (!el.name.endsWith('_pep_approval')) {
-						el.disabled = !isSectionEnabled;
-						if (!isSectionEnabled) {
-							if (el.type === 'radio' || el.type === 'checkbox') el.checked = false;
-							else el.value = '';
-						}
-					}
-				});
-
-				const pepYesRadio = document.querySelector(`input[name="${prefix}_pep_yn"][value="Yes"]`);
-				const pepApprovalRadios = document.querySelectorAll(`input[name="${prefix}_pep_approval"]`);
-				const allowPepApproval = isSectionEnabled && pepYesRadio && pepYesRadio.checked;
-
-				pepApprovalRadios.forEach(radio => {
-					radio.disabled = !allowPepApproval;
-					if (!allowPepApproval) radio.checked = false;
-				});
-			});
-
-			const profileNo = document.querySelector('input[name="profile_match_yn"][value="No"]');
-			const remarks = document.querySelector('[name="profile_mismatch_remarks"]');
-			if (profileNo && remarks && !profileNo.disabled) {
-				remarks.disabled = !profileNo.checked;
-				if (remarks.disabled) remarks.value = '';
-			}
-		}
-
-		// ===================================================================
-		//                      EVENT LISTENERS
-		// ===================================================================
-		document.querySelectorAll('.modify-btn').forEach(button => {
-			button.addEventListener('click', function () {
-				const actions = this.closest('.section-actions');
-				const targetId = actions.dataset.target;
-				if (activeSectionId && activeSectionId !== targetId) {
-					alert("Please Save or Cancel the active section first.");
-					return;
-				}
-				activeSectionId = targetId;
-				const section = document.getElementById(targetId);
-				originalSectionValues[targetId] = {};
-				section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-					if (el.name) {
-						if (el.type === 'radio') {
-							if (el.checked) originalSectionValues[targetId][el.name] = el.value;
-						} else {
-							originalSectionValues[targetId][el.name] = el.value;
-						}
-					}
-					if (!el.hasAttribute('readonly')) el.disabled = false;
-				});
-				actions.querySelector('.modify-btn').classList.add('d-none');
-				actions.querySelector('.save-cancel-controls').classList.remove('d-none');
-				updateFieldDependencies();
-			});
-		});
-
-		document.querySelectorAll('.cancel-btn').forEach(button => {
-			button.addEventListener('click', function () {
-				const actions = this.closest('.section-actions');
-				const targetId = actions.dataset.target;
-				const section = document.getElementById(targetId);
-				if (originalSectionValues[targetId]) {
-					section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-						const originalValue = originalSectionValues[targetId][el.name];
-						if (el.type === 'radio') {
-							el.checked = (originalValue === el.value);
-						} else {
-							el.value = originalValue !== undefined ? originalValue : '';
-						}
-					});
-				}
-				section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
-				updateFieldDependencies();
-				actions.querySelector('.modify-btn').classList.remove('d-none');
-				actions.querySelector('.save-cancel-controls').classList.add('d-none');
-				activeSectionId = null;
-			});
-		});
-
-		document.querySelectorAll('.save-btn').forEach(button => {
-			button.addEventListener('click', async function () {
-				const actions = this.closest('.section-actions');
-				const targetSection = document.getElementById(actions.dataset.target);
-				for (const el of targetSection.querySelectorAll('input:not(:disabled), select:not(:disabled), textarea:not(:disabled)')) {
-					if (!el.checkValidity()) {
-						el.reportValidity();
-						return;
-					}
-				}
-				this.disabled = true;
-				const spinner = this.querySelector('i.fa-spinner');
-				if (spinner) spinner.classList.remove('d-none');
-				const formData = new FormData();
-				formData.append('srlno', kycForm.querySelector('input[name="srlno"]').value);
-				formData.append('formmode', 'submit');
-				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-					const wasDisabled = el.disabled;
-					el.disabled = false;
-					if (el.type === 'radio') {
-						if (el.checked) formData.append(el.name, el.value);
-					} else if (el.type === 'checkbox') {
-						if (el.checked) formData.append(el.name, el.value);
-					} else {
-						let valueToSubmit = el.classList.contains('format-as-number') ? unformatNumber(el.value) : el.value;
-						formData.append(el.name, valueToSubmit);
-					}
-					el.disabled = wasDisabled;
-				});
-				try {
-					const response = await fetch(kycForm.action + '?ajax=true', { method: 'POST', body: formData });
-					if (!response.ok) throw new Error(await response.text() || 'Server error');
-					location.reload(true);
-				} catch (err) {
-					alert("Save Failed: " + err.message);
-					this.disabled = false;
-					if (spinner) spinner.classList.add('d-none');
-				}
-			});
-		});
-        
-        document.querySelectorAll('a.btn-link[data-toggle="collapse"]').forEach(button => {
-            button.addEventListener('click', function(e) {
-                const icon = this.querySelector('.collapse-icon');
-                const targetId = this.getAttribute('href');
-                const targetBody = document.querySelector(targetId);
-                if (targetBody && icon) {
-                    const isOpening = !targetBody.classList.contains('show');
-                    icon.textContent = isOpening ? '−' : '+';
+            targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+                if (el.type === 'radio') {
+                    if (el.checked) formData.append(el.name, el.value);
+                } else if (el.type === 'checkbox') {
+                    if (el.checked) formData.append(el.name, el.value);
+                } else {
+                    let valueToSubmit = el.classList.contains('format-as-number') ? unformatNumber(el.value) : el.value;
+                    formData.append(el.name, valueToSubmit);
                 }
             });
-        });
 
-		// ===================================================================
-		//                       INITIAL PAGE SETUP
-		// ===================================================================
-		kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
-		kycForm.querySelectorAll('.format-as-number').forEach(input => { if (input.value) input.value = formatNumber(input.value); });
+	        try {
+	            const response = await fetch(kycForm.action + '?ajax=true', { method: 'POST', body: formData });
+	            
+	            if (!response.ok) {
+	                 const errorText = await response.text();
+	                 throw new Error(errorText || `Server responded with status: ${response.status}`);
+	            }
 
-		// +++ THIS IS THE CORRECTED CHARACTER COUNTER LOGIC +++
-		// It now selects both inputs and textareas and adds an event listener.
-		kycForm.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
-			const counter = field.nextElementSibling;
-			if (counter && counter.classList.contains('char-counter')) {
-				updateCharCounter(field); // Set initial count on page load
-				field.addEventListener('input', () => updateCharCounter(field)); // Update on typing
-			}
-		});
+	            const saveStatus = actions.querySelector('.save-status');
+	            saveStatus.textContent = "Saved!";
+	            saveStatus.style.color = 'green';
+	            saveStatus.classList.remove('d-none');
+	            
+	            sessionStorage.setItem('savedStatus_' + targetId, 'true');
+	            
+                actions.querySelector('.modify-btn').classList.remove('d-none');
+	            actions.querySelector('.save-cancel-controls').classList.add('d-none');
+                
+                activeSectionId = null;
 
-		setTimeout(() => { updateFieldDependencies(); }, 100);
-		kycForm.addEventListener('input', () => { if (activeSectionId) { updateFieldDependencies(); } });
+	        } catch (err) {
+	            console.error("Save failed:", err);
+	            alert("Save Failed: " + err.message);
+	        } finally {
+	            this.disabled = false;
+	            if (spinner) spinner.classList.add('d-none');
+	            updateFieldDependencies();
+	        }
+	    });
 	});
-</script>
 
+    document.querySelectorAll('a.btn-link[data-toggle="collapse"]').forEach(button => {
+        button.addEventListener('click', function (e) {
+            const icon = this.querySelector('.collapse-icon');
+            const targetId = this.getAttribute('href');
+            const targetBody = document.querySelector(targetId);
+            if (targetBody && icon) {
+                setTimeout(() => {
+                    const isOpening = targetBody.classList.contains('show');
+                    icon.textContent = isOpening ? '−' : '+';
+                }, 100);
+            }
+        });
+    });
+
+    // ===================================================================
+    //                       INITIAL PAGE SETUP
+    // ===================================================================
+    
+    kycForm.querySelectorAll('.format-as-number').forEach(input => { if (input.value) input.value = formatNumber(input.value); });
+    kycForm.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
+        updateCharCounter(field);
+        field.addEventListener('input', () => updateCharCounter(field));
+    });
+
+    kycForm.addEventListener('input', (event) => {
+        const name = event.target.name;
+        if(name && (name.endsWith('_customer_id') || name.endsWith('_pep_yn') || name === 'profile_match_yn')) {
+             updateFieldDependencies();
+        }
+    });
+    
+    updateFieldDependencies(); 
+    applyPersistedStatuses();
+});
+</script>
 <!-- SCRIPT FOR UPLOAD/DOWNLOAD MODALS -->
 <script>
 	let fileListStore = [];
