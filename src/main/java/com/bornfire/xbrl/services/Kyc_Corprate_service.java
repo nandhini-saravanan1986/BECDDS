@@ -254,12 +254,12 @@ public class Kyc_Corprate_service {
 				String ajaxParam = req.getParameter("ajax");
 				if ("true".equals(ajaxParam)) {
 					// This is an AJAX partial save
-					audit.setFunc_code("Modified (AJAX)");
-					audit.setAudit_screen("Modify (Partial Save)");
-					audit.setModi_details("Section saved successfully via AJAX.");
+					audit.setFunc_code("Modify");
+					audit.setAudit_screen("Modified");
+					audit.setModi_details("Section saved successfully.");
 				} else {
 					// This is a full form submit
-					audit.setFunc_code("Modified");
+					audit.setFunc_code("Modify");
 					audit.setAudit_screen("Modify");
 					audit.setModi_details("Modified Successfully");
 				}
@@ -341,12 +341,12 @@ public class Kyc_Corprate_service {
 			audit.setEntry_time(currentDate);
 			audit.setEntry_user(user1);
 			audit.setEntry_user_name(username);
-			audit.setFunc_code("Verified");
+			audit.setFunc_code("Verify");
 			audit.setAudit_table("Kyc_corporate");
 			audit.setAudit_screen("Verify");
 			audit.setEvent_id(user1);
 			audit.setEvent_name(username);
-			audit.setChange_details("Verify Successfully");
+			audit.setChange_details("Verified Successfully");
 			audit.setAuth_user(user1);
 			audit.setAuth_time(currentDate);
 			audit.setAuth_user_name(username);
@@ -2342,7 +2342,7 @@ public class Kyc_Corprate_service {
 				audit.setEntry_time(currentDate);
 				audit.setEntry_user(user1);
 				audit.setEntry_user_name(username);
-				audit.setFunc_code("Downloaded");
+				audit.setFunc_code("Download");
 				audit.setAudit_table("Kyc_corporate");
 				audit.setAudit_screen("Download");
 				audit.setEvent_id(user1);
@@ -2355,7 +2355,7 @@ public class Kyc_Corprate_service {
 				// audit.setChange_details(
 				// EcddCorporateEntity.getCustomer_id() + " - Document downloaded by user - " +
 				// user1);
-
+				audit.setChange_details("Downloaded Successfully");
 				audit.setAudit_ref_no(auditID);
 
 				// Save audit entity

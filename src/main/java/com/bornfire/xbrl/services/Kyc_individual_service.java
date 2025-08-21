@@ -409,14 +409,14 @@ public class Kyc_individual_service {
 			audit.setAuth_user(user1);
 			audit.setAuth_time(currentDate);
 			audit.setAuth_user_name(username);
-			audit.setFunc_code("Verified");
+			audit.setFunc_code("Verify");
 			audit.setAudit_table("KYC_individual");
 			audit.setAudit_screen("Verify");
 			audit.setEvent_id(user1);
 			audit.setEvent_name(username);
 			audit.setRemarks(branchcode); // This now has the correct value
 			audit.setReport_id(kycEntity.getCustomer_id());
-			audit.setChange_details("Verify Successfully");
+			audit.setChange_details("Verified Successfully");
 			audit.setAudit_ref_no(auditID);
 
 			audit.setReport_id(customerId);
@@ -824,7 +824,7 @@ public class Kyc_individual_service {
 		audit.setEntry_time(currentDate);
 		audit.setEntry_user(userId);
 		audit.setEntry_user_name(username);
-		audit.setFunc_code("Modified");
+		audit.setFunc_code("Modify");
 		audit.setAudit_table("KYC_individual");
 		audit.setAudit_screen("Modify");
 		audit.setModi_details("Modified section for SRL No: " + entity.getSrlno());

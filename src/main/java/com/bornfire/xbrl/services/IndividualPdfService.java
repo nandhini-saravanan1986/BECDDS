@@ -515,7 +515,7 @@ public class IndividualPdfService {
 			audit.setAuth_time(currentDate);
 			audit.setAuth_user(userId);
 			audit.setAuth_user_name(username);
-			audit.setFunc_code("Downloaded");
+			audit.setFunc_code("Download");
 			audit.setAudit_table("KYC_individual");
 			audit.setAudit_screen("ECDD Individual Report Generation");
 			audit.setEvent_id(userId);
