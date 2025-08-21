@@ -204,66 +204,63 @@
 			alert("Oops! Branch name is still missing. Please double-check and complete the field.");
 		}
 	}
-
-	/**
-	 * Handles the FINAL 'Submit' button click at the bottom of the page.
-	 */
 	async function modifysubmit() {
-		const form = document.getElementById('kycForm');
-		const confirmationCheckbox = document.getElementById('confirm_screening_cb');
-		const branch_name = document.getElementById('branch_name').value;
-		if (confirmationCheckbox && !confirmationCheckbox.checked) {
+		const $form = $('#kycForm');
+		const $confirmationCheckbox = $('#confirm_screening_cb');
+		const branch_name = $('#branch_name').val();
+		if ($confirmationCheckbox.length && !$confirmationCheckbox.is(':checked')) {
 			alert('Please confirm that you have done screening of all account holders by checking the box.');
-			confirmationCheckbox.focus();
+			$confirmationCheckbox.focus();
 			return;
 		}
 
-		if ((!branch_name)) {
+		if (!branch_name) {
 			alert("Oops! Branch name is still missing. Please double-check and complete the field.");
+			$('#branch_name').focus();
 			return;
 		}
-
-		//	$('#loader1').modal('show');
-		const allDisabledElements = Array.from(form.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
-		allDisabledElements.forEach(el => el.disabled = false);
+		$('#loader1').modal('show');
+		const $disabledElements = $form.find('input:disabled, select:disabled, textarea:disabled');
+		$disabledElements.prop('disabled', false);
 
 		try {
-			const formData = new FormData(form);
+			const formData = new FormData($form[0]);
 			formData.set("auth_flg", "Y");
-			form.querySelectorAll('.format-as-number').forEach(input => {
+			$form.find('.format-as-number').each(function () {
+				const input = this;
 				if (formData.has(input.name)) {
-					formData.set(input.name, String(formData.get(input.name)).replace(/,/g, ''));
+					const cleanValue = String(formData.get(input.name)).replace(/,/g, '');
+					formData.set(input.name, cleanValue);
 				}
 			});
 
-			const response = await fetch(form.action, {method: 'POST', body: formData});
+			const response = await fetch($form.attr('action'), {
+				method: 'POST',
+				body: formData
+			});
+
 			if (!response.ok) {
 				const errorText = await response.text();
-				throw new Error(errorText || `Server error ${response.status}`);
+				throw new Error(errorText || `Server responded with status: ${response.status}`);
 			}
 
-			// On success, reload the page to get fresh data and see the correct button state
-			$('#alertmsg_success').text("All changes submitted successfully!");
-			$('#alert_success').modal('show');
-			$('#alert_success .btn-primary').attr("onclick", "goBack();");
+			const $successModal = $('#alert_success');
+			$successModal.find('#alertmsg_success').text("All changes submitted successfully!");
+			$successModal.find('.btn-primary').off('click').on('click', function () {
+				window.location.reload();
+			});
+
+			$successModal.modal('show');
 
 		} catch (error) {
 			console.error("Submit failed:", error);
-			$('#alertmsg_failure').text(`Error: ${error.message}`);
+			$('#alertmsg_failure').text(`Submission failed. Error: ${error.message}`);
 			$('#alert_failure').modal('show');
 		} finally {
-			allDisabledElements.forEach(el => el.disabled = true);
-			//		$('#loader1').modal('hide');
+			$disabledElements.prop('disabled', true);
+			$('#loader1').modal('hide');
 		}
 	}
-
-	document.addEventListener("DOMContentLoaded", () => {
-		//	$('#loader1').modal('hide');
-		window.addEventListener('pageshow', (event) => {
-			if (event.persisted)
-				$('#loader1').modal('hide');
-		});
-	});
 
 </script>
 
@@ -1214,7 +1211,7 @@
 											<td>
 												<strong>If PEP is "Yes", provide details:</strong>
 												<textarea class="form-control" name="pep_remarks" id="pep_remarks"
-													rows="1" required th:text="${user_data?.pep_remarks}" 
+													rows="1" required th:text="${user_data?.pep_remarks}"
 													maxlength="100"></textarea>
 												<span class="char-counter">0 / 100</span>
 											</td>
@@ -1350,8 +1347,7 @@
 												<input list="CorporateRemarksList" class="form-control"
 													name="corporate_screening_remarks"
 													th:value="${user_data?.corporate_screening_remarks}" required
-													placeholder="Type or select a remark"
-													maxlength="100" />
+													placeholder="Type or select a remark" maxlength="100" />
 
 												<datalist id="CorporateRemarksList">
 													<option value="Nothing adverse found">
@@ -1410,8 +1406,7 @@
 												<input list="UBORemarksList" class="form-control"
 													name="ubo_screening_remarks"
 													th:value="${user_data?.ubo_screening_remarks}" required
-													placeholder="Type or select a remark" 
-													maxlength="100" />
+													placeholder="Type or select a remark" maxlength="100" />
 
 												<datalist id="UBORemarksList">
 													<option value="Nothing adverse found">
@@ -1471,8 +1466,7 @@
 												<input list="CounterRemarksList" class="form-control"
 													name="counterparty_screening_remarks"
 													th:value="${user_data?.counterparty_screening_remarks}" required
-													placeholder="Type or select a remark" 
-													maxlength="100" />
+													placeholder="Type or select a remark" maxlength="100" />
 
 												<datalist id="CounterRemarksList">
 													<option value="Nothing adverse found">
@@ -1724,8 +1718,7 @@
 														for="aof_n">No</label></div>
 											</td>
 											<td><textarea class="form-control" name="aof_remarks" rows="1" required
-													th:text="${user_data?.aof_remarks}" 
-													maxlength="100"></textarea></td>
+													th:text="${user_data?.aof_remarks}" maxlength="100"></textarea></td>
 										</tr>
 										<tr>
 											<td>Ensured availability of FATCA/CRS & KYC Docs</td>
@@ -1742,7 +1735,7 @@
 														for="fatca_n">No</label></div>
 											</td>
 											<td><textarea class="form-control" name="fatca_crs_remarks" rows="1"
-													required th:text="${user_data?.fatca_crs_remarks}" 
+													required th:text="${user_data?.fatca_crs_remarks}"
 													maxlength="100"></textarea>
 											</td>
 										</tr>
@@ -1764,7 +1757,7 @@
 											</td>
 											<td><textarea class="form-control" name="source_of_funds_remarks" rows="1"
 													required th:text="${user_data?.source_of_funds_remarks}"
-													 maxlength="100"></textarea></td>
+													maxlength="100"></textarea></td>
 										</tr>
 									</tbody>
 								</table>

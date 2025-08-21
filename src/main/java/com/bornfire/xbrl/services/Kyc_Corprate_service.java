@@ -83,10 +83,11 @@ public class Kyc_Corprate_service {
 			EcddCorporateEntity kycEntity = optionalKyc.get();
 			Map<String, String> changes = new LinkedHashMap<>();
 
+			// --- Step 1: Compare all fields using reflection to find what has changed ---
 			Set<String> skipFields = new HashSet<>(Arrays.asList("srl_no", "entity_flg", "auth_flg", "modify_flg",
 					"del_flg", "entry_user", "entry_time", "auth_user", "auth_time", "modify_user", "modify_time",
-					"verify_user", "verify_time", "branch_code", "reviewed_by_name", "reviewed_by_ec_no", "approval_date",
-					"reviewed_by_designation"));
+					"verify_user", "verify_time", "branch_code", "reviewed_by_name", "reviewed_by_ec_no",
+					"approval_date", "reviewed_by_designation"));
 			List<Field> allFields = getAllFields(EcddCorporateEntity.class);
 
 			for (Field field : allFields) {
@@ -110,6 +111,8 @@ public class Kyc_Corprate_service {
 					e.printStackTrace();
 				}
 			}
+
+			// --- Step 2: Set all entity fields from the incoming data object ---
 			kycEntity.setCompany_name(data.getCompany_name());
 			kycEntity.setCustomer_id(data.getCustomer_id());
 			kycEntity.setCompany_address(data.getCompany_address());
@@ -193,12 +196,12 @@ public class Kyc_Corprate_service {
 			kycEntity.setReview_date(data.getReview_date());
 
 			// --- Set fields programmatically ---
-			Optional<UserProfile> Userdetails = userProfileRep.findById(userId);
-			if (Userdetails.isPresent()) {
-				kycEntity.setReviewed_by_name(Userdetails.get().getUsername());
-				kycEntity.setReviewed_by_ec_no(Userdetails.get().getEmpid());
-				kycEntity.setReviewed_by_designation(
-						Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
+			Optional<UserProfile> userDetails = userProfileRep.findById(userId);
+			if (userDetails.isPresent()) {
+				UserProfile user = userDetails.get();
+				kycEntity.setReviewed_by_name(user.getUsername());
+				kycEntity.setReviewed_by_ec_no(user.getEmpid());
+				kycEntity.setReviewed_by_designation(user.getDesignation() != null ? user.getDesignation() : "");
 			}
 
 			kycEntity.setApproved_by_designation(data.getApproved_by_designation());
@@ -213,7 +216,7 @@ public class Kyc_Corprate_service {
 
 			// --- Set system flags for modification ---
 			data.setAuth_flg(data.getAuth_flg() == null ? "N" : data.getAuth_flg());
-			if (data.getAuth_flg().equals("Y")) {
+			if ("Y".equals(data.getAuth_flg())) {
 				kycEntity.setModify_flg("Y");
 				kycEntity.setAuth_flg("Y");
 			} else {
@@ -225,29 +228,43 @@ public class Kyc_Corprate_service {
 
 			Kyc_Corprate_Repo.save(kycEntity);
 
-			// --- Create a clean audit log entry if changes were made ---
+			// --- Step 3: Create a conditional audit log if any changes were detected ---
 			if (!changes.isEmpty()) {
 				String auditID = sequence.generateRequestUUId();
-				String user1 = (String) req.getSession().getAttribute("USERID");
 				String username = (String) req.getSession().getAttribute("USERNAME");
 				String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
 
 				KYC_Audit_Entity audit = new KYC_Audit_Entity();
 				Date currentDate = new Date();
+
+				// Set properties common to both audit types
 				audit.setAudit_date(currentDate);
 				audit.setEntry_time(currentDate);
-				audit.setEntry_user(user1);
+				audit.setEntry_user(userId);
 				audit.setEntry_user_name(username);
-				audit.setFunc_code("Modified");
-				audit.setAudit_table("Kyc_corporate");
-				audit.setAudit_screen("Modify");
-				audit.setModi_details("Modified Successfully");
-				audit.setAuth_user(user1);
+				audit.setAuth_user(userId);
 				audit.setAuth_time(currentDate);
 				audit.setAuth_user_name(username);
-				audit.setRemarks(branchcode); // This now has the correct value
+				audit.setRemarks(branchcode);
 				audit.setReport_id(kycEntity.getCustomer_id());
+				audit.setAudit_table("Kyc_corporate");
 
+				// *** CORE LOGIC: Check if the call was from AJAX to customize the audit log
+				// ***
+				String ajaxParam = req.getParameter("ajax");
+				if ("true".equals(ajaxParam)) {
+					// This is an AJAX partial save
+					audit.setFunc_code("Modified (AJAX)");
+					audit.setAudit_screen("Modify (Partial Save)");
+					audit.setModi_details("Section saved successfully via AJAX.");
+				} else {
+					// This is a full form submit
+					audit.setFunc_code("Modified");
+					audit.setAudit_screen("Modify");
+					audit.setModi_details("Modified Successfully");
+				}
+
+				// Set the detailed changes, which are the same for both scenarios
 				StringBuilder changeDetails = new StringBuilder();
 				changes.forEach((field, value) -> changeDetails.append(field).append(": ").append(value).append("|||"));
 				if (changeDetails.length() > 3) {
@@ -258,11 +275,10 @@ public class Kyc_Corprate_service {
 
 				KYC_Audit_Rep.save(audit);
 			}
-
 			return true;
 
 		} else {
-			return false;
+			return false; // Record with given srl_no not found
 		}
 	}
 
@@ -275,11 +291,16 @@ public class Kyc_Corprate_service {
 		return fields;
 	}
 
+	/**
+	 * Formats a camelCase field name into a more readable, user-friendly string.
+	 * Example: "companyName" becomes "Company Name".
+	 */
 	private String formatFieldName(String camelCaseString) {
 		if (camelCaseString == null || camelCaseString.isEmpty()) {
 			return "";
 		}
-		// Add a space before each uppercase letter
+		// Add a space before each uppercase letter that is preceded by a lowercase
+		// letter
 		String result = camelCaseString.replaceAll("(?<=[a-z])(?=[A-Z])", " ");
 		// Capitalize the first letter of the resulting string
 		return result.substring(0, 1).toUpperCase() + result.substring(1);
@@ -325,7 +346,7 @@ public class Kyc_Corprate_service {
 			audit.setAudit_screen("Verify");
 			audit.setEvent_id(user1);
 			audit.setEvent_name(username);
-			audit.setModi_details("Verify Successfully");
+			audit.setChange_details("Verify Successfully");
 			audit.setAuth_user(user1);
 			audit.setAuth_time(currentDate);
 			audit.setAuth_user_name(username);
@@ -2331,8 +2352,9 @@ public class Kyc_Corprate_service {
 				audit.setAuth_user_name(username);
 				audit.setRemarks(branchcode); // This now has the correct value
 				audit.setReport_id(EcddCorporateEntity.getCustomer_id());
-				//audit.setChange_details(
-						//EcddCorporateEntity.getCustomer_id() + " - Document downloaded by user - " + user1);
+				// audit.setChange_details(
+				// EcddCorporateEntity.getCustomer_id() + " - Document downloaded by user - " +
+				// user1);
 
 				audit.setAudit_ref_no(auditID);
 

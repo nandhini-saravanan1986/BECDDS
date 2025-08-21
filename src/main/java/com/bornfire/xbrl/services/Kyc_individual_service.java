@@ -416,7 +416,7 @@ public class Kyc_individual_service {
 			audit.setEvent_name(username);
 			audit.setRemarks(branchcode); // This now has the correct value
 			audit.setReport_id(kycEntity.getCustomer_id());
-			audit.setModi_details("Verified Successfully");
+			audit.setChange_details("Verify Successfully");
 			audit.setAudit_ref_no(auditID);
 
 			audit.setReport_id(customerId);

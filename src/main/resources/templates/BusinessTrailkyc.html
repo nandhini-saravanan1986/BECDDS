@@ -348,65 +348,51 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 	
 	function navigateToid(element) {
 	    var audit_ref_no = element.getAttribute('data-custid');
-	    console.log(audit_ref_no);
+	    console.log("Audit ref no:", audit_ref_no);
 
-	
 	    $.ajax({
 	        url: './getchanges',
 	        type: 'GET',
-	        data: {
-	            audit_ref_no: audit_ref_no
-	        },
+	        data: { audit_ref_no: audit_ref_no },
 	        success: function(response) {
-	            
-	            // Split the string using ||| as the delimiter
-	            let splitData = response.split("|||");
+	            console.log("Raw response:", response);
 
-	            // Trim whitespace from each part (optional)
-	            splitData = splitData.map(item => item.trim());
+	            let splitData = response.split("|||").map(item => item.trim()).filter(item => item);
 
-	            // Clear existing table rows before appending
 	            $("#usertablemodel tbody").empty();
 
-	            // Access each part individually
-	            splitData.forEach((entry, index) => {
-	                // Use a regular expression to extract the column name, old value, and new value
-	                let regex = /([^:]+): OldValue: ([^,]+), NewValue: (.+)/;
-
-	                // Match the data string against the regex
+	            splitData.forEach((entry) => {
+	                let regex = /([^:]+):\s*OldValue:\s*(.*?),\s*NewValue:\s*(.*)/;
 	                let match = entry.match(regex);
 
 	                if (match) {
-	                    let columnName = match[1].trim(); // Extract the column name
-	                    let oldValue = match[2].trim();  // Extract the old value
-	                    let newValue = match[3].trim();  // Extract the new value
+	                    let columnName = match[1].trim();
+	                    let oldValue = match[2].trim();
+	                    let newValue = match[3].trim();
 
+	                    console.log("Parsed:", columnName, oldValue, newValue);
 
-	                    // Append the extracted values as a new row in the table
 	                    $("#usertablemodel tbody").append(`
 	                        <tr>
 	                            <td>${columnName}</td>
-	                            <td>${oldValue}</td>
-	                            <td>${newValue}</td>
+	                            <td>${oldValue || "-"}</td>
+	                            <td>${newValue || "-"}</td>
 	                        </tr>
 	                    `);
 	                } else {
-	                    console.log("No match found for entry");
+	                    console.log("No match for entry:", entry);
 	                }
 	            });
 
-	            // Show the modal
 	            $('#exampleModalCenter').modal('show');
 	        },
 	        error: function(xhr, status, error) {
 	            alert("An error occurred while processing the request.");
 	            console.error(xhr, status, error);
 	        },
-	       
 	    });
 	}
 
-	
 	
 </script>
 <title>BECDDS</title>
