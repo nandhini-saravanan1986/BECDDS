@@ -8,16 +8,13 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -75,169 +72,174 @@ public class Kyc_Corprate_service {
 	@Autowired
 	KYC_Audit_Rep KYC_Audit_Rep;
 
+	// In Kyc_Corprate_service.java
+
 	public boolean updateKycData(String srl_no, EcddCorporateEntity data, HttpServletRequest req) {
 		Optional<EcddCorporateEntity> optionalKyc = Kyc_Corprate_Repo.findById(srl_no);
 		String userId = (String) req.getSession().getAttribute("USERID");
 
 		if (optionalKyc.isPresent()) {
 			EcddCorporateEntity kycEntity = optionalKyc.get();
-			Map<String, String> changes = new LinkedHashMap<>();
+			// *** CHANGE 1: The Map now stores an array [oldValue, newValue] instead of a
+			// pre-formatted string.
+			Map<String, String[]> changes = new LinkedHashMap<>();
 
-			// --- Step 1: Compare all fields using reflection to find what has changed ---
-			Set<String> skipFields = new HashSet<>(Arrays.asList("srl_no", "entity_flg", "auth_flg", "modify_flg",
-					"del_flg", "entry_user", "entry_time", "auth_user", "auth_time", "modify_user", "modify_time",
-					"verify_user", "verify_time", "branch_code", "reviewed_by_name", "reviewed_by_ec_no",
-					"approval_date", "reviewed_by_designation"));
-			List<Field> allFields = getAllFields(EcddCorporateEntity.class);
+			// Conditionally update fields only if a new value is provided
+			updateField(kycEntity::getCompany_name, kycEntity::setCompany_name, data.getCompany_name(), "Company Name",
+					changes);
+			updateField(kycEntity::getAssociated_account_number, kycEntity::setAssociated_account_number,
+					data.getAssociated_account_number(), "Associated Account Number", changes);
+			updateField(kycEntity::getTrade_license_number, kycEntity::setTrade_license_number,
+					data.getTrade_license_number(), "Trade License Number", changes);
+			updateField(kycEntity::getTrade_legal_status, kycEntity::setTrade_legal_status,
+					data.getTrade_legal_status(), "Trade Legal Status", changes);
+			updateField(kycEntity::getTrade_expiry_date, kycEntity::setTrade_expiry_date, data.getTrade_expiry_date(),
+					"Trade Expiry Date", changes);
+			updateField(kycEntity::getCompany_address, kycEntity::setCompany_address, data.getCompany_address(),
+					"Company Address", changes);
+			updateField(kycEntity::getTriggered_event, kycEntity::setTriggered_event, data.getTriggered_event(),
+					"Triggered Event", changes);
+			updateField(kycEntity::getNo_change_reason, kycEntity::setNo_change_reason, data.getNo_change_reason(),
+					"No Change Reason", changes);
+			updateField(kycEntity::getGeographic_risk_profile, kycEntity::setGeographic_risk_profile,
+					data.getGeographic_risk_profile(), "Geographic Risk Profile", changes);
+			updateField(kycEntity::getBusiness_activity_products, kycEntity::setBusiness_activity_products,
+					data.getBusiness_activity_products(), "Business Activity Products", changes);
+			updateField(kycEntity::getTrade_license_validity, kycEntity::setTrade_license_validity,
+					data.getTrade_license_validity(), "Trade License Validity", changes);
+			updateField(kycEntity::getUbo_signatories_kyc_validity, kycEntity::setUbo_signatories_kyc_validity,
+					data.getUbo_signatories_kyc_validity(), "UBO/Signatories KYC Validity", changes);
+			updateField(kycEntity::getTrade_license_remarks, kycEntity::setTrade_license_remarks,
+					data.getTrade_license_remarks(), "Trade License Remarks", changes);
+			updateField(kycEntity::getUbo_signatories_kyc_remarks, kycEntity::setUbo_signatories_kyc_remarks,
+					data.getUbo_signatories_kyc_remarks(), "UBO/Signatories KYC Remarks", changes);
+			updateField(kycEntity::getPep_status, kycEntity::setPep_status, data.getPep_status(), "PEP Status",
+					changes);
+			updateField(kycEntity::getPep_remarks, kycEntity::setPep_remarks, data.getPep_remarks(), "PEP Remarks",
+					changes);
 
-			for (Field field : allFields) {
-				try {
-					if (skipFields.contains(field.getName())) {
-						continue;
-					}
+			for (int i = 1; i <= 5; i++) {
+				updateCounterpartyField(kycEntity, data, "counterparty_name_" + i, "Counterparty Name " + i, changes);
+				updateCounterpartyField(kycEntity, data, "counterparty_import_export_" + i,
+						"Counterparty Import/Export " + i, changes);
+				updateCounterpartyField(kycEntity, data, "counterparty_country_" + i, "Counterparty Country " + i,
+						changes);
+				updateCounterpartyField(kycEntity, data, "counterparty_activity_products_" + i,
+						"Counterparty Activity/Products " + i, changes);
+			}
 
-					field.setAccessible(true);
-					Object oldValue = field.get(kycEntity);
-					Object newValue = field.get(data);
+			updateField(kycEntity::getCorporate_cbuae_bbl, kycEntity::setCorporate_cbuae_bbl,
+					data.getCorporate_cbuae_bbl(), "Corporate CBUAE BBL", changes);
+			updateField(kycEntity::getCorporate_google_screening, kycEntity::setCorporate_google_screening,
+					data.getCorporate_google_screening(), "Corporate Google Screening", changes);
+			updateField(kycEntity::getCorporate_dow_jones_screening, kycEntity::setCorporate_dow_jones_screening,
+					data.getCorporate_dow_jones_screening(), "Corporate Dow Jones Screening", changes);
+			updateField(kycEntity::getCorporate_screening_remarks, kycEntity::setCorporate_screening_remarks,
+					data.getCorporate_screening_remarks(), "Corporate Screening Remarks", changes);
+			updateField(kycEntity::getUbo_cbuae_bbl, kycEntity::setUbo_cbuae_bbl, data.getUbo_cbuae_bbl(),
+					"UBO CBUAE BBL", changes);
+			updateField(kycEntity::getUbo_google_screening, kycEntity::setUbo_google_screening,
+					data.getUbo_google_screening(), "UBO Google Screening", changes);
+			updateField(kycEntity::getUbo_dow_jones_screening, kycEntity::setUbo_dow_jones_screening,
+					data.getUbo_dow_jones_screening(), "UBO Dow Jones Screening", changes);
+			updateField(kycEntity::getUbo_screening_remarks, kycEntity::setUbo_screening_remarks,
+					data.getUbo_screening_remarks(), "UBO Screening Remarks", changes);
+			updateField(kycEntity::getCounterparty_cbuae_bbl, kycEntity::setCounterparty_cbuae_bbl,
+					data.getCounterparty_cbuae_bbl(), "Counterparty CBUAE BBL", changes);
+			updateField(kycEntity::getCounterparty_google_screening, kycEntity::setCounterparty_google_screening,
+					data.getCounterparty_google_screening(), "Counterparty Google Screening", changes);
+			updateField(kycEntity::getCounterparty_dow_jones_screening, kycEntity::setCounterparty_dow_jones_screening,
+					data.getCounterparty_dow_jones_screening(), "Counterparty Dow Jones Screening", changes);
+			updateField(kycEntity::getCounterparty_screening_remarks, kycEntity::setCounterparty_screening_remarks,
+					data.getCounterparty_screening_remarks(), "Counterparty Screening Remarks", changes);
+			updateField(kycEntity::getTransaction_history, kycEntity::setTransaction_history,
+					data.getTransaction_history(), "Transaction History", changes);
+			updateField(kycEntity::getAccount_conduct, kycEntity::setAccount_conduct, data.getAccount_conduct(),
+					"Account Conduct", changes);
+			updateField(kycEntity::getHigh_value_transaction_count, kycEntity::setHigh_value_transaction_count,
+					data.getHigh_value_transaction_count(), "High Value Txn Count", changes);
+			updateField(kycEntity::getHigh_value_transaction_volume, kycEntity::setHigh_value_transaction_volume,
+					data.getHigh_value_transaction_volume(), "High Value Txn Volume", changes);
+			updateField(kycEntity::getCash_transaction_percent, kycEntity::setCash_transaction_percent,
+					data.getCash_transaction_percent(), "Cash Txn %", changes);
+			updateField(kycEntity::getCheque_transaction_percent, kycEntity::setCheque_transaction_percent,
+					data.getCheque_transaction_percent(), "Cheque Txn %", changes);
+			updateField(kycEntity::getLocal_transfer_percent, kycEntity::setLocal_transfer_percent,
+					data.getLocal_transfer_percent(), "Local Transfer %", changes);
+			updateField(kycEntity::getIntl_transfer_percent, kycEntity::setIntl_transfer_percent,
+					data.getIntl_transfer_percent(), "Intl Transfer %", changes);
+			updateField(kycEntity::getCurrent_transaction_count, kycEntity::setCurrent_transaction_count,
+					data.getCurrent_transaction_count(), "Current Txn Count", changes);
+			updateField(kycEntity::getExpected_transaction_count, kycEntity::setExpected_transaction_count,
+					data.getExpected_transaction_count(), "Expected Txn Count", changes);
+			updateField(kycEntity::getCash_volume_percent, kycEntity::setCash_volume_percent,
+					data.getCash_volume_percent(), "Cash Volume %", changes);
+			updateField(kycEntity::getCheque_volume_percent, kycEntity::setCheque_volume_percent,
+					data.getCheque_volume_percent(), "Cheque Volume %", changes);
+			updateField(kycEntity::getLocal_transfer_volume_percent, kycEntity::setLocal_transfer_volume_percent,
+					data.getLocal_transfer_volume_percent(), "Local Volume %", changes);
+			updateField(kycEntity::getIntl_transfer_volume_percent, kycEntity::setIntl_transfer_volume_percent,
+					data.getIntl_transfer_volume_percent(), "Intl Volume %", changes);
+			updateField(kycEntity::getCurrent_volume_count, kycEntity::setCurrent_volume_count,
+					data.getCurrent_volume_count(), "Current Volume", changes);
+			updateField(kycEntity::getExpected_volume_count, kycEntity::setExpected_volume_count,
+					data.getExpected_volume_count(), "Expected Volume", changes);
+			updateField(kycEntity::getTransactions_match_profile, kycEntity::setTransactions_match_profile,
+					data.getTransactions_match_profile(), "Transactions Match Profile", changes);
+			updateField(kycEntity::getSystem_risk, kycEntity::setSystem_risk, data.getSystem_risk(), "System Risk",
+					changes);
+			updateField(kycEntity::getRisk_reason, kycEntity::setRisk_reason, data.getRisk_reason(), "Risk Reason",
+					changes);
+			updateField(kycEntity::getAof_available, kycEntity::setAof_available, data.getAof_available(),
+					"AOF Available", changes);
+			updateField(kycEntity::getAof_remarks, kycEntity::setAof_remarks, data.getAof_remarks(), "AOF Remarks",
+					changes);
+			updateField(kycEntity::getFatca_crs_available, kycEntity::setFatca_crs_available,
+					data.getFatca_crs_available(), "FATCA/CRS Available", changes);
+			updateField(kycEntity::getFatca_crs_remarks, kycEntity::setFatca_crs_remarks, data.getFatca_crs_remarks(),
+					"FATCA/CRS Remarks", changes);
+			updateField(kycEntity::getSource_of_funds_available, kycEntity::setSource_of_funds_available,
+					data.getSource_of_funds_available(), "Source of Funds Available", changes);
+			updateField(kycEntity::getSource_of_funds_remarks, kycEntity::setSource_of_funds_remarks,
+					data.getSource_of_funds_remarks(), "Source of Funds Remarks", changes);
+			updateField(kycEntity::getObservations, kycEntity::setObservations, data.getObservations(), "Observations",
+					changes);
+			updateField(kycEntity::getBranch_name, kycEntity::setBranch_name, data.getBranch_name(), "Branch Name",
+					changes);
+			updateField(kycEntity::getReview_date, kycEntity::setReview_date, data.getReview_date(), "Review Date",
+					changes);
+			updateField(kycEntity::getApproval_date, kycEntity::setApproval_date, data.getApproval_date(),
+					"Approval Date", changes);
 
-					if (!Objects.equals(oldValue, newValue)) {
-						String formattedFieldName = formatFieldName(field.getName());
-						String oldValStr = oldValue != null ? oldValue.toString() : "N/A";
-						String newValStr = newValue != null ? newValue.toString() : "N/A";
-						changes.put(formattedFieldName, "OldValue: " + oldValStr + ", NewValue: " + newValStr);
-					}
-				} catch (IllegalAccessException e) {
-					System.err.println("Error accessing field: " + field.getName());
-					e.printStackTrace();
+			if (!changes.isEmpty()) {
+				Optional<UserProfile> userDetails = userProfileRep.findById(userId);
+				if (userDetails.isPresent()) {
+					UserProfile user = userDetails.get();
+					kycEntity.setReviewed_by_name(user.getUsername());
+					kycEntity.setReviewed_by_ec_no(user.getEmpid());
+					kycEntity.setReviewed_by_designation(user.getDesignation() != null ? user.getDesignation() : "");
 				}
+				kycEntity.setReview_date(new Date());
 			}
 
-			// --- Step 2: Set all entity fields from the incoming data object ---
-			kycEntity.setCompany_name(data.getCompany_name());
-			kycEntity.setCustomer_id(data.getCustomer_id());
-			kycEntity.setCompany_address(data.getCompany_address());
-			kycEntity.setAssociated_account_number(data.getAssociated_account_number());
-			kycEntity.setEcdd_date(data.getEcdd_date());
-			kycEntity.setTrade_license_number(data.getTrade_license_number());
-			kycEntity.setTrade_legal_status(data.getTrade_legal_status());
-			kycEntity.setTrade_expiry_date(data.getTrade_expiry_date());
-			kycEntity.setTriggered_event(data.getTriggered_event());
-			kycEntity.setNo_change_reason(data.getNo_change_reason());
-			kycEntity.setGeographic_risk_profile(data.getGeographic_risk_profile());
-			kycEntity.setBusiness_activity_products(data.getBusiness_activity_products());
-			kycEntity.setTrade_license_validity(data.getTrade_license_validity());
-			kycEntity.setUbo_signatories_kyc_validity(data.getUbo_signatories_kyc_validity());
-			kycEntity.setTrade_license_remarks(data.getTrade_license_remarks());
-			kycEntity.setUbo_signatories_kyc_remarks(data.getUbo_signatories_kyc_remarks());
-			kycEntity.setPep_status(data.getPep_status());
-			kycEntity.setPep_remarks(data.getPep_remarks());
-			kycEntity.setCounterparty_name_1(data.getCounterparty_name_1());
-			kycEntity.setCounterparty_import_export_1(data.getCounterparty_import_export_1());
-			kycEntity.setCounterparty_country_1(data.getCounterparty_country_1());
-			kycEntity.setCounterparty_activity_products_1(data.getCounterparty_activity_products_1());
-			kycEntity.setCounterparty_name_2(data.getCounterparty_name_2());
-			kycEntity.setCounterparty_import_export_2(data.getCounterparty_import_export_2());
-			kycEntity.setCounterparty_country_2(data.getCounterparty_country_2());
-			kycEntity.setCounterparty_activity_products_2(data.getCounterparty_activity_products_2());
-			kycEntity.setCounterparty_name_3(data.getCounterparty_name_3());
-			kycEntity.setCounterparty_import_export_3(data.getCounterparty_import_export_3());
-			kycEntity.setCounterparty_country_3(data.getCounterparty_country_3());
-			kycEntity.setCounterparty_activity_products_3(data.getCounterparty_activity_products_3());
-			kycEntity.setCounterparty_name_4(data.getCounterparty_name_4());
-			kycEntity.setCounterparty_import_export_4(data.getCounterparty_import_export_4());
-			kycEntity.setCounterparty_country_4(data.getCounterparty_country_4());
-			kycEntity.setCounterparty_activity_products_4(data.getCounterparty_activity_products_4());
-			kycEntity.setCounterparty_name_5(data.getCounterparty_name_5());
-			kycEntity.setCounterparty_import_export_5(data.getCounterparty_import_export_5());
-			kycEntity.setCounterparty_country_5(data.getCounterparty_country_5());
-			kycEntity.setCounterparty_activity_products_5(data.getCounterparty_activity_products_5());
-			kycEntity.setCorporate_cbuae_bbl(data.getCorporate_cbuae_bbl());
-			kycEntity.setCorporate_google_screening(data.getCorporate_google_screening());
-			kycEntity.setCorporate_dow_jones_screening(data.getCorporate_dow_jones_screening());
-			kycEntity.setCorporate_internal_deny_list(data.getCorporate_internal_deny_list());
-			kycEntity.setCorporate_screening_remarks(data.getCorporate_screening_remarks());
-			kycEntity.setUbo_cbuae_bbl(data.getUbo_cbuae_bbl());
-			kycEntity.setUbo_google_screening(data.getUbo_google_screening());
-			kycEntity.setUbo_dow_jones_screening(data.getUbo_dow_jones_screening());
-			kycEntity.setUbo_internal_deny_list(data.getUbo_internal_deny_list());
-			kycEntity.setUbo_screening_remarks(data.getUbo_screening_remarks());
-			kycEntity.setCounterparty_cbuae_bbl(data.getCounterparty_cbuae_bbl());
-			kycEntity.setCounterparty_google_screening(data.getCounterparty_google_screening());
-			kycEntity.setCounterparty_dow_jones_screening(data.getCounterparty_dow_jones_screening());
-			kycEntity.setCounterparty_internal_deny_list(data.getCounterparty_internal_deny_list());
-			kycEntity.setCounterparty_screening_remarks(data.getCounterparty_screening_remarks());
-			kycEntity.setTransaction_history(data.getTransaction_history());
-			kycEntity.setHigh_value_transaction_count(data.getHigh_value_transaction_count());
-			kycEntity.setHigh_value_transaction_volume(data.getHigh_value_transaction_volume());
-			kycEntity.setAccount_conduct(data.getAccount_conduct());
-			kycEntity.setCash_transaction_percent(data.getCash_transaction_percent());
-			kycEntity.setCheque_transaction_percent(data.getCheque_transaction_percent());
-			kycEntity.setLocal_transfer_percent(data.getLocal_transfer_percent());
-			kycEntity.setIntl_transfer_percent(data.getIntl_transfer_percent());
-			kycEntity.setCurrent_transaction_count(data.getCurrent_transaction_count());
-			kycEntity.setExpected_transaction_count(data.getExpected_transaction_count());
-			kycEntity.setCash_volume_percent(data.getCash_volume_percent());
-			kycEntity.setCheque_volume_percent(data.getCheque_volume_percent());
-			kycEntity.setLocal_transfer_volume_percent(data.getLocal_transfer_volume_percent());
-			kycEntity.setIntl_transfer_volume_percent(data.getIntl_transfer_volume_percent());
-			kycEntity.setCurrent_volume_count(data.getCurrent_volume_count());
-			kycEntity.setExpected_volume_count(data.getExpected_volume_count());
-			kycEntity.setTransactions_match_profile(data.getTransactions_match_profile());
-			kycEntity.setSystem_risk(data.getSystem_risk());
-			kycEntity.setLatest_risk(data.getLatest_risk());
-			kycEntity.setRisk_reason(data.getRisk_reason());
-			kycEntity.setAof_available(data.getAof_available());
-			kycEntity.setAof_remarks(data.getAof_remarks());
-			kycEntity.setFatca_crs_available(data.getFatca_crs_available());
-			kycEntity.setFatca_crs_remarks(data.getFatca_crs_remarks());
-			kycEntity.setSource_of_funds_available(data.getSource_of_funds_available());
-			kycEntity.setSource_of_funds_remarks(data.getSource_of_funds_remarks());
-			kycEntity.setObservations(data.getObservations());
-			kycEntity.setReview_date(data.getReview_date());
-
-			// --- Set fields programmatically ---
-			Optional<UserProfile> userDetails = userProfileRep.findById(userId);
-			if (userDetails.isPresent()) {
-				UserProfile user = userDetails.get();
-				kycEntity.setReviewed_by_name(user.getUsername());
-				kycEntity.setReviewed_by_ec_no(user.getEmpid());
-				kycEntity.setReviewed_by_designation(user.getDesignation() != null ? user.getDesignation() : "");
-			}
-
-			kycEntity.setApproved_by_designation(data.getApproved_by_designation());
-			kycEntity.setBranch_name(data.getBranch_name());
-			kycEntity.setData_entry_date(data.getData_entry_date());
-			kycEntity.setData_entry_employee_name(data.getData_entry_employee_name());
-			kycEntity.setDocument_uploaded_date(data.getDocument_uploaded_date());
-			kycEntity.setDocument_uploaded_employee_name(data.getDocument_uploaded_employee_name());
-			kycEntity.setCurrent_date(data.getCurrent_date());
-			kycEntity.setReport_date(data.getReport_date());
-			kycEntity.setSrl_no(data.getSrl_no());
-
-			// --- Set system flags for modification ---
-			data.setAuth_flg(data.getAuth_flg() == null ? "N" : data.getAuth_flg());
-			if ("Y".equals(data.getAuth_flg())) {
-				kycEntity.setModify_flg("Y");
-				kycEntity.setAuth_flg("Y");
-			} else {
-				kycEntity.setAuth_flg("N");
-				kycEntity.setModify_flg("N");
-			}
 			kycEntity.setModify_user(userId);
 			kycEntity.setModify_time(new Date());
 
+			String formmode = req.getParameter("formmode");
+			if ("submit".equalsIgnoreCase(formmode) || "Y".equals(data.getAuth_flg())) {
+				kycEntity.setModify_flg("Y");
+				kycEntity.setAuth_flg("Y");
+			}
+
 			Kyc_Corprate_Repo.save(kycEntity);
 
-			// --- Step 3: Create a conditional audit log if any changes were detected ---
 			if (!changes.isEmpty()) {
 				String auditID = sequence.generateRequestUUId();
 				String username = (String) req.getSession().getAttribute("USERNAME");
 				String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
-
 				KYC_Audit_Entity audit = new KYC_Audit_Entity();
 				Date currentDate = new Date();
 
-				// Set properties common to both audit types
 				audit.setAudit_date(currentDate);
 				audit.setEntry_time(currentDate);
 				audit.setEntry_user(userId);
@@ -248,62 +250,78 @@ public class Kyc_Corprate_service {
 				audit.setRemarks(branchcode);
 				audit.setReport_id(kycEntity.getCustomer_id());
 				audit.setAudit_table("Kyc_corporate");
+				audit.setFunc_code("Modify");
+				audit.setAudit_screen("Modify");
 
-				// *** CORE LOGIC: Check if the call was from AJAX to customize the audit log
-				// ***
 				String ajaxParam = req.getParameter("ajax");
 				if ("true".equals(ajaxParam)) {
-					// This is an AJAX partial save
-					audit.setFunc_code("Modify");
-					audit.setAudit_screen("Modified");
 					audit.setModi_details("Section saved successfully.");
 				} else {
-					// This is a full form submit
-					audit.setFunc_code("Modify");
-					audit.setAudit_screen("Modify");
 					audit.setModi_details("Modified Successfully");
 				}
 
-				// Set the detailed changes, which are the same for both scenarios
-				StringBuilder changeDetails = new StringBuilder();
-				changes.forEach((field, value) -> changeDetails.append(field).append(": ").append(value).append("|||"));
-				if (changeDetails.length() > 3) {
-					changeDetails.setLength(changeDetails.length() - 3);
+				// *** THIS IS THE NEW LOGIC YOU REQUESTED, ADAPTED FOR OUR CODE ***
+				if (changes.isEmpty()) {
+					audit.setChange_details("No data fields were changed (metadata update only).");
+				} else {
+					StringBuilder changeDetails = new StringBuilder();
+					changes.forEach((fieldName, values) -> {
+						String oldValue = values[0];
+						String newValue = values[1];
+						changeDetails.append(fieldName).append(": OldValue: ").append(oldValue).append(", NewValue: ")
+								.append(newValue).append(" ||| ");
+					});
+					if (changeDetails.length() > 5) {
+						changeDetails.setLength(changeDetails.length() - 5);
+					}
+					audit.setChange_details(changeDetails.toString());
 				}
-				audit.setChange_details(changeDetails.toString());
-				audit.setAudit_ref_no(auditID);
 
+				audit.setAudit_ref_no(auditID);
 				KYC_Audit_Rep.save(audit);
 			}
 			return true;
 
 		} else {
-			return false; // Record with given srl_no not found
+			return false;
 		}
 	}
 
-	private List<Field> getAllFields(Class<?> clazz) {
-		List<Field> fields = new ArrayList<>();
-		while (clazz != null && clazz != Object.class) {
-			fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-			clazz = clazz.getSuperclass();
+	// REPLACE YOUR OLD HELPER METHODS WITH THESE TWO
+
+	private <T> void updateField(Supplier<T> getter, Consumer<T> setter, T newValue, String fieldName,
+			Map<String, String[]> changes) {
+		if (newValue != null) {
+			T oldValue = getter.get();
+			if (!Objects.equals(oldValue, newValue)) {
+				// Store the raw old and new values in the map
+				String oldValStr = (oldValue != null) ? oldValue.toString() : "N/A";
+				String newValStr = newValue.toString();
+				changes.put(fieldName, new String[] { oldValStr, newValStr });
+				setter.accept(newValue);
+			}
 		}
-		return fields;
 	}
 
-	/**
-	 * Formats a camelCase field name into a more readable, user-friendly string.
-	 * Example: "companyName" becomes "Company Name".
-	 */
-	private String formatFieldName(String camelCaseString) {
-		if (camelCaseString == null || camelCaseString.isEmpty()) {
-			return "";
+	private void updateCounterpartyField(EcddCorporateEntity kycEntity, EcddCorporateEntity data, String fieldName,
+			String friendlyName, Map<String, String[]> changes) {
+		try {
+			Field field = EcddCorporateEntity.class.getDeclaredField(fieldName);
+			field.setAccessible(true);
+
+			Object newValue = field.get(data);
+			if (newValue != null) {
+				Object oldValue = field.get(kycEntity);
+				if (!Objects.equals(oldValue, newValue)) {
+					String oldValStr = (oldValue != null) ? oldValue.toString() : "N/A";
+					String newValStr = newValue.toString();
+					changes.put(friendlyName, new String[] { oldValStr, newValStr });
+					field.set(kycEntity, newValue);
+				}
+			}
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			logger.error("Reflection error updating field " + fieldName, e);
 		}
-		// Add a space before each uppercase letter that is preceded by a lowercase
-		// letter
-		String result = camelCaseString.replaceAll("(?<=[a-z])(?=[A-Z])", " ");
-		// Capitalize the first letter of the resulting string
-		return result.substring(0, 1).toUpperCase() + result.substring(1);
 	}
 
 	public Boolean verified(String customerId, HttpServletRequest req) {
