@@ -233,7 +233,7 @@ public class Kyc_Corprate_service {
 
 			Kyc_Corprate_Repo.save(kycEntity);
 
-			if (!changes.isEmpty()) {
+			 if (!changes.isEmpty() && !"submit".equalsIgnoreCase(formmode)) {
 				String auditID = sequence.generateRequestUUId();
 				String username = (String) req.getSession().getAttribute("USERNAME");
 				String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
@@ -287,7 +287,6 @@ public class Kyc_Corprate_service {
 		}
 	}
 
-	// REPLACE YOUR OLD HELPER METHODS WITH THESE TWO
 
 	private <T> void updateField(Supplier<T> getter, Consumer<T> setter, T newValue, String fieldName,
 			Map<String, String[]> changes) {
