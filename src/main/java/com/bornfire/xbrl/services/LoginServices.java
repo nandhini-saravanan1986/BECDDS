@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import javax.validation.constraints.NotNull;
 
@@ -43,10 +44,13 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.bornfire.xbrl.config.PasswordEncryption;
+import com.bornfire.xbrl.config.SequenceGenerator;
 import com.bornfire.xbrl.entities.AlertEntity;
 import com.bornfire.xbrl.entities.AlertRep;
 import com.bornfire.xbrl.entities.FinUserProfile;
 import com.bornfire.xbrl.entities.FinUserProfileRep;
+import com.bornfire.xbrl.entities.KYC_Audit_Entity;
+import com.bornfire.xbrl.entities.KYC_Audit_Rep;
 import com.bornfire.xbrl.entities.Smsserviceotp;
 import com.bornfire.xbrl.entities.UserProfile;
 import com.bornfire.xbrl.entities.UserProfileRep;
@@ -90,6 +94,15 @@ public class LoginServices {
 	@Autowired
 	RestTemplate restTemplate;
 
+	@Autowired
+	SequenceGenerator sequence;
+
+	@Autowired
+	KYC_Audit_Rep KYC_Audit_Rep;
+
+	@Autowired
+	private HttpServletRequest req;
+
 	@NotNull
 	private String exportpath;
 
@@ -112,37 +125,58 @@ public class LoginServices {
 		this.exportpath = exportpath;
 	}
 
-	/*
-	 * Getting 3 inputs -
-	 * 
-	 * UserProfile Object, Formmode - Valid values : add, edit, inputuser - user who
-	 * edited the data
-	 * 
-	 * if formmode is add - Get password from application.properties create the user
-	 * 
-	 * if formmode is edit - Get password from database for that user and use other
-	 * fields came from front end.
-	 * 
-	 * 
-	 */
-
-	public String deleteuser(String userid) {
+	public String deleteuser(String userId) {
 		String msg = "";
 
 		try {
-			Optional<UserProfile> user = userProfileRep.findById(userid);
+			Optional<UserProfile> user = userProfileRep.findById(userId);
+
 			if (user.isPresent()) {
-				userProfileRep.deleteById(userid);
-				msg = "User Id Rejected";
+				// Delete the user
+				userProfileRep.deleteById(userId);
+
+				// Get session user details
+				String currentUserId = (String) req.getSession().getAttribute("USERID");
+				String currentUserName = (String) req.getSession().getAttribute("USERNAME");
+				String branchCode = (String) req.getSession().getAttribute("BRANCHCODE");
+
+				// Generate audit ID
+				String auditID = sequence.generateRequestUUId();
+				Date currentDate = new Date();
+
+				KYC_Audit_Entity audit = new KYC_Audit_Entity();
+				audit.setAudit_ref_no(auditID);
+				audit.setAudit_date(currentDate);
+				audit.setEntry_time(currentDate);
+				audit.setEntry_user(currentUserId);
+				audit.setEntry_user_name(currentUserName);
+				audit.setFunc_code("DELETE");
+				audit.setAudit_table("USERPROFILETABLE");
+				audit.setAudit_screen("USER_MANAGEMENT");
+				audit.setEvent_id(userId);
+				audit.setEvent_name(user.get().getUsername());
+				audit.setChange_details("User deleted successfully");
+				audit.setAuth_user(currentUserId);
+				audit.setAuth_user_name(currentUserName);
+				audit.setAuth_time(currentDate);
+
+				// MODIFIED HERE
+				audit.setRemarks(branchCode);
+
+				// Save audit entity
+				KYC_Audit_Rep.save(audit);
+
+				msg = "User deleted successfully";
 
 			} else {
-				msg = "Invalid Data";
+				msg = "Invalid User Id";
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			msg = "Please contact Administrator";
-			// TODO: handle exception
 		}
+
 		return msg;
 	}
 
@@ -152,33 +186,36 @@ public class LoginServices {
 		String msg = "";
 
 		try {
+			Date currentDate = new Date();
+			String auditID = sequence.generateRequestUUId();
+			String branchCode = (String) req.getSession().getAttribute("BRANCHCODE");
 
-			if (formmode.equals("add")) {
+			if (formmode.equalsIgnoreCase("add")) {
 				UserProfile up = userProfile;
 				try {
 					String encryptedPassword = PasswordEncryption.getEncryptedPassword(userProfile.getPassword());
 
-					if (up.getLogin_status().equals("Active")) {
+					if ("Active".equalsIgnoreCase(up.getLogin_status())) {
 						up.setUser_locked_flg("N");
 					} else {
 						up.setUser_locked_flg("Y");
 					}
 
-					if (up.getUser_status().equals("Active")) {
+					if ("Active".equalsIgnoreCase(up.getUser_status())) {
 						up.setDisable_flg("N");
 					} else {
 						up.setDisable_flg("Y");
 					}
 
 					up.setEntity_flg("N");
-					up.setEntry_time(new Date());
+					up.setEntry_time(currentDate);
 					up.setEntry_user(inputUser);
-					up.setAcct_access_code(up.getAcct_access_code());
-					up.setLogin_flg("N");// To prompt the user for changing the password at first login
+					up.setLogin_flg("N"); // To prompt the user for changing the password at first login
 					up.setNo_of_attmp(0);
 					up.setLog_in_count("0");
 					up.setEmp_name(up.getUsername());
-					String localdateval = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+					String localdateval = new SimpleDateFormat("yyyy-MM-dd").format(currentDate);
 					LocalDate date = LocalDate.parse(localdateval);
 					BigDecimal passexpdays = new BigDecimal(up.getPass_exp_days());
 					LocalDate date2 = date.plusDays(passexpdays.intValue());
@@ -187,23 +224,28 @@ public class LoginServices {
 
 					userProfileRep.save(up);
 
-					/*
-					 * //save datas for audit services BigDecimal mobile = new BigDecimal(mob); Date
-					 * currentDate = new Date(); Session hs = sessionFactory.getCurrentSession();
-					 * System.out.println("first"); BigDecimal srlno = (BigDecimal)
-					 * hs.createNativeQuery("SELECT USER_AUDIT_SRL_NO.NEXTVAL AS SRL_NO FROM DUAL")
-					 * .getSingleResult(); System.out.println(srlno+"second"); AuditServicesEntity
-					 * as=new AuditServicesEntity();
-					 * 
-					 * as.setSrl_no(srlno); as.setLog_in_user_id(inputUser);
-					 * as.setLog_in_user_name(username); as.setLog_in_contact_no(mobile);
-					 * as.setLog_in_designation(role); as.setNew_user_id(userProfile.getUserid());
-					 * as.setNew_user_name(userProfile.getUsername());
-					 * as.setLog_in_audit_date(currentDate);
-					 * 
-					 * 
-					 * AuditServicesRep.save(as);
-					 */
+					// ---- Audit for User Creation ----
+					KYC_Audit_Entity audit = new KYC_Audit_Entity();
+					audit.setAudit_ref_no(auditID);
+					audit.setAudit_date(currentDate);
+					audit.setEntry_time(currentDate);
+					audit.setEntry_user(inputUser);
+					audit.setEntry_user_name(username);
+					audit.setFunc_code("CREATE");
+					audit.setAudit_table("USERPROFILETABLE");
+					audit.setAudit_screen("USER_MANAGEMENT");
+					audit.setEvent_id(up.getUserid());
+					audit.setEvent_name(up.getUsername());
+					audit.setChange_details("User created successfully");
+					audit.setAuth_user(inputUser);
+					audit.setAuth_user_name(username);
+					audit.setAuth_time(currentDate);
+
+					// MODIFIED HERE
+					audit.setRemarks(branchCode);
+
+					KYC_Audit_Rep.save(audit);
+
 					msg = "User Created Successfully";
 
 				} catch (Exception e) {
@@ -211,21 +253,20 @@ public class LoginServices {
 					e.printStackTrace();
 				}
 
-			} else {
-
+			} else { // ------- Edit case -------
 				Optional<UserProfile> up = userProfileRep.findById(userProfile.getUserid());
 
 				if (up.isPresent()) {
 
 					userProfile.setPassword(up.get().getPassword());
 
-					if (userProfile.getLogin_status().equals("Active")) {
+					if ("Active".equalsIgnoreCase(userProfile.getLogin_status())) {
 						userProfile.setUser_locked_flg("N");
 					} else {
 						userProfile.setUser_locked_flg("Y");
 					}
 
-					if (userProfile.getUser_status().equals("Active")) {
+					if ("Active".equalsIgnoreCase(userProfile.getUser_status())) {
 						userProfile.setDisable_flg("N");
 					} else {
 						userProfile.setDisable_flg("Y");
@@ -234,29 +275,52 @@ public class LoginServices {
 					if (userProfile.getPass_exp_days().equals(up.get().getPass_exp_days())) {
 						userProfile.setPass_exp_date(up.get().getPass_exp_date());
 					} else {
-						String localdateval = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+						String localdateval = new SimpleDateFormat("yyyy-MM-dd").format(currentDate);
 						LocalDate date = LocalDate.parse(localdateval);
 						BigDecimal passexpdays = new BigDecimal(userProfile.getPass_exp_days());
 						LocalDate date2 = date.plusDays(passexpdays.intValue());
 						userProfile.setPass_exp_date(new SimpleDateFormat("yyyy-MM-dd").parse(date2.toString()));
 					}
+
 					userProfile.setLog_in_count(up.get().getLog_in_count() != null ? up.get().getLog_in_count() : "1");
 					userProfile.setEntry_user(up.get().getEntry_user());
 					userProfile.setEntry_time(up.get().getEntry_time());
 					userProfile.setNo_of_attmp(0);
 					userProfile.setEntity_flg("N");
 					userProfile.setModify_user(inputUser);
-					userProfile.setModify_time(new Date());
+					userProfile.setModify_time(currentDate);
 
 					userProfileRep.save(userProfile);
+
+					// ---- Audit for User Update ----
+					KYC_Audit_Entity audit = new KYC_Audit_Entity();
+					audit.setAudit_ref_no(auditID);
+					audit.setAudit_date(currentDate);
+					audit.setEntry_time(currentDate);
+					audit.setEntry_user(inputUser);
+					audit.setEntry_user_name(username);
+					audit.setFunc_code("UPDATE");
+					audit.setAudit_table("USERPROFILETABLE");
+					audit.setAudit_screen("USER_MANAGEMENT");
+					audit.setEvent_id(userProfile.getUserid());
+					audit.setEvent_name(userProfile.getUsername());
+					audit.setChange_details("User updated successfully");
+					audit.setAuth_user(inputUser);
+					audit.setAuth_user_name(username);
+					audit.setAuth_time(currentDate);
+
+					// MODIFIED HERE
+					audit.setRemarks(branchCode);
+
+					KYC_Audit_Rep.save(audit);
+
 					msg = "User Edited Successfully";
 				} else {
 					msg = "User Not found to edit";
 				}
-
 			}
 		} catch (Exception e) {
-			msg = "Error Occured. Please contact Administrator";
+			msg = "Error Occurred. Please contact Administrator";
 			e.printStackTrace();
 			logger.info(e.getMessage());
 		}
@@ -270,54 +334,50 @@ public class LoginServices {
 			String role, String report_srl1) {
 
 		String msg = "";
+		Date currentDate = new Date();
+		String auditID = sequence.generateRequestUUId();
+		String branchCode = (String) req.getSession().getAttribute("BRANCHCODE");
 
 		try {
 
-			if (formmode.equals("add")) {
-
+			if (formmode.equalsIgnoreCase("add")) {
 				AlertEntity up = alertEntity;
-				try {
-					String encryptedPassword = PasswordEncryption.getEncryptedPassword(this.password);
-					up.setReport_srl(up.getReport_srl());
-					;
-					up.setReport_desc(up.getReport_desc());
-					up.setUser_id_1(up.getUser_id_1());
-					up.setUser_name_1(up.getUser_name_1());
-					up.setEmail_id_1(up.getEmail_id_1());
-					up.setMobile_no_1(up.getMobile_no_1());
-					up.setAlert_flg_1(up.getAlert_flg_1());
-					up.setUser_id_2(up.getUser_id_2());
-					up.setUser_name_2(up.getUser_name_2());
-					up.setEmail_id_2(up.getEmail_id_2());
-					up.setMobile_no_2(up.getMobile_no_2());
-					up.setAlert_flg_2(up.getAlert_flg_2());
-					up.setUser_id_3(up.getUser_id_3());
-					up.setUser_name_3(up.getUser_name_3());
-					up.setEmail_id_3(up.getEmail_id_3());
-					up.setMobile_no_3(up.getMobile_no_3());
-					up.setAlert_flg_3(up.getAlert_flg_3());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 
+				// Save alert
 				alertRep.save(up);
+
+				// ---- Audit for Alert Creation ----
+				KYC_Audit_Entity audit = new KYC_Audit_Entity();
+				audit.setAudit_ref_no(auditID);
+				audit.setAudit_date(currentDate);
+				audit.setEntry_time(currentDate);
+				audit.setEntry_user(inputUser);
+				audit.setEntry_user_name(username);
+				audit.setFunc_code("CREATE");
+				audit.setAudit_table("USERPROFILETABLE");
+				audit.setAudit_screen("ALERT_MANAGEMENT");
+				audit.setEvent_id(up.getReport_srl());
+				audit.setEvent_name(up.getReport_desc());
+				audit.setChange_details("Alert created successfully");
+				audit.setAuth_user(inputUser);
+				audit.setAuth_user_name(username);
+				audit.setAuth_time(currentDate);
+
+				// MODIFIED HERE
+				audit.setRemarks(branchCode);
+
+				KYC_Audit_Rep.save(audit);
 
 				msg = "Added Successfully";
 			}
-			// When the user data modifed and submitted.
 
-			else if (formmode.equals("edit")) {
-				String[] a = alertEntity.getReport_srl().split(",");
-
+			else if (formmode.equalsIgnoreCase("edit")) {
 				Optional<AlertEntity> up = alertRep.findById(report_srl1);
-				System.out.println(alertRep.findById(report_srl1));
-				System.out.println(up.isPresent());
-				System.out.println(alertEntity.getReport_srl());
-				System.out.println(alertEntity.getReport_desc());
+
 				if (up.isPresent()) {
-					// System.out.println(up.get().getReport_desc());
 					AlertEntity entity = up.get();
 
+					// Update fields
 					entity.setReport_desc(alertEntity.getReport_desc());
 					entity.setUser_id_1(alertEntity.getUser_id_1());
 					entity.setUser_id_2(alertEntity.getUser_id_2());
@@ -327,40 +387,76 @@ public class LoginServices {
 					entity.setUser_name_3(alertEntity.getUser_name_3());
 					entity.setEmail_id_1(alertEntity.getEmail_id_1());
 					entity.setEmail_id_2(alertEntity.getEmail_id_2());
+					entity.setEmail_id_3(alertEntity.getEmail_id_3());
 					entity.setMobile_no_1(alertEntity.getMobile_no_1());
 					entity.setMobile_no_2(alertEntity.getMobile_no_2());
 					entity.setMobile_no_3(alertEntity.getMobile_no_3());
 					entity.setAlert_flg_1(alertEntity.getAlert_flg_1());
 					entity.setAlert_flg_2(alertEntity.getAlert_flg_2());
 					entity.setAlert_flg_3(alertEntity.getAlert_flg_3());
-					System.out.println(entity);
+
 					alertRep.save(entity);
+
+					// ---- Audit for Alert Update ----
+					KYC_Audit_Entity audit = new KYC_Audit_Entity();
+					audit.setAudit_ref_no(auditID);
+					audit.setAudit_date(currentDate);
+					audit.setEntry_time(currentDate);
+					audit.setEntry_user(inputUser);
+					audit.setEntry_user_name(username);
+					audit.setFunc_code("UPDATE");
+					audit.setAudit_table("USERPROFILETABLE");
+					audit.setAudit_screen("ALERT_MANAGEMENT");
+					audit.setEvent_id(entity.getReport_srl());
+					audit.setEvent_name(entity.getReport_desc());
+					audit.setChange_details("Alert updated successfully");
+					audit.setAuth_user(inputUser);
+					audit.setAuth_user_name(username);
+					audit.setAuth_time(currentDate);
+
+					// MODIFIED HERE
+					audit.setRemarks(branchCode);
+
+					KYC_Audit_Rep.save(audit);
 				}
 
 				msg = "Edited Successfully";
-
 			}
 
-			else if (formmode.equals("delete")) {
-				String[] a = alertEntity.getReport_srl().split(",");
-
+			else if (formmode.equalsIgnoreCase("delete")) {
 				Optional<AlertEntity> up = alertRep.findById(report_srl1);
-				System.out.println(alertRep.findById(report_srl1));
-				System.out.println(up.isPresent());
-				System.out.println(alertEntity.getReport_srl());
-				System.out.println(alertEntity.getReport_desc());
-				if (up.isPresent()) {
-					// System.out.println(up.get().getReport_desc());
 
-					alertRep.delete(alertEntity);
+				if (up.isPresent()) {
+					alertRep.delete(up.get());
+
+					// ---- Audit for Alert Delete ----
+					KYC_Audit_Entity audit = new KYC_Audit_Entity();
+					audit.setAudit_ref_no(auditID);
+					audit.setAudit_date(currentDate);
+					audit.setEntry_time(currentDate);
+					audit.setEntry_user(inputUser);
+					audit.setEntry_user_name(username);
+					audit.setFunc_code("DELETE");
+					audit.setAudit_table("USERPROFILETABLE");
+					audit.setAudit_screen("ALERT_MANAGEMENT");
+					audit.setEvent_id(up.get().getReport_srl());
+					audit.setEvent_name(up.get().getReport_desc());
+					audit.setChange_details("Alert deleted successfully");
+					audit.setAuth_user(inputUser);
+					audit.setAuth_user_name(username);
+					audit.setAuth_time(currentDate);
+
+					// MODIFIED HERE
+					audit.setRemarks(branchCode);
+
+					KYC_Audit_Rep.save(audit);
 				}
 
 				msg = "Deleted Successfully";
-
 			}
 
 		} catch (Exception e) {
-			msg = "Error Occured. Please contact Administrator";
+			msg = "Error Occurred. Please contact Administrator";
 			e.printStackTrace();
 			logger.info(e.getMessage());
 		}
@@ -493,13 +589,15 @@ public class LoginServices {
 
 	public String verifyUser(UserProfile userProfile, String inputUser) {
 		String msg = "";
+		Date currentDate = new Date();
+		String auditID = sequence.generateRequestUUId();
+		String branchCode = (String) req.getSession().getAttribute("BRANCHCODE");
 
 		Optional<UserProfile> up = userProfileRep.findById(userProfile.getUserid());
 
 		try {
-
 			if (up.isPresent()) {
-
+				// Preserve existing details
 				userProfile.setPassword(up.get().getPassword());
 				userProfile.setPass_exp_date(up.get().getPass_exp_date());
 				userProfile.setEmp_name(up.get().getEmp_name());
@@ -507,21 +605,44 @@ public class LoginServices {
 				userProfile.setEntry_user(up.get().getEntry_user());
 				userProfile.setEntry_time(up.get().getEntry_time());
 				userProfile.setNo_of_attmp(0);
-				userProfile.setEntity_flg("Y");
+				userProfile.setEntity_flg("Y"); // Verified
 				userProfile.setLogin_flg("N");
 				userProfile.setAuth_user(inputUser);
-				userProfile.setAuth_time(new Date());
+				userProfile.setAuth_time(currentDate);
 
+				// Save verified user
 				userProfileRep.save(userProfile);
+
+				// ---- Audit for User Verification ----
+				KYC_Audit_Entity audit = new KYC_Audit_Entity();
+				audit.setAudit_ref_no(auditID);
+				audit.setAudit_date(currentDate);
+				audit.setEntry_time(currentDate);
+				audit.setEntry_user(inputUser);
+				audit.setEntry_user_name(userProfile.getUsername()); // Verifying user name
+				audit.setFunc_code("VERIFY");
+				audit.setAudit_table("USERPROFILETABLE");
+				audit.setAudit_screen("USER_MANAGEMENT");
+				audit.setEvent_id(userProfile.getUserid()); // Verified user id
+				audit.setEvent_name(userProfile.getUsername()); // Verified user name
+				audit.setChange_details("User verified successfully");
+				audit.setAuth_user(inputUser);
+				audit.setAuth_user_name(userProfile.getUsername());
+				audit.setAuth_time(currentDate);
+
+				// MODIFIED HERE
+				audit.setRemarks(branchCode);
+
+				KYC_Audit_Rep.save(audit);
+
 				msg = "User Verified Successfully";
 			} else {
 				msg = "User not found";
 			}
-
 		} catch (Exception e) {
 			logger.info(e.getMessage());
 			e.printStackTrace();
-			msg = "Error Occured. Please contact Administrator";
+			msg = "Error Occurred. Please contact Administrator";
 		}
 
 		return msg;
