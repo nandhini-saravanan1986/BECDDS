@@ -154,39 +154,43 @@
 	    window.location.href = url;
 	}
 	function verifyrecord(a) {
-		const srlno = a.getAttribute("data-srlno");
-		const approvdesig = document.getElementById('branch_name').value;
-		//	const Approvaldate = document.getElementById('approval_date').value;
+	    const srlno = a.getAttribute("data-srlno");
+	    const entryuser = a.getAttribute("data-entry_user");
+	    const modifyuser = a.getAttribute("data-modify_user");
+	    const loginuser = a.getAttribute("data-login_user");
+	    const approvdesig = document.getElementById('branch_name')?.value;
 
+	    // Prevent modifier/creator from verifying
+	    if (loginuser === modifyuser || loginuser === entryuser) {
+	        $("#alertmsg").text("You cannot verify a record you created or modified");
+	        $('#alert').modal("toggle");
+	        return;
+	    }
 
+	    if (!approvdesig) {
+	        alert("Please enter approval designation");
+	        return;
+	    }
 
-		//	$('#loader1').modal('show');
-		if ((approvdesig)) {
-
-			$.ajax({
-				url: '/BECDDS/kyc/individual/verify',
-				type: 'POST',
-				data: {
-					formmode: 'verified',
-					custid: srlno
-				}
-			})
-				.done(function (response) {
-					$("#alertmsg_success").text("Verified successfully!");
-					$("#alert_success").modal("show");
-					$('#alert_success').find('.btn-primary').attr("onclick", "location.reload();");
-				})
-				.fail(function (error) {
-					$("#alertmsg_failure").text("Verification failed! " + (error.responseText || "Please try again."));
-					$("#alert_failure").modal("show");
-				})
-				.always(function () {
-					//			$('#loader1').modal('hide');
-				});
-		} else {
-			alert("Please enter approval designation");
-		}
+	    $.ajax({
+	        url: '/BECDDS/kyc/individual/verify',
+	        type: 'POST',
+	        data: {
+	            formmode: 'verified',
+	            custid: srlno
+	        }
+	    })
+	    .done(function () {
+	        $("#alertmsg_success").text("Verified successfully!");
+	        $("#alert_success").modal("show");
+	        $('#alert_success').find('.btn-primary').attr("onclick", "location.reload();");
+	    })
+	    .fail(function (error) {
+	        $("#alertmsg_failure").text("Verification failed! " + (error.responseText || "Please try again."));
+	        $("#alert_failure").modal("show");
+	    });
 	}
+
 	async function Downloadfn(element) {
 		const srlno = element.getAttribute("data-resource");
 		const customer_id = element.getAttribute("data-resource");
@@ -1983,13 +1987,18 @@
 							th:if="${formmode == 'modify' and user_data.modify_flg == 'N'}"
 							onclick="modifysubmit()">Submit</button>
 
-						<button type="button" th:if="${(user_data.modify_flg == 'Y' and session.WORKCLASS == 'C'
-							  and session.USERID != user_data.reviewed_by_ec_no) or (user_data.modify_flg == 'Y' and 
-							  session.ROLEID == 'Superadmin')  or  (user_data.modify_flg == 'Y' and session.WORKCLASS == 'C' and 
-							  session.ROLEID == 'DCD_ADMIN')}" class="btn btn-xs headderbutton" onclick="verifyrecord(this)"
-							th:attr="data-srlno=${user_data.srlno}">
-							Verify
-						</button>
+							<button type="button"
+							        th:if="${user_data.modify_flg == 'Y' and 
+							                 (session.USERID != user_data.modify_user and session.USERID != user_data.entry_user)}"
+							        class="btn btn-xs headderbutton"
+							        onclick="verifyrecord(this)"
+							        th:attr="data-srlno=${user_data.srlno},
+							                 data-entry_user=${user_data.entry_user},
+							                 data-modify_user=${user_data.modify_user},
+							                 data-login_user=${session.USERID}">
+							    Verify
+							</button>
+
 
 						<button type="reset" class="btn btn-xs headderbutton" onclick="goBack();">Back</button>
 					</div>

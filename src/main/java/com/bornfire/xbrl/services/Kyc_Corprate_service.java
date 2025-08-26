@@ -229,6 +229,9 @@ public class Kyc_Corprate_service {
 			if ("submit".equalsIgnoreCase(formmode) || "Y".equals(data.getAuth_flg())) {
 				kycEntity.setModify_flg("Y");
 				kycEntity.setAuth_flg("Y");
+				kycEntity.setEntry_user(kycEntity.getEntry_user());
+				kycEntity.setEntry_time(kycEntity.getEntry_time());
+				kycEntity.setModify_user(userId);
 			}
 
 			Kyc_Corprate_Repo.save(kycEntity);
