@@ -231,7 +231,7 @@
 			$('#branch_name').focus();
 			return;
 		}
-		$('#loader1').modal('show');
+		//$('#loader1').modal('show');
 		const $disabledElements = $form.find('input:disabled, select:disabled, textarea:disabled');
 		$disabledElements.prop('disabled', false);
 
@@ -270,7 +270,7 @@
 			$('#alert_failure').modal('show');
 		} finally {
 			$disabledElements.prop('disabled', true);
-			$('#loader1').modal('hide');
+			//$('#loader1').modal('hide');
 		}
 	}
 

@@ -348,19 +348,25 @@ public class IndividualPdfService {
 					Element.ALIGN_LEFT, 60f);
 			reasonCell.setRowspan(3);
 
-			String systemRisk = nvl(entity.getSystem_risk());
-			Font highFont = systemRisk.equalsIgnoreCase("High") ? FONT_PLAIN_LABEL : FONT_DATA;
-			Font mediumFont = systemRisk.equalsIgnoreCase("Medium") ? FONT_PLAIN_LABEL : FONT_DATA;
-			Font lowFont = systemRisk.equalsIgnoreCase("Low") ? FONT_PLAIN_LABEL : FONT_DATA;
-
-			riskTable.addCell(createCellWithHeight("High", highFont, Element.ALIGN_LEFT, 20f));
-			riskTable.addCell(reasonCell);
-
-			riskTable.addCell(createCellWithHeight("Medium", mediumFont, Element.ALIGN_LEFT, 20f));
-
-			riskTable.addCell(createCellWithHeight("Low", lowFont, Element.ALIGN_LEFT, 20f));
-
-			document.add(riskTable);
+			if (entity.getSystem_risk().equals("High")) {
+				riskTable.addCell(createCellWithHeight("High", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				riskTable.addCell(reasonCell);
+				riskTable.addCell(createCellWithHeight("", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				riskTable.addCell(createCellWithHeight("", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				document.add(riskTable);
+			} else if (entity.getSystem_risk().equals("Medium")) {
+				riskTable.addCell(createCellWithHeight("", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				riskTable.addCell(reasonCell);
+				riskTable.addCell(createCellWithHeight("Medium", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				riskTable.addCell(createCellWithHeight("", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				document.add(riskTable);
+			} else if (entity.getSystem_risk().equals("Low")) {
+				riskTable.addCell(createCellWithHeight("", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				riskTable.addCell(reasonCell);
+				riskTable.addCell(createCellWithHeight("", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				riskTable.addCell(createCellWithHeight("Low", FONT_PLAIN_LABEL, Element.ALIGN_LEFT, 20f));
+				document.add(riskTable);
+			}
 
 			// --- Section 7: Documents Availability ---
 			PdfPTable docsTable = new PdfPTable(3);
