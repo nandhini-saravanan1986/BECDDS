@@ -389,6 +389,7 @@ public class Kyc_individual_service {
 					Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
 			kycEntity.setModify_flg("N");
 			kycEntity.setEntity_flg("Y");
+			kycEntity.setFinacle_flg("N");
 			kycEntity.setVerify_user(userId);
 			kycEntity.setVerify_time(Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant()));
 
@@ -798,10 +799,13 @@ public class Kyc_individual_service {
 			existingEntity.setEntity_flg("N");
 			existingEntity.setAuth_flg("Y");
 			existingEntity.setModify_flg("Y");
+			existingEntity.setFinacle_flg("N");
+			
 		} else {
 			existingEntity.setEntity_flg("N");
 			existingEntity.setAuth_flg("N");
 			existingEntity.setModify_flg("N");
+			existingEntity.setFinacle_flg("N");
 		}
 		existingEntity.setModify_user(userId);
 		existingEntity.setModify_time(new Date());

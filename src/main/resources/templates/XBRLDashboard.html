@@ -183,87 +183,96 @@
 	</style>
 
 	<script th:inline="javascript">
-		/*<![CDATA[*/
+	/*<![CDATA[*/
+	$(function () {
+	    var Dashboardpage = /*[[${Dashboardpage}]]*/0;
 
-		$(function () {
-			var Dashboardpage = /*[[${Dashboardpage}]]*/0;
-			var completed = /*[[${completed}]]*/0;
-			var Pending = /*[[${Pending}]]*/0;
-			var incomplete = /*[[${Under_review}]]*/0;
+	    var Indvcompleted   = /*[[${IndvSubmitted}]]*/0;
+	    var IndvVerified    = /*[[${IndvVerified}]]*/0;
+	    var IndvPending     = /*[[${IndvPending}]]*/0;
+	    var IndvUnattended  = /*[[${IndvUnattended}]]*/0;
 
-			if (Dashboardpage == 'DCD_BRANCH' || Dashboardpage == 'DCD_ADMIN' || Dashboardpage == 'DCD_BRANCH_MANAGER'
-				|| Dashboardpage == 'Superadmin') {
-				var ctxL = document.getElementById("pieChart").getContext('2d');
-				var myBarChart = new Chart(ctxL, {
-					type: 'bar',
-					data: {
-						labels: ["Completed", "Pending", "In Completed"],
-						datasets: [{
-							label: "Individual Task Status",
-							data: [completed, Pending, incomplete],
-							backgroundColor: ['rgba(102,153,51,0.8)', // Green
-								'rgba(255,206,86,0.8)', // Yellow
-								'rgba(200,99,132,0.8)' // Pink
-							],
-							borderColor: ['rgba(102,153,51,0.8)', // Green
-								'rgba(255,206,86,0.8)', // Yellow
-								'rgba(200,99,132,0.8)' // Pink
-							],
-							borderWidth: 1
-						}]
-					},
-					options: {
-						responsive: true,
-						scales: {
-							y: {
-								beginAtZero: true
-							}
-						}
-					}
-				});
-			}
-		});
+	    if (Dashboardpage == 'DCD_BRANCH' || Dashboardpage == 'DCD_ADMIN' 
+	        || Dashboardpage == 'DCD_BRANCH_MANAGER' || Dashboardpage == 'Superadmin') {
 
-		$(function () {
-			var Dashboardpage = /*[[${Dashboardpage}]]*/0;
-			var corpbarcompleted = /*[[${corpbarcompleted}]]*/0;
-			var corpbarPending = /*[[${corpbarPending}]]*/0;
-			var corpbarincomplete = /*[[${corpbarincomplete}]]*/0;
+	        var ctxL = document.getElementById("pieChart").getContext('2d');
+	        var myBarChart = new Chart(ctxL, {
+	            type: 'bar',
+	            data: {
+	                labels: ["Completed in finacle", "Verified in portal Fincale Pending", "Working in Progress", "Unattended"],
+	                datasets: [{
+	                    label: "Individual Task Status",
+	                    data: [Indvcompleted, IndvVerified, IndvPending, IndvUnattended],
+	                    backgroundColor: [
+	                        'rgba(40,167,69,0.85)',   // Green - Completed
+	                        'rgba(241,196,15,0.85)', // Yellow - Verified
+	                        'rgba(243,156,18,0.85)', // Orange - Pending
+	                        'rgba(231,76,60,0.85)'   // Red - Unattended
+	                    ],
+	                    borderColor: [
+	                        'rgba(40,167,69,1)',
+	                        'rgba(241,196,15,1)',
+	                        'rgba(243,156,18,1)',
+	                        'rgba(231,76,60,1)'
+	                    ],
+	                    borderWidth: 1
+	                }]
+	            },
+	            options: {
+	                responsive: true,
+	                scales: {
+	                    y: { beginAtZero: true }
+	                }
+	            }
+	        });
+	    }
+	});
 
-			if (Dashboardpage == 'DCD_BRANCH' || Dashboardpage == 'DCD_ADMIN' || Dashboardpage == 'DCD_BRANCH_MANAGER'
-				|| Dashboardpage == 'Superadmin') {
-				var ctxL = document.getElementById("pieChart1").getContext('2d');
-				var myBarChart = new Chart(ctxL, {
-					type: 'bar',
-					data: {
-						labels: ["Completed", "Pending", "In Completed"],
-						datasets: [{
-							label: "Corporate Task Status",
-							data: [corpbarcompleted, corpbarPending, corpbarincomplete],
-							backgroundColor: ['rgba(102,153,51,0.8)', // Green
-								'rgba(255,206,86,0.8)', // Yellow
-								'rgba(200,99,132,0.8)' // Pink
-							],
-							borderColor: ['rgba(102,153,51,0.8)', // Green
-								'rgba(255,206,86,0.8)', // Yellow
-								'rgba(200,99,132,0.8)' // Pink
-							],
-							borderWidth: 1
-						}]
-					},
-					options: {
-						responsive: true,
-						scales: {
-							y: {
-								beginAtZero: true
-							}
-						}
-					}
-				});
-			}
-		});
 
-		/*]]>*/
+	$(function () {
+	    var Dashboardpage = /*[[${Dashboardpage}]]*/0;
+
+	    var Corpcompleted   = /*[[${CorpSubmitted}]]*/0;
+	    var CorpVerified    = /*[[${CorpVerified}]]*/0;
+	    var CorpPending     = /*[[${CorpPending}]]*/0;
+	    var CorpUnattended  = /*[[${CorpUnattended}]]*/0;
+
+	    if (Dashboardpage == 'DCD_BRANCH' || Dashboardpage == 'DCD_ADMIN' 
+	        || Dashboardpage == 'DCD_BRANCH_MANAGER' || Dashboardpage == 'Superadmin') {
+
+	        var ctxL = document.getElementById("pieChart1").getContext('2d');
+	        var myBarChart = new Chart(ctxL, {
+	            type: 'bar',
+	            data: {
+	                labels: ["Completed in finacle", "Verified in portal Fincale Pending", "Working in Progress", "Unattended"],
+	                datasets: [{
+	                    label: "Corporate Task Status",
+	                    data: [Corpcompleted, CorpVerified, CorpPending, CorpUnattended],
+	                    backgroundColor: [
+	                        'rgba(40,167,69,0.85)',   // Green - Completed
+	                        'rgba(241,196,15,0.85)', // Yellow - Verified
+	                        'rgba(243,156,18,0.85)', // Orange - Pending
+	                        'rgba(231,76,60,0.85)'   // Red - Unattended
+	                    ],
+	                    borderColor: [
+	                        'rgba(40,167,69,1)',
+	                        'rgba(241,196,15,1)',
+	                        'rgba(243,156,18,1)',
+	                        'rgba(231,76,60,1)'
+	                    ],
+	                    borderWidth: 1
+	                }]
+	            },
+	            options: {
+	                responsive: true,
+	                scales: {
+	                    y: { beginAtZero: true }
+	                }
+	            }
+	        });
+	    }
+	});
+	/*]]>*/
 	</script>
 
 

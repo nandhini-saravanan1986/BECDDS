@@ -232,7 +232,9 @@ public class Kyc_Corprate_service {
 				kycEntity.setEntry_user(kycEntity.getEntry_user());
 				kycEntity.setEntry_time(kycEntity.getEntry_time());
 				kycEntity.setModify_user(userId);
+				kycEntity.setFinacle_flg("N");
 			}
+			
 
 			Kyc_Corprate_Repo.save(kycEntity);
 
@@ -343,6 +345,7 @@ public class Kyc_Corprate_service {
 			kycEntity.setApproved_by_designation(
 					Userdetails.get().getDesignation() != null ? Userdetails.get().getDesignation() : "");
 			kycEntity.setModify_flg("N");
+			kycEntity.setFinacle_flg("N");
 			kycEntity.setEntity_flg("Y");
 			kycEntity.setVerify_user(userId);
 			kycEntity.setVerify_time(Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant()));

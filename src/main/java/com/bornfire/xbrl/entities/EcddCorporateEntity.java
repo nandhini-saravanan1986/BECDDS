@@ -148,6 +148,9 @@ public class EcddCorporateEntity {
 	private String auth_flg;
 	private String modify_flg;
 	private String del_flg;
+	private String finacle_flg;
+	private String dormant_flg;
+
 
 	public String getCustomer_id() {
 		return customer_id;
@@ -1021,6 +1024,88 @@ public class EcddCorporateEntity {
 		this.del_flg = del_flg;
 	}
 
+	public String getFinacle_flg() {
+		return finacle_flg;
+	}
+
+	public void setFinacle_flg(String finacle_flg) {
+		this.finacle_flg = finacle_flg;
+	}
+
+	public String getDormant_flg() {
+		return dormant_flg;
+	}
+
+	public void setDormant_flg(String dormant_flg) {
+		this.dormant_flg = dormant_flg;
+	}
+
+	@Override
+	public String toString() {
+		return "EcddCorporateEntity [customer_id=" + customer_id + ", company_name=" + company_name
+				+ ", associated_account_number=" + associated_account_number + ", ecdd_date=" + ecdd_date
+				+ ", trade_license_number=" + trade_license_number + ", trade_legal_status=" + trade_legal_status
+				+ ", trade_expiry_date=" + trade_expiry_date + ", company_address=" + company_address
+				+ ", triggered_event=" + triggered_event + ", no_change_reason=" + no_change_reason
+				+ ", geographic_risk_profile=" + geographic_risk_profile + ", business_activity_products="
+				+ business_activity_products + ", trade_license_validity=" + trade_license_validity
+				+ ", ubo_signatories_kyc_validity=" + ubo_signatories_kyc_validity + ", pep_status=" + pep_status
+				+ ", trade_license_remarks=" + trade_license_remarks + ", ubo_signatories_kyc_remarks="
+				+ ubo_signatories_kyc_remarks + ", pep_remarks=" + pep_remarks + ", counterparty_name_1="
+				+ counterparty_name_1 + ", counterparty_import_export_1=" + counterparty_import_export_1
+				+ ", counterparty_country_1=" + counterparty_country_1 + ", counterparty_activity_products_1="
+				+ counterparty_activity_products_1 + ", counterparty_name_2=" + counterparty_name_2
+				+ ", counterparty_import_export_2=" + counterparty_import_export_2 + ", counterparty_country_2="
+				+ counterparty_country_2 + ", counterparty_activity_products_2=" + counterparty_activity_products_2
+				+ ", counterparty_name_3=" + counterparty_name_3 + ", counterparty_import_export_3="
+				+ counterparty_import_export_3 + ", counterparty_country_3=" + counterparty_country_3
+				+ ", counterparty_activity_products_3=" + counterparty_activity_products_3 + ", counterparty_name_4="
+				+ counterparty_name_4 + ", counterparty_import_export_4=" + counterparty_import_export_4
+				+ ", counterparty_country_4=" + counterparty_country_4 + ", counterparty_activity_products_4="
+				+ counterparty_activity_products_4 + ", counterparty_name_5=" + counterparty_name_5
+				+ ", counterparty_import_export_5=" + counterparty_import_export_5 + ", counterparty_country_5="
+				+ counterparty_country_5 + ", counterparty_activity_products_5=" + counterparty_activity_products_5
+				+ ", corporate_cbuae_bbl=" + corporate_cbuae_bbl + ", corporate_google_screening="
+				+ corporate_google_screening + ", corporate_dow_jones_screening=" + corporate_dow_jones_screening
+				+ ", corporate_internal_deny_list=" + corporate_internal_deny_list + ", corporate_screening_remarks="
+				+ corporate_screening_remarks + ", ubo_cbuae_bbl=" + ubo_cbuae_bbl + ", ubo_google_screening="
+				+ ubo_google_screening + ", ubo_dow_jones_screening=" + ubo_dow_jones_screening
+				+ ", ubo_internal_deny_list=" + ubo_internal_deny_list + ", ubo_screening_remarks="
+				+ ubo_screening_remarks + ", counterparty_cbuae_bbl=" + counterparty_cbuae_bbl
+				+ ", counterparty_google_screening=" + counterparty_google_screening
+				+ ", counterparty_dow_jones_screening=" + counterparty_dow_jones_screening
+				+ ", counterparty_internal_deny_list=" + counterparty_internal_deny_list
+				+ ", counterparty_screening_remarks=" + counterparty_screening_remarks + ", transaction_history="
+				+ transaction_history + ", high_value_transaction_count=" + high_value_transaction_count
+				+ ", high_value_transaction_volume=" + high_value_transaction_volume + ", account_conduct="
+				+ account_conduct + ", cash_transaction_percent=" + cash_transaction_percent
+				+ ", cheque_transaction_percent=" + cheque_transaction_percent + ", local_transfer_percent="
+				+ local_transfer_percent + ", intl_transfer_percent=" + intl_transfer_percent
+				+ ", current_transaction_count=" + current_transaction_count + ", expected_transaction_count="
+				+ expected_transaction_count + ", cash_volume_percent=" + cash_volume_percent
+				+ ", cheque_volume_percent=" + cheque_volume_percent + ", local_transfer_volume_percent="
+				+ local_transfer_volume_percent + ", intl_transfer_volume_percent=" + intl_transfer_volume_percent
+				+ ", current_volume_count=" + current_volume_count + ", expected_volume_count=" + expected_volume_count
+				+ ", transactions_match_profile=" + transactions_match_profile + ", system_risk=" + system_risk
+				+ ", latest_risk=" + latest_risk + ", risk_reason=" + risk_reason + ", aof_available=" + aof_available
+				+ ", aof_remarks=" + aof_remarks + ", fatca_crs_available=" + fatca_crs_available
+				+ ", fatca_crs_remarks=" + fatca_crs_remarks + ", source_of_funds_available="
+				+ source_of_funds_available + ", source_of_funds_remarks=" + source_of_funds_remarks + ", observations="
+				+ observations + ", review_date=" + review_date + ", approval_date=" + approval_date
+				+ ", reviewed_by_name=" + reviewed_by_name + ", reviewed_by_ec_no=" + reviewed_by_ec_no
+				+ ", reviewed_by_designation=" + reviewed_by_designation + ", approved_by_name=" + approved_by_name
+				+ ", approved_by_ec_no=" + approved_by_ec_no + ", approved_by_designation=" + approved_by_designation
+				+ ", branch_name=" + branch_name + ", branch_code=" + branch_code + ", data_entry_date="
+				+ data_entry_date + ", data_entry_employee_name=" + data_entry_employee_name
+				+ ", document_uploaded_date=" + document_uploaded_date + ", document_uploaded_employee_name="
+				+ document_uploaded_employee_name + ", current_date=" + current_date + ", report_date=" + report_date
+				+ ", srl_no=" + srl_no + ", entry_user=" + entry_user + ", entry_time=" + entry_time + ", auth_user="
+				+ auth_user + ", auth_time=" + auth_time + ", modify_user=" + modify_user + ", modify_time="
+				+ modify_time + ", verify_user=" + verify_user + ", verify_time=" + verify_time + ", entity_flg="
+				+ entity_flg + ", auth_flg=" + auth_flg + ", modify_flg=" + modify_flg + ", del_flg=" + del_flg
+				+ ", finacle_flg=" + finacle_flg + ", dormant_flg=" + dormant_flg + "]";
+	}
+
 	public EcddCorporateEntity(String customer_id, String company_name, String associated_account_number,
 			Date ecdd_date, String trade_license_number, String trade_legal_status, Date trade_expiry_date,
 			String company_address, String triggered_event, String no_change_reason, String geographic_risk_profile,
@@ -1052,8 +1137,8 @@ public class EcddCorporateEntity {
 			String branch_code, Date data_entry_date, String data_entry_employee_name, Date document_uploaded_date,
 			String document_uploaded_employee_name, Date current_date, Date report_date, String srl_no,
 			String entry_user, Date entry_time, String auth_user, Date auth_time, String modify_user, Date modify_time,
-			String verify_user, Date verify_time, String entity_flg, String auth_flg, String modify_flg,
-			String del_flg) {
+			String verify_user, Date verify_time, String entity_flg, String auth_flg, String modify_flg, String del_flg,
+			String finacle_flg, String dormant_flg) {
 		super();
 		this.customer_id = customer_id;
 		this.company_name = company_name;
@@ -1164,151 +1249,14 @@ public class EcddCorporateEntity {
 		this.auth_flg = auth_flg;
 		this.modify_flg = modify_flg;
 		this.del_flg = del_flg;
-	}
-
-	@Override
-	public String toString() {
-		return "EcddCorporateEntity [customer_id=" + customer_id + ", company_name=" + company_name
-				+ ", associated_account_number=" + associated_account_number + ", ecdd_date=" + ecdd_date
-				+ ", trade_license_number=" + trade_license_number + ", trade_legal_status=" + trade_legal_status
-				+ ", trade_expiry_date=" + trade_expiry_date + ", company_address=" + company_address
-				+ ", triggered_event=" + triggered_event + ", no_change_reason=" + no_change_reason
-				+ ", geographic_risk_profile=" + geographic_risk_profile + ", business_activity_products="
-				+ business_activity_products + ", trade_license_validity=" + trade_license_validity
-				+ ", ubo_signatories_kyc_validity=" + ubo_signatories_kyc_validity + ", pep_status=" + pep_status
-				+ ", trade_license_remarks=" + trade_license_remarks + ", ubo_signatories_kyc_remarks="
-				+ ubo_signatories_kyc_remarks + ", pep_remarks=" + pep_remarks + ", counterparty_name_1="
-				+ counterparty_name_1 + ", counterparty_import_export_1=" + counterparty_import_export_1
-				+ ", counterparty_country_1=" + counterparty_country_1 + ", counterparty_activity_products_1="
-				+ counterparty_activity_products_1 + ", counterparty_name_2=" + counterparty_name_2
-				+ ", counterparty_import_export_2=" + counterparty_import_export_2 + ", counterparty_country_2="
-				+ counterparty_country_2 + ", counterparty_activity_products_2=" + counterparty_activity_products_2
-				+ ", counterparty_name_3=" + counterparty_name_3 + ", counterparty_import_export_3="
-				+ counterparty_import_export_3 + ", counterparty_country_3=" + counterparty_country_3
-				+ ", counterparty_activity_products_3=" + counterparty_activity_products_3 + ", counterparty_name_4="
-				+ counterparty_name_4 + ", counterparty_import_export_4=" + counterparty_import_export_4
-				+ ", counterparty_country_4=" + counterparty_country_4 + ", counterparty_activity_products_4="
-				+ counterparty_activity_products_4 + ", counterparty_name_5=" + counterparty_name_5
-				+ ", counterparty_import_export_5=" + counterparty_import_export_5 + ", counterparty_country_5="
-				+ counterparty_country_5 + ", counterparty_activity_products_5=" + counterparty_activity_products_5
-				+ ", corporate_cbuae_bbl=" + corporate_cbuae_bbl + ", corporate_google_screening="
-				+ corporate_google_screening + ", corporate_dow_jones_screening=" + corporate_dow_jones_screening
-				+ ", corporate_internal_deny_list=" + corporate_internal_deny_list + ", corporate_screening_remarks="
-				+ corporate_screening_remarks + ", ubo_cbuae_bbl=" + ubo_cbuae_bbl + ", ubo_google_screening="
-				+ ubo_google_screening + ", ubo_dow_jones_screening=" + ubo_dow_jones_screening
-				+ ", ubo_internal_deny_list=" + ubo_internal_deny_list + ", ubo_screening_remarks="
-				+ ubo_screening_remarks + ", counterparty_cbuae_bbl=" + counterparty_cbuae_bbl
-				+ ", counterparty_google_screening=" + counterparty_google_screening
-				+ ", counterparty_dow_jones_screening=" + counterparty_dow_jones_screening
-				+ ", counterparty_internal_deny_list=" + counterparty_internal_deny_list
-				+ ", counterparty_screening_remarks=" + counterparty_screening_remarks + ", transaction_history="
-				+ transaction_history + ", high_value_transaction_count=" + high_value_transaction_count
-				+ ", high_value_transaction_volume=" + high_value_transaction_volume + ", account_conduct="
-				+ account_conduct + ", cash_transaction_percent=" + cash_transaction_percent
-				+ ", cheque_transaction_percent=" + cheque_transaction_percent + ", local_transfer_percent="
-				+ local_transfer_percent + ", intl_transfer_percent=" + intl_transfer_percent
-				+ ", current_transaction_count=" + current_transaction_count + ", expected_transaction_count="
-				+ expected_transaction_count + ", cash_volume_percent=" + cash_volume_percent
-				+ ", cheque_volume_percent=" + cheque_volume_percent + ", local_transfer_volume_percent="
-				+ local_transfer_volume_percent + ", intl_transfer_volume_percent=" + intl_transfer_volume_percent
-				+ ", current_volume_count=" + current_volume_count + ", expected_volume_count=" + expected_volume_count
-				+ ", transactions_match_profile=" + transactions_match_profile + ", system_risk=" + system_risk
-				+ ", latest_risk=" + latest_risk + ", risk_reason=" + risk_reason + ", aof_available=" + aof_available
-				+ ", aof_remarks=" + aof_remarks + ", fatca_crs_available=" + fatca_crs_available
-				+ ", fatca_crs_remarks=" + fatca_crs_remarks + ", source_of_funds_available="
-				+ source_of_funds_available + ", source_of_funds_remarks=" + source_of_funds_remarks + ", observations="
-				+ observations + ", review_date=" + review_date + ", approval_date=" + approval_date
-				+ ", reviewed_by_name=" + reviewed_by_name + ", reviewed_by_ec_no=" + reviewed_by_ec_no
-				+ ", reviewed_by_designation=" + reviewed_by_designation + ", approved_by_name=" + approved_by_name
-				+ ", approved_by_ec_no=" + approved_by_ec_no + ", approved_by_designation=" + approved_by_designation
-				+ ", branch_name=" + branch_name + ", branch_code=" + branch_code + ", data_entry_date="
-				+ data_entry_date + ", data_entry_employee_name=" + data_entry_employee_name
-				+ ", document_uploaded_date=" + document_uploaded_date + ", document_uploaded_employee_name="
-				+ document_uploaded_employee_name + ", current_date=" + current_date + ", report_date=" + report_date
-				+ ", srl_no=" + srl_no + ", entry_user=" + entry_user + ", entry_time=" + entry_time + ", auth_user="
-				+ auth_user + ", auth_time=" + auth_time + ", modify_user=" + modify_user + ", modify_time="
-				+ modify_time + ", verify_user=" + verify_user + ", verify_time=" + verify_time + ", entity_flg="
-				+ entity_flg + ", auth_flg=" + auth_flg + ", modify_flg=" + modify_flg + ", del_flg=" + del_flg
-				+ ", getCustomer_id()=" + getCustomer_id() + ", getCompany_name()=" + getCompany_name()
-				+ ", getAssociated_account_number()=" + getAssociated_account_number() + ", getEcdd_date()="
-				+ getEcdd_date() + ", getTrade_license_number()=" + getTrade_license_number()
-				+ ", getTrade_legal_status()=" + getTrade_legal_status() + ", getTrade_expiry_date()="
-				+ getTrade_expiry_date() + ", getCompany_address()=" + getCompany_address() + ", getTriggered_event()="
-				+ getTriggered_event() + ", getNo_change_reason()=" + getNo_change_reason()
-				+ ", getGeographic_risk_profile()=" + getGeographic_risk_profile()
-				+ ", getBusiness_activity_products()=" + getBusiness_activity_products()
-				+ ", getTrade_license_validity()=" + getTrade_license_validity()
-				+ ", getUbo_signatories_kyc_validity()=" + getUbo_signatories_kyc_validity() + ", getPep_status()="
-				+ getPep_status() + ", getTrade_license_remarks()=" + getTrade_license_remarks()
-				+ ", getUbo_signatories_kyc_remarks()=" + getUbo_signatories_kyc_remarks() + ", getPep_remarks()="
-				+ getPep_remarks() + ", getCounterparty_name_1()=" + getCounterparty_name_1()
-				+ ", getCounterparty_import_export_1()=" + getCounterparty_import_export_1()
-				+ ", getCounterparty_country_1()=" + getCounterparty_country_1()
-				+ ", getCounterparty_activity_products_1()=" + getCounterparty_activity_products_1()
-				+ ", getCounterparty_name_2()=" + getCounterparty_name_2() + ", getCounterparty_import_export_2()="
-				+ getCounterparty_import_export_2() + ", getCounterparty_country_2()=" + getCounterparty_country_2()
-				+ ", getCounterparty_activity_products_2()=" + getCounterparty_activity_products_2()
-				+ ", getCounterparty_name_3()=" + getCounterparty_name_3() + ", getCounterparty_import_export_3()="
-				+ getCounterparty_import_export_3() + ", getCounterparty_country_3()=" + getCounterparty_country_3()
-				+ ", getCounterparty_activity_products_3()=" + getCounterparty_activity_products_3()
-				+ ", getCounterparty_name_4()=" + getCounterparty_name_4() + ", getCounterparty_import_export_4()="
-				+ getCounterparty_import_export_4() + ", getCounterparty_country_4()=" + getCounterparty_country_4()
-				+ ", getCounterparty_activity_products_4()=" + getCounterparty_activity_products_4()
-				+ ", getCounterparty_name_5()=" + getCounterparty_name_5() + ", getCounterparty_import_export_5()="
-				+ getCounterparty_import_export_5() + ", getCounterparty_country_5()=" + getCounterparty_country_5()
-				+ ", getCounterparty_activity_products_5()=" + getCounterparty_activity_products_5()
-				+ ", getCorporate_cbuae_bbl()=" + getCorporate_cbuae_bbl() + ", getCorporate_google_screening()="
-				+ getCorporate_google_screening() + ", getCorporate_dow_jones_screening()="
-				+ getCorporate_dow_jones_screening() + ", getCorporate_internal_deny_list()="
-				+ getCorporate_internal_deny_list() + ", getCorporate_screening_remarks()="
-				+ getCorporate_screening_remarks() + ", getUbo_cbuae_bbl()=" + getUbo_cbuae_bbl()
-				+ ", getUbo_google_screening()=" + getUbo_google_screening() + ", getUbo_dow_jones_screening()="
-				+ getUbo_dow_jones_screening() + ", getUbo_internal_deny_list()=" + getUbo_internal_deny_list()
-				+ ", getUbo_screening_remarks()=" + getUbo_screening_remarks() + ", getCounterparty_cbuae_bbl()="
-				+ getCounterparty_cbuae_bbl() + ", getCounterparty_google_screening()="
-				+ getCounterparty_google_screening() + ", getCounterparty_dow_jones_screening()="
-				+ getCounterparty_dow_jones_screening() + ", getCounterparty_internal_deny_list()="
-				+ getCounterparty_internal_deny_list() + ", getCounterparty_screening_remarks()="
-				+ getCounterparty_screening_remarks() + ", getTransaction_history()=" + getTransaction_history()
-				+ ", getHigh_value_transaction_count()=" + getHigh_value_transaction_count()
-				+ ", getHigh_value_transaction_volume()=" + getHigh_value_transaction_volume()
-				+ ", getAccount_conduct()=" + getAccount_conduct() + ", getCash_transaction_percent()="
-				+ getCash_transaction_percent() + ", getCheque_transaction_percent()=" + getCheque_transaction_percent()
-				+ ", getLocal_transfer_percent()=" + getLocal_transfer_percent() + ", getIntl_transfer_percent()="
-				+ getIntl_transfer_percent() + ", getCurrent_transaction_count()=" + getCurrent_transaction_count()
-				+ ", getExpected_transaction_count()=" + getExpected_transaction_count() + ", getCash_volume_percent()="
-				+ getCash_volume_percent() + ", getCheque_volume_percent()=" + getCheque_volume_percent()
-				+ ", getLocal_transfer_volume_percent()=" + getLocal_transfer_volume_percent()
-				+ ", getIntl_transfer_volume_percent()=" + getIntl_transfer_volume_percent()
-				+ ", getCurrent_volume_count()=" + getCurrent_volume_count() + ", getExpected_volume_count()="
-				+ getExpected_volume_count() + ", getTransactions_match_profile()=" + getTransactions_match_profile()
-				+ ", getSystem_risk()=" + getSystem_risk() + ", getLatest_risk()=" + getLatest_risk()
-				+ ", getRisk_reason()=" + getRisk_reason() + ", getAof_available()=" + getAof_available()
-				+ ", getAof_remarks()=" + getAof_remarks() + ", getFatca_crs_available()=" + getFatca_crs_available()
-				+ ", getFatca_crs_remarks()=" + getFatca_crs_remarks() + ", getSource_of_funds_available()="
-				+ getSource_of_funds_available() + ", getSource_of_funds_remarks()=" + getSource_of_funds_remarks()
-				+ ", getObservations()=" + getObservations() + ", getReview_date()=" + getReview_date()
-				+ ", getApproval_date()=" + getApproval_date() + ", getReviewed_by_name()=" + getReviewed_by_name()
-				+ ", getReviewed_by_ec_no()=" + getReviewed_by_ec_no() + ", getReviewed_by_designation()="
-				+ getReviewed_by_designation() + ", getApproved_by_name()=" + getApproved_by_name()
-				+ ", getApproved_by_ec_no()=" + getApproved_by_ec_no() + ", getApproved_by_designation()="
-				+ getApproved_by_designation() + ", getBranch_name()=" + getBranch_name() + ", getBranch_code()="
-				+ getBranch_code() + ", getData_entry_date()=" + getData_entry_date()
-				+ ", getData_entry_employee_name()=" + getData_entry_employee_name() + ", getDocument_uploaded_date()="
-				+ getDocument_uploaded_date() + ", getDocument_uploaded_employee_name()="
-				+ getDocument_uploaded_employee_name() + ", getCurrent_date()=" + getCurrent_date()
-				+ ", getReport_date()=" + getReport_date() + ", getSrl_no()=" + getSrl_no() + ", getEntry_user()="
-				+ getEntry_user() + ", getEntry_time()=" + getEntry_time() + ", getAuth_user()=" + getAuth_user()
-				+ ", getAuth_time()=" + getAuth_time() + ", getModify_user()=" + getModify_user()
-				+ ", getModify_time()=" + getModify_time() + ", getVerify_user()=" + getVerify_user()
-				+ ", getVerify_time()=" + getVerify_time() + ", getEntity_flg()=" + getEntity_flg() + ", getAuth_flg()="
-				+ getAuth_flg() + ", getModify_flg()=" + getModify_flg() + ", getDel_flg()=" + getDel_flg()
-				+ ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()=" + super.toString()
-				+ "]";
+		this.finacle_flg = finacle_flg;
+		this.dormant_flg = dormant_flg;
 	}
 
 	public EcddCorporateEntity() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+
+	
 }

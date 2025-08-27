@@ -201,17 +201,15 @@ public class XBRLNavigationController {
 		md.addAttribute("changepassword", loginServices.checkPasswordChangeReq(userid));
 
 		if (Dashboardpage.equals("DCD_ADMIN") || Dashboardpage.equals("DCD_BRANCH")) {
-			int Completed = 0;
-			int Pending = 0;
-			int Under_review = 0;
+			int IndvSubmitted = 0;
+			int IndvVerified = 0;
+			int IndvPending = 0;
+			int IndvUnattended = 0;
 
-			int CorpCompleted = 0;
+			int CorpSubmitted = 0;
+			int CorpVerified = 0;
 			int CorpPending = 0;
-			int CorpUnder_review = 0;
-
-			int corpbarcompleted = 0;
-			int corpbarPending = 0;
-			int corpbarincomplete = 0;
+			int CorpUnattended = 0;
 
 			/// Counts fetched for Dashborad page Pending kyc INDIVIDUAL details branch wise
 			BigDecimal DubaiPendIndividuals = new BigDecimal("0");
@@ -228,26 +226,27 @@ public class XBRLNavigationController {
 			BigDecimal RasalkhaimaPendCorporate = new BigDecimal("0");
 			BigDecimal SyndPendCorporate = new BigDecimal("0");
 			if (Dashboardpage.equals("DCD_ADMIN")) {
-				Completed = ecddIndividualProfileRepository.Getcompletedcount();
-				Under_review = ecddIndividualProfileRepository.GetIncompletedcount();
-				Pending = ecddIndividualProfileRepository.GetPendingcount();
+				IndvSubmitted = ecddIndividualProfileRepository.Getfinacompletedcount();
+				IndvVerified = ecddIndividualProfileRepository.Getcompletedcount();
+				IndvPending = ecddIndividualProfileRepository.GetPendingcount();
+				IndvUnattended = ecddIndividualProfileRepository.GetUnattendcount();
 
-				CorpCompleted = kyc_corporate_repo.Getcompletedcount();
-				CorpUnder_review = kyc_corporate_repo.GetIncompletedcount();
-				CorpPending = kyc_corporate_repo.GetPendingcount();
+				CorpSubmitted = kyc_corporate_repo.getFinacleCompletedCount();
+				CorpVerified = kyc_corporate_repo.getCompletedCount();
+				CorpPending = kyc_corporate_repo.getPendingCount();
+				CorpUnattended = kyc_corporate_repo.getUnattendedCount();
 			} else {
-				Completed = ecddIndividualProfileRepository.Getbranchwisecompletedcount(BRANCHCODE);
-				Under_review = ecddIndividualProfileRepository.GetbranchwiseIncompletedcount(BRANCHCODE);
-				Pending = ecddIndividualProfileRepository.GetbranchwisePendingcount(BRANCHCODE);
+				IndvSubmitted = ecddIndividualProfileRepository.getBranchFinacleCompletedCount(BRANCHCODE);
+				IndvVerified = ecddIndividualProfileRepository.getBranchWiseCompletedCount(BRANCHCODE);
+				IndvPending = ecddIndividualProfileRepository.getBranchWisePendingCount(BRANCHCODE);
+				IndvUnattended = ecddIndividualProfileRepository.getBranchWiseUnattendedCount(BRANCHCODE);
 
-				CorpCompleted = kyc_corporate_repo.Getbranchwisecompletedcount(BRANCHCODE);
-				CorpUnder_review = kyc_corporate_repo.GetbranchwiseIncompletedcount(BRANCHCODE);
-				CorpPending = kyc_corporate_repo.GetbranchwisePendingcount(BRANCHCODE);
+				CorpSubmitted = kyc_corporate_repo.getBranchFinacleCompletedCount(BRANCHCODE);
+				CorpVerified = kyc_corporate_repo.getBranchCompletedCount(BRANCHCODE);
+				CorpPending = kyc_corporate_repo.getBranchPendingCount(BRANCHCODE);
+				CorpUnattended = kyc_corporate_repo.getBranchUnattendedCount(BRANCHCODE);
 			}
 
-			corpbarcompleted = CorpCompleted;
-			corpbarPending = CorpPending;
-			corpbarincomplete = CorpUnder_review;
 
 			List<Object[]> branchwiseIndividual = ecddIndividualProfileRepository.GetbranchPendingcount();
 
@@ -325,14 +324,19 @@ public class XBRLNavigationController {
 			md.addAttribute("RasalkhaimaPendCorporate", RasalkhaimaPendCorporate);
 			md.addAttribute("SyndPendCorporate", SyndPendCorporate);
 
-			md.addAttribute("completed", Completed);
-			md.addAttribute("Pending", Pending);
-			md.addAttribute("Under_review", Under_review);
-			md.addAttribute("Dashboardpage", Dashboardpage);
-			md.addAttribute("corpbarcompleted", corpbarcompleted);
-			md.addAttribute("corpbarPending", corpbarPending);
-			md.addAttribute("corpbarincomplete", corpbarincomplete);
 
+			md.addAttribute("Dashboardpage", Dashboardpage);
+			md.addAttribute("IndvSubmitted", IndvSubmitted);
+			md.addAttribute("IndvVerified", IndvVerified);
+			md.addAttribute("IndvPending", IndvPending);
+			md.addAttribute("IndvUnattended", IndvUnattended);
+			md.addAttribute("CorpSubmitted", CorpSubmitted);
+			md.addAttribute("CorpVerified", CorpVerified);
+			md.addAttribute("CorpPending", CorpPending);
+			md.addAttribute("CorpUnattended", CorpUnattended);
+			
+			
+			
 			md.addAttribute("Branch_code", BRANCHCODE);
 
 			System.out.println(Dashboardpage);
@@ -351,25 +355,21 @@ public class XBRLNavigationController {
 		String Dashboardpage = (String) req.getSession().getAttribute("ROLEID");
 		String BRANCHCODE = (String) req.getSession().getAttribute("BRANCHCODE");
 
-		System.out.println("Dashboard page is:" + Dashboardpage);
-		System.out.println("Branchcode is : " + BRANCHCODE);
 		md.addAttribute("menu", "Dashboard");
 		md.addAttribute("checkpassExpiry", loginServices.checkpassexpirty(userid));
 		md.addAttribute("checkAcctExpiry", loginServices.checkAcctexpirty(userid));
 		md.addAttribute("changepassword", loginServices.checkPasswordChangeReq(userid));
 
 		if (Dashboardpage.equals("DCD_ADMIN") || Dashboardpage.equals("DCD_BRANCH")) {
-			int Completed = 0;
-			int Pending = 0;
-			int Under_review = 0;
+			int IndvSubmitted = 0;
+			int IndvVerified = 0;
+			int IndvPending = 0;
+			int IndvUnattended = 0;
 
-			int CorpCompleted = 0;
+			int CorpSubmitted = 0;
+			int CorpVerified = 0;
 			int CorpPending = 0;
-			int CorpUnder_review = 0;
-
-			int corpbarcompleted = 0;
-			int corpbarPending = 0;
-			int corpbarincomplete = 0;
+			int CorpUnattended = 0;
 
 			/// Counts fetched for Dashborad page Pending kyc INDIVIDUAL details branch wise
 			BigDecimal DubaiPendIndividuals = new BigDecimal("0");
@@ -386,26 +386,27 @@ public class XBRLNavigationController {
 			BigDecimal RasalkhaimaPendCorporate = new BigDecimal("0");
 			BigDecimal SyndPendCorporate = new BigDecimal("0");
 			if (Dashboardpage.equals("DCD_ADMIN")) {
-				Completed = ecddIndividualProfileRepository.Getcompletedcount();
-				Under_review = ecddIndividualProfileRepository.GetIncompletedcount();
-				Pending = ecddIndividualProfileRepository.GetPendingcount();
+				IndvSubmitted = ecddIndividualProfileRepository.Getfinacompletedcount();
+				IndvVerified = ecddIndividualProfileRepository.Getcompletedcount();
+				IndvPending = ecddIndividualProfileRepository.GetPendingcount();
+				IndvUnattended = ecddIndividualProfileRepository.GetUnattendcount();
 
-				CorpCompleted = kyc_corporate_repo.Getcompletedcount();
-				CorpUnder_review = kyc_corporate_repo.GetIncompletedcount();
-				CorpPending = kyc_corporate_repo.GetPendingcount();
+				CorpSubmitted = kyc_corporate_repo.getFinacleCompletedCount();
+				CorpVerified = kyc_corporate_repo.getCompletedCount();
+				CorpPending = kyc_corporate_repo.getPendingCount();
+				CorpUnattended = kyc_corporate_repo.getUnattendedCount();
 			} else {
-				Completed = ecddIndividualProfileRepository.Getbranchwisecompletedcount(BRANCHCODE);
-				Under_review = ecddIndividualProfileRepository.GetbranchwiseIncompletedcount(BRANCHCODE);
-				Pending = ecddIndividualProfileRepository.GetbranchwisePendingcount(BRANCHCODE);
+				IndvSubmitted = ecddIndividualProfileRepository.getBranchFinacleCompletedCount(BRANCHCODE);
+				IndvVerified = ecddIndividualProfileRepository.getBranchWiseCompletedCount(BRANCHCODE);
+				IndvPending = ecddIndividualProfileRepository.getBranchWisePendingCount(BRANCHCODE);
+				IndvUnattended = ecddIndividualProfileRepository.getBranchWiseUnattendedCount(BRANCHCODE);
 
-				CorpCompleted = kyc_corporate_repo.Getbranchwisecompletedcount(BRANCHCODE);
-				CorpUnder_review = kyc_corporate_repo.GetbranchwiseIncompletedcount(BRANCHCODE);
-				CorpPending = kyc_corporate_repo.GetbranchwisePendingcount(BRANCHCODE);
+				CorpSubmitted = kyc_corporate_repo.getBranchFinacleCompletedCount(BRANCHCODE);
+				CorpVerified = kyc_corporate_repo.getBranchCompletedCount(BRANCHCODE);
+				CorpPending = kyc_corporate_repo.getBranchPendingCount(BRANCHCODE);
+				CorpUnattended = kyc_corporate_repo.getBranchUnattendedCount(BRANCHCODE);
 			}
 
-			corpbarcompleted = CorpCompleted;
-			corpbarPending = CorpPending;
-			corpbarincomplete = CorpUnder_review;
 
 			List<Object[]> branchwiseIndividual = ecddIndividualProfileRepository.GetbranchPendingcount();
 
@@ -483,18 +484,24 @@ public class XBRLNavigationController {
 			md.addAttribute("RasalkhaimaPendCorporate", RasalkhaimaPendCorporate);
 			md.addAttribute("SyndPendCorporate", SyndPendCorporate);
 
-			md.addAttribute("completed", Completed);
-			md.addAttribute("Pending", Pending);
-			md.addAttribute("Under_review", Under_review);
-			md.addAttribute("Dashboardpage", Dashboardpage);
-			md.addAttribute("corpbarcompleted", corpbarcompleted);
-			md.addAttribute("corpbarPending", corpbarPending);
-			md.addAttribute("corpbarincomplete", corpbarincomplete);
 
+			md.addAttribute("Dashboardpage", Dashboardpage);
+			md.addAttribute("IndvSubmitted", IndvSubmitted);
+			md.addAttribute("IndvVerified", IndvVerified);
+			md.addAttribute("IndvPending", IndvPending);
+			md.addAttribute("IndvUnattended", IndvUnattended);
+			md.addAttribute("CorpSubmitted", CorpSubmitted);
+			md.addAttribute("CorpVerified", CorpVerified);
+			md.addAttribute("CorpPending", CorpPending);
+			md.addAttribute("CorpUnattended", CorpUnattended);
+			
+			
+			
 			md.addAttribute("Branch_code", BRANCHCODE);
 
 			System.out.println(Dashboardpage);
 		}
+
 		md.addAttribute("menu", "Dashboard");
 		return "XBRLDashboard";
 	}
@@ -861,6 +868,46 @@ public class XBRLNavigationController {
 		md.addAttribute("datavalue", fromDateToUse);
 		md.addAttribute("formmode", formmode);
 		return "KYC_Home";
+	}
+	
+	@RequestMapping(value = "KycDormantProfiles", method = { RequestMethod.GET, RequestMethod.POST })
+	public String KYCDormant(@RequestParam(required = false) String formmode,
+			@RequestParam(required = false) String customerRisk, @RequestParam(required = false) Integer age, // days
+			Model md, HttpServletRequest req) {
+
+		String ROLEID = (String) req.getSession().getAttribute("ROLEID");
+		String BRANCHCODE = (String) req.getSession().getAttribute("BRANCHCODE");
+		
+		formmode = (formmode == null) ? "individual" : formmode;
+		
+		boolean isBranchRole = "DCD_BRANCH".equals(ROLEID);
+		// Check if both filter parameters are present and not empty
+		boolean hasFilters = (customerRisk != null && !customerRisk.isEmpty() && age != null);
+
+		if ("corporate".equals(formmode)) {
+			List<Object[]> results = isBranchRole
+					? (hasFilters ? kyc_corporate_repo.getBranchDynamicValue(customerRisk, age, BRANCHCODE)
+							: kyc_corporate_repo.Getdormantprofilesbranch(BRANCHCODE))
+					: (hasFilters ? kyc_corporate_repo.getDynamicValue(customerRisk, age)
+							: kyc_corporate_repo.Getdormantprofiles());
+			md.addAttribute("kycData", results);
+		} else { // Individual case
+			List<Object[]> results = isBranchRole
+					? (hasFilters
+							? ecddIndividualProfileRepository.findFilteredIndividualsByBranch(customerRisk, age,
+									BRANCHCODE)
+							: ecddIndividualProfileRepository.findAllIndividualsdormantBranch(BRANCHCODE))
+					: (hasFilters ? ecddIndividualProfileRepository.findFilteredIndividuals(customerRisk, age)
+							: ecddIndividualProfileRepository.findAllDormantIndividuals());
+			md.addAttribute("reportlist", results);
+		}
+		LocalDate today = LocalDate.now(); // Get today's date
+		Date fromDateToUse; // Declare a variable for the date to use
+
+		fromDateToUse = java.sql.Date.valueOf(today.minusDays(0));
+		md.addAttribute("datavalue", fromDateToUse);
+		md.addAttribute("formmode", formmode);
+		return "Dormant_home";
 	}
 
 	@RequestMapping(value = "/kyc/individual", method = { RequestMethod.GET, RequestMethod.POST })
@@ -1306,6 +1353,148 @@ public class XBRLNavigationController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
+	
+	@GetMapping("kyc/DetailReportstatus/Download")
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> downloadDetailKycStatus(HttpServletRequest req) {
+		
+		String Role_id = (String) req.getSession().getAttribute("ROLEID");
+		String Branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
+
+		List<Object[]> Individualstatus = new ArrayList<Object[]>();
+		List<Object[]> Corporatestatus = new ArrayList<Object[]>();
+		
+		if (Role_id.equals("DCD_ADMIN")) {
+			Individualstatus = ecddIndividualProfileRepository.GetEcddstatus();
+			Corporatestatus = kyc_corporate_repo.GetEcddstatusreport();
+		} else {
+			Individualstatus = ecddIndividualProfileRepository.GetEcddbranchstatus(Branchcode);
+			Corporatestatus = kyc_corporate_repo.GetEcddbranchstatusreport(Branchcode);
+		}
+	    try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+	        /*
+	         * ===== FIRST SHEET =====
+	         */
+	        Sheet sheet1 = workbook.createSheet("ECDD Individual Status");
+
+	        // Create title style
+	        CellStyle titleStyle = workbook.createCellStyle();
+	        Font titleFont = workbook.createFont();
+	        titleFont.setBold(true);
+	        titleFont.setFontHeightInPoints((short) 14);
+	        titleStyle.setFont(titleFont);
+	        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+	        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+	        // Title row for first sheet
+	        Row titleRow1 = sheet1.createRow(0);
+	        Cell titleCell1 = titleRow1.createCell(0);
+	        titleCell1.setCellValue("ECDD Individual Status");
+	        titleCell1.setCellStyle(titleStyle);
+	        sheet1.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+
+	        // Create header style
+	        CellStyle headerStyle = workbook.createCellStyle();
+	        Font headerFont = workbook.createFont();
+	        headerFont.setBold(true);
+	        headerStyle.setFont(headerFont);
+	        headerStyle.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
+	        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	        headerStyle.setBorderBottom(BorderStyle.THIN);
+	        headerStyle.setBorderTop(BorderStyle.THIN);
+	        headerStyle.setBorderLeft(BorderStyle.THIN);
+	        headerStyle.setBorderRight(BorderStyle.THIN);
+	        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+	        // Header row for first sheet
+	        String[] columns1 = {"CUSTOMER", "ACCOUNT NO", "BRANCH", "ECDD STATUS",
+	                "MODIFY_USER", "MODIFY_TIME", "VERIFY_USER", "VERIFY_TIME", "SYSTEM_RISK"};
+
+	        Row headerRow1 = sheet1.createRow(1);
+	        for (int i = 0; i < columns1.length; i++) {
+	            Cell cell = headerRow1.createCell(i);
+	            cell.setCellValue(columns1[i]);
+	            cell.setCellStyle(headerStyle);
+	            sheet1.autoSizeColumn(i);
+	        }
+
+	        int rowval = 2; // start from row 2 (third physical row, after title & header)
+
+	        for (Object[] record : Individualstatus) {
+	            Row dataRow = sheet1.createRow(rowval++);
+
+	            for (int col = 0; col < record.length; col++) {
+	                Cell cell = dataRow.createCell(col);
+
+	                // Handle nulls safely
+	                if (record[col] != null) {
+	                    cell.setCellValue(record[col].toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+	            }
+	        }
+	        /*
+	         * ===== SECOND SHEET =====
+	         */
+	        Sheet sheet2 = workbook.createSheet("ECDD Corporate Status");
+
+	        // Title row for second sheet
+	        Row titleRow2 = sheet2.createRow(0);
+	        Cell titleCell2 = titleRow2.createCell(0);
+	        titleCell2.setCellValue("ECDD Corporate Status");
+	        titleCell2.setCellStyle(titleStyle);
+	        sheet2.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+
+	        // Header row for second sheet
+	        String[] columns2 = {"CUSTOMER", "ACCOUNT NO", "BRANCH", "ECDD STATUS",
+	                "MODIFY_USER", "MODIFY_TIME", "VERIFY_USER", "VERIFY_TIME", "SYSTEM_RISK"};
+
+	        Row headerRow2 = sheet2.createRow(1);
+	        for (int i = 0; i < columns2.length; i++) {
+	            Cell cell = headerRow2.createCell(i);
+	            cell.setCellValue(columns2[i]);
+	            cell.setCellStyle(headerStyle);
+	            sheet2.autoSizeColumn(i);
+	        }
+	        
+	        int rowval1 = 2; // start from row 2 (third physical row, after title & header)
+
+	        for (Object[] record : Corporatestatus) {
+	            Row dataRow = sheet2.createRow(rowval1++);
+
+	            for (int col = 0; col < record.length; col++) {
+	                Cell cell = dataRow.createCell(col);
+
+	                // Handle nulls safely
+	                if (record[col] != null) {
+	                    cell.setCellValue(record[col].toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+	            }
+	        }
+	        /*
+	         * ===== OUTPUT =====
+	         */
+	        workbook.write(out);
+	        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+
+	        HttpHeaders headersHttp = new HttpHeaders();
+	        headersHttp.add("Content-Disposition", "attachment; filename=ecdd_completed_report.xlsx");
+
+	        return ResponseEntity.ok()
+	                .headers(headersHttp)
+	                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+	                .body(new InputStreamResource(in));
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	    }
+	}
+
 
 	@RequestMapping(value = "kyc/corporate/download", method = RequestMethod.GET)
 

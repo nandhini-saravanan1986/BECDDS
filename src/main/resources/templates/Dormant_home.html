@@ -34,7 +34,7 @@
 
 	<script src="js/bootstrap411.js"></script>
 	<link rel="stylesheet" href="css/spur.css">
-	<title>BECDDS - ECDD Customers</title>
+	<title>BECDDS - Dormant Customers</title>
 </head>
 
 <style>
@@ -147,7 +147,7 @@
 	function navigateToForm(element, action, type) {
 		
 		const srlno = element.getAttribute('data-srlno');
-		const baseUrl = `/BECDDS/kyc/${type}`;
+		const baseUrl = `/BECDDS/KycDormantProfiles/${type}`;
 		let url = "";
 
 		if (action === 'view') {
@@ -173,7 +173,7 @@
 	function navigateToForm1(element, action, type) {
 			
 			const srl_no = element.getAttribute('data-srl_no');
-			const baseUrl = `/BECDDS/kyc/${type}`;
+			const baseUrl = `/BECDDS/KycDormantProfiles/${type}`;
 			let url = "";
 
 			if (action === 'view') {
@@ -215,7 +215,7 @@
 			
 			
 		      
-		       fetch(`./kyc/DetailReportstatus/Download`)
+		       fetch(`./KycDormantProfiles/DetailReportstatus/Download`)
 		           .then(response => {
 		               if (!response.ok) {
 		                   throw new Error("No transaction file found or server error.");
@@ -241,7 +241,7 @@
 		
 		var Fromdate = $('#datechanger').val();
 	       $('#exampleModal').modal('hide');
-	       fetch(`./kyc/Reportstatus/Download?Fromdate=${Fromdate}`)
+	       fetch(`./KycDormantProfiles/Reportstatus/Download?Fromdate=${Fromdate}`)
 	           .then(response => {
 	               if (!response.ok) {
 	                   throw new Error("No transaction file found or server error.");
@@ -297,7 +297,7 @@
 		if (isValid) {
 			const currentUrl = new URL(window.location.href);
 			const formmode = currentUrl.searchParams.get('formmode') || 'individual';
-			location.href = `kyc?formmode=${formmode}&age=${age}&customerRisk=${customerRisk}`;
+			location.href = `KycDormantProfiles?formmode=${formmode}&age=${age}&customerRisk=${customerRisk}`;
 		}
 	}
 
@@ -354,14 +354,6 @@
 							<button type="button" class="btn" th:classappend="${formmode == 'individual'} ? 'btn-outline-primary2' : 'btn-outline-primary'" id="individual" onclick="submitForm(this.id)">CDD Individual</button>
 							<button type="button" class="btn" th:classappend="${formmode == 'corporate'} ? 'btn-outline-primary2' : 'btn-outline-primary'" id="corporate" onclick="submitForm(this.id)">CDD Corporate</button>
 						</div>
-						<div class="btn-group">
-							<button type="button" class="btn-outline-primary" onclick="Downloadstatusmodal()"
-								th:if="${#session.getAttribute('ROLEID') == 'Superadmin' or #session.getAttribute('ROLEID') == 'DCD_ADMIN'}">
-								<i class="fa fa-download mr-2" aria-hidden="true"></i> Report</button>
-							<button type="button" class="btn-outline-primary" onclick="Downloaddetailreport()">
-								<i class="fa fa-download mr-2" aria-hidden="true"></i>Detail Report</button>
-						
-						</div>
 					</div>
 				</div>
 			</div>
@@ -386,9 +378,7 @@
 						</thead>
 						<tbody>
 							<tr style="letter-spacing: .1em;" th:each="row : ${reportlist}">
-								<td>
-									<a href="javascript:void(0)" th:attr="data-srlno=${row[5]}" onclick="navigateToForm(this, 'view', 'individual')" th:text="${row[0]}"></a>
-								</td>
+								<td th:text="${row[0]}"></td>
 								<td th:text="${row[8]}"></td>
 								<!--<td th:text="${row[10]"></td>-->
 								<td th:text="${row[9] != null ? #dates.format(row[9], 'dd-MM-yyyy') : ''}"></td>
@@ -425,9 +415,7 @@
 						</thead>
 						<tbody>
 							<tr style="letter-spacing: .1em" th:each="row : ${kycData}" th:attr="data-srl_no=${row[10]}">
-								<td>
-									<a href="javascript:void(0)" th:attr="data-srl_no=${row[10]}" onclick="navigateToForm1(this, 'view', 'corporate')" th:text="${row[0]}"></a>
-								</td>
+								<td th:text="${row[0]}"></td>
 								<td th:text="${row[1]}"></td>
 								<td th:text="${row[2]}"></td>
 								<td th:text="${row[3]}"></td>

@@ -183,6 +183,9 @@ public class Ecdd_Individual_Profile_Entity {
 	private String del_flg;
 	private String branch_name;
 	private String head_signature_name;
+	private String finacle_flg;
+	private String dormant_flg;
+
 
 	public String getSrlno() {
 		return srlno;
@@ -1288,6 +1291,22 @@ public class Ecdd_Individual_Profile_Entity {
 		this.head_signature_name = head_signature_name;
 	}
 
+	public String getFinacle_flg() {
+		return finacle_flg;
+	}
+
+	public void setFinacle_flg(String finacle_flg) {
+		this.finacle_flg = finacle_flg;
+	}
+
+	public String getDormant_flg() {
+		return dormant_flg;
+	}
+
+	public void setDormant_flg(String dormant_flg) {
+		this.dormant_flg = dormant_flg;
+	}
+
 	@Override
 	public String toString() {
 		return "Ecdd_Individual_Profile_Entity [srlno=" + srlno + ", account_title=" + account_title + ", ecdd_date="
@@ -1357,90 +1376,8 @@ public class Ecdd_Individual_Profile_Entity {
 				+ ", modify_user=" + modify_user + ", modify_time=" + modify_time + ", verify_user=" + verify_user
 				+ ", verify_time=" + verify_time + ", entity_flg=" + entity_flg + ", auth_flg=" + auth_flg
 				+ ", modify_flg=" + modify_flg + ", del_flg=" + del_flg + ", branch_name=" + branch_name
-				+ ", head_signature_name=" + head_signature_name + ", getSrlno()=" + getSrlno()
-				+ ", getAccount_title()=" + getAccount_title() + ", getEcdd_date()=" + getEcdd_date()
-				+ ", getCustomer_id()=" + getCustomer_id() + ", getAssociated_accounts()=" + getAssociated_accounts()
-				+ ", getCurrency()=" + getCurrency() + ", getAccount_open_date()=" + getAccount_open_date()
-				+ ", getCurrency_approval_yn()=" + getCurrency_approval_yn() + ", getPrimary_holder_name()="
-				+ getPrimary_holder_name() + ", getPrimary_customer_id()=" + getPrimary_customer_id()
-				+ ", getPrimary_non_resident_yn()=" + getPrimary_non_resident_yn() + ", getPrimary_nationality()="
-				+ getPrimary_nationality() + ", getPrimary_mobile_no()=" + getPrimary_mobile_no()
-				+ ", getPrimary_email()=" + getPrimary_email() + ", getPrimary_address()=" + getPrimary_address()
-				+ ", getPrimary_passport_no()=" + getPrimary_passport_no() + ", getPrimary_passport_exp_date()="
-				+ getPrimary_passport_exp_date() + ", getPrimary_emirates_id_no()=" + getPrimary_emirates_id_no()
-				+ ", getPrimary_emirates_exp_date()=" + getPrimary_emirates_exp_date() + ", getPrimary_pep_yn()="
-				+ getPrimary_pep_yn() + ", getPrimary_pep_approval()=" + getPrimary_pep_approval()
-				+ ", getKyc_valid_yn_primary()=" + getKyc_valid_yn_primary() + ", getAnnual_income_primary()="
-				+ getAnnual_income_primary() + ", getSource_of_income_primary()=" + getSource_of_income_primary()
-				+ ", getScreen_google_primary()=" + getScreen_google_primary() + ", getScreen_dowjones_primary()="
-				+ getScreen_dowjones_primary() + ", getJoint1_name()=" + getJoint1_name() + ", getJoint1_customer_id()="
-				+ getJoint1_customer_id() + ", getJoint1_non_resident_yn()=" + getJoint1_non_resident_yn()
-				+ ", getJoint1_nationality()=" + getJoint1_nationality() + ", getJoint1_mobile_no()="
-				+ getJoint1_mobile_no() + ", getJoint1_email()=" + getJoint1_email() + ", getJoint1_address()="
-				+ getJoint1_address() + ", getJoint1_passport_no()=" + getJoint1_passport_no()
-				+ ", getJoint1_passport_exp_date()=" + getJoint1_passport_exp_date() + ", getJoint1_emirates_id_no()="
-				+ getJoint1_emirates_id_no() + ", getJoint1_emirates_exp_date()=" + getJoint1_emirates_exp_date()
-				+ ", getJoint1_pep_yn()=" + getJoint1_pep_yn() + ", getJoint1_pep_approval()="
-				+ getJoint1_pep_approval() + ", getKyc_valid_yn_joint1()=" + getKyc_valid_yn_joint1()
-				+ ", getAnnual_income_joint1()=" + getAnnual_income_joint1() + ", getSource_of_income_joint1()="
-				+ getSource_of_income_joint1() + ", getScreen_google_joint1()=" + getScreen_google_joint1()
-				+ ", getScreen_dowjones_joint1()=" + getScreen_dowjones_joint1() + ", getJoint2_name()="
-				+ getJoint2_name() + ", getJoint2_customer_id()=" + getJoint2_customer_id()
-				+ ", getJoint2_non_resident_yn()=" + getJoint2_non_resident_yn() + ", getJoint2_nationality()="
-				+ getJoint2_nationality() + ", getJoint2_mobile_no()=" + getJoint2_mobile_no() + ", getJoint2_email()="
-				+ getJoint2_email() + ", getJoint2_address()=" + getJoint2_address() + ", getJoint2_passport_no()="
-				+ getJoint2_passport_no() + ", getJoint2_passport_exp_date()=" + getJoint2_passport_exp_date()
-				+ ", getJoint2_emirates_id_no()=" + getJoint2_emirates_id_no() + ", getJoint2_emirates_exp_date()="
-				+ getJoint2_emirates_exp_date() + ", getJoint2_pep_yn()=" + getJoint2_pep_yn()
-				+ ", getJoint2_pep_approval()=" + getJoint2_pep_approval() + ", getKyc_valid_yn_joint2()="
-				+ getKyc_valid_yn_joint2() + ", getAnnual_income_joint2()=" + getAnnual_income_joint2()
-				+ ", getSource_of_income_joint2()=" + getSource_of_income_joint2() + ", getScreen_google_joint2()="
-				+ getScreen_google_joint2() + ", getScreen_dowjones_joint2()=" + getScreen_dowjones_joint2()
-				+ ", getJoint3_name()=" + getJoint3_name() + ", getJoint3_customer_id()=" + getJoint3_customer_id()
-				+ ", getJoint3_non_resident_yn()=" + getJoint3_non_resident_yn() + ", getJoint3_nationality()="
-				+ getJoint3_nationality() + ", getJoint3_mobile_no()=" + getJoint3_mobile_no() + ", getJoint3_email()="
-				+ getJoint3_email() + ", getJoint3_address()=" + getJoint3_address() + ", getJoint3_passport_no()="
-				+ getJoint3_passport_no() + ", getJoint3_passport_exp_date()=" + getJoint3_passport_exp_date()
-				+ ", getJoint3_emirates_id_no()=" + getJoint3_emirates_id_no() + ", getJoint3_emirates_exp_date()="
-				+ getJoint3_emirates_exp_date() + ", getJoint3_pep_yn()=" + getJoint3_pep_yn()
-				+ ", getJoint3_pep_approval()=" + getJoint3_pep_approval() + ", getKyc_valid_yn_joint3()="
-				+ getKyc_valid_yn_joint3() + ", getAnnual_income_joint3()=" + getAnnual_income_joint3()
-				+ ", getSource_of_income_joint3()=" + getSource_of_income_joint3() + ", getScreen_google_joint3()="
-				+ getScreen_google_joint3() + ", getScreen_dowjones_joint3()=" + getScreen_dowjones_joint3()
-				+ ", getBranch_remarks()=" + getBranch_remarks() + ", getUnusual_txn_details()="
-				+ getUnusual_txn_details() + ", getSuspicious_activity()=" + getSuspicious_activity()
-				+ ", getHigh_value_txn_count()=" + getHigh_value_txn_count() + ", getHigh_value_txn_volume()="
-				+ getHigh_value_txn_volume() + ", getFrequency_txn_percent()=" + getFrequency_txn_percent()
-				+ ", getVolume_turnover_percent()=" + getVolume_turnover_percent() + ", getCash_txn_count()="
-				+ getCash_txn_count() + ", getCash_txn_volume()=" + getCash_txn_volume() + ", getCheque_txn_count()="
-				+ getCheque_txn_count() + ", getCheque_txn_volume()=" + getCheque_txn_volume()
-				+ ", getLocal_txn_count()=" + getLocal_txn_count() + ", getLocal_txn_volume()=" + getLocal_txn_volume()
-				+ ", getIntl_txn_count()=" + getIntl_txn_count() + ", getIntl_txn_volume()=" + getIntl_txn_volume()
-				+ ", getCurr_txn_count()=" + getCurr_txn_count() + ", getCurr_txn_volume()=" + getCurr_txn_volume()
-				+ ", getExpected_txn_count()=" + getExpected_txn_count() + ", getExpected_txn_volume()="
-				+ getExpected_txn_volume() + ", getProfile_match_yn()=" + getProfile_match_yn()
-				+ ", getProfile_mismatch_remarks()=" + getProfile_mismatch_remarks() + ", getSystem_risk()="
-				+ getSystem_risk() + ", getCustomer_risk_reason()=" + getCustomer_risk_reason()
-				+ ", getAof_available_yn()=" + getAof_available_yn() + ", getAof_remarks()=" + getAof_remarks()
-				+ ", getKyc_doc_available_yn()=" + getKyc_doc_available_yn() + ", getKyc_doc_remarks()="
-				+ getKyc_doc_remarks() + ", getSource_of_funds_available_yn()=" + getSource_of_funds_available_yn()
-				+ ", getSource_of_funds_remarks()=" + getSource_of_funds_remarks() + ", getBranch_observations()="
-				+ getBranch_observations() + ", getReview_date()=" + getReview_date() + ", getReviewed_by_name()="
-				+ getReviewed_by_name() + ", getReviewed_by_ec_no()=" + getReviewed_by_ec_no()
-				+ ", getReviewed_by_designation()=" + getReviewed_by_designation() + ", getApproval_date()="
-				+ getApproval_date() + ", getApproved_by_name()=" + getApproved_by_name() + ", getApproved_by_ec_no()="
-				+ getApproved_by_ec_no() + ", getApproved_by_designation()=" + getApproved_by_designation()
-				+ ", getBranch()=" + getBranch() + ", getEntry_date()=" + getEntry_date() + ", getEntered_by()="
-				+ getEntered_by() + ", getDoc_uploaded_date()=" + getDoc_uploaded_date() + ", getDoc_uploaded_by()="
-				+ getDoc_uploaded_by() + ", getReport_date()=" + getReport_date() + ", getEntry_user()="
-				+ getEntry_user() + ", getEntry_time()=" + getEntry_time() + ", getAuth_user()=" + getAuth_user()
-				+ ", getAuth_time()=" + getAuth_time() + ", getModify_user()=" + getModify_user()
-				+ ", getModify_time()=" + getModify_time() + ", getVerify_user()=" + getVerify_user()
-				+ ", getVerify_time()=" + getVerify_time() + ", getEntity_flg()=" + getEntity_flg() + ", getAuth_flg()="
-				+ getAuth_flg() + ", getModify_flg()=" + getModify_flg() + ", getDel_flg()=" + getDel_flg()
-				+ ", getBranch_name()=" + getBranch_name() + ", getHead_signature_name()=" + getHead_signature_name()
-				+ ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()=" + super.toString()
-				+ "]";
+				+ ", head_signature_name=" + head_signature_name + ", finacle_flg=" + finacle_flg + ", dormant_flg="
+				+ dormant_flg + "]";
 	}
 
 	public Ecdd_Individual_Profile_Entity(String srlno, String account_title, Date ecdd_date, String customer_id,
@@ -1481,7 +1418,8 @@ public class Ecdd_Individual_Profile_Entity {
 			String branch, Date entry_date, String entered_by, Date doc_uploaded_date, String doc_uploaded_by,
 			Date report_date, String entry_user, Date entry_time, String auth_user, Date auth_time, String modify_user,
 			Date modify_time, String verify_user, Date verify_time, String entity_flg, String auth_flg,
-			String modify_flg, String del_flg, String branch_name, String head_signature_name) {
+			String modify_flg, String del_flg, String branch_name, String head_signature_name, String finacle_flg,
+			String dormant_flg) {
 		super();
 		this.srlno = srlno;
 		this.account_title = account_title;
@@ -1621,10 +1559,14 @@ public class Ecdd_Individual_Profile_Entity {
 		this.del_flg = del_flg;
 		this.branch_name = branch_name;
 		this.head_signature_name = head_signature_name;
+		this.finacle_flg = finacle_flg;
+		this.dormant_flg = dormant_flg;
 	}
 
 	public Ecdd_Individual_Profile_Entity() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+
+	
 }

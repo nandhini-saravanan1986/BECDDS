@@ -294,7 +294,7 @@
 
 			var ROLEIDUSER = /*[[${session.ROLEID}]]*/null;
 
-			if (ROLEIDUSER == 'Superadmin') {
+			if (ROLEIDUSER == 'Superadmin' || ROLEIDUSER == 'DCD_ADMIN') {
 				//		$('#loader1').modal("toggle");
 				var url = './defaultpasswordReset';
 				$("#userProfile").attr('action', url);
