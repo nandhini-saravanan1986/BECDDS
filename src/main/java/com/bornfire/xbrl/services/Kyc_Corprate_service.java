@@ -226,19 +226,24 @@ public class Kyc_Corprate_service {
 			kycEntity.setModify_time(new Date());
 
 			String formmode = req.getParameter("formmode");
+
 			if ("submit".equalsIgnoreCase(formmode) || "Y".equals(data.getAuth_flg())) {
-				kycEntity.setModify_flg("Y");
+				kycEntity.setEntity_flg("N");
 				kycEntity.setAuth_flg("Y");
-				kycEntity.setEntry_user(kycEntity.getEntry_user());
-				kycEntity.setEntry_time(kycEntity.getEntry_time());
-				kycEntity.setModify_user(userId);
+				kycEntity.setModify_flg("Y");
+				kycEntity.setFinacle_flg("N");
+			} else {
+				kycEntity.setEntity_flg("N");
+				kycEntity.setAuth_flg("N");
+				kycEntity.setModify_flg("N");
 				kycEntity.setFinacle_flg("N");
 			}
-			
 
 			Kyc_Corprate_Repo.save(kycEntity);
 
-			 if (!changes.isEmpty() && !"submit".equalsIgnoreCase(formmode)) {
+			Kyc_Corprate_Repo.save(kycEntity);
+
+			if (!changes.isEmpty() && !"submit".equalsIgnoreCase(formmode)) {
 				String auditID = sequence.generateRequestUUId();
 				String username = (String) req.getSession().getAttribute("USERNAME");
 				String branchcode = (String) req.getSession().getAttribute("BRANCHCODE");
@@ -291,7 +296,6 @@ public class Kyc_Corprate_service {
 			return false;
 		}
 	}
-
 
 	private <T> void updateField(Supplier<T> getter, Consumer<T> setter, T newValue, String fieldName,
 			Map<String, String[]> changes) {
