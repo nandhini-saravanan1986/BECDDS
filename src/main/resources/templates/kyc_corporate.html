@@ -127,7 +127,7 @@
 	}
 </style>
 <script>
-    var loginuser = /*[[${session.USERID}]]*/ '';
+	var loginuser = /*[[${session.USERID}]]*/ '';
 </script>
 
 <script type="text/javascript">
@@ -182,38 +182,38 @@
 	}
 
 	function verifyrecord(a) {
-	    const srl_no = a.getAttribute("data-srl_no");
-	    const entryuser = a.getAttribute("data-entry_user");
-	    const modifyuser = a.getAttribute("data-modify_user");
-	    const loginuser = a.getAttribute("data-login_user");
+		const srl_no = a.getAttribute("data-srl_no");
+		const entryuser = a.getAttribute("data-entry_user");
+		const modifyuser = a.getAttribute("data-modify_user");
+		const loginuser = a.getAttribute("data-login_user");
 
-	    // Check: user cannot verify if they modified or created the record
-	    if (loginuser === modifyuser || loginuser === entryuser) {
-	        $("#alertmsg").text("You cannot verify a record you created or modified");
-	        $('#alert').modal("toggle");
-	        return;
-	    }
+		// Check: user cannot verify if they modified or created the record
+		if (loginuser === modifyuser || loginuser === entryuser) {
+			$("#alertmsg").text("You cannot verify a record you created or modified");
+			$('#alert').modal("toggle");
+			return;
+		}
 
-	    // Your existing verification AJAX logic
-	    const branch_name = document.getElementById('branch_name').value;
-	    if (branch_name) {
-	        $.ajax({
-	            url: '/BECDDS/kyc/corporate/verify',
-	            type: 'POST',
-	            data: { formmode: 'verified', custid: srl_no }
-	        })
-	        .done(function () {
-	            $("#alertmsg_success").text("Verified successfully!");
-	            $("#alert_success").modal("show");
-	            $('#alert_success').find('.btn-primary').attr("onclick", "location.reload();");
-	        })
-	        .fail(function () {
-	            $("#alertmsg_failure").text("Verification failed!");
-	            $("#alert_failure").modal("show");
-	        });
-	    } else {
-	        alert("Oops! Branch name is still missing.");
-	    }
+		// Your existing verification AJAX logic
+		const branch_name = document.getElementById('branch_name').value;
+		if (branch_name) {
+			$.ajax({
+				url: '/BECDDS/kyc/corporate/verify',
+				type: 'POST',
+				data: {formmode: 'verified', custid: srl_no}
+			})
+				.done(function () {
+					$("#alertmsg_success").text("Verified successfully!");
+					$("#alert_success").modal("show");
+					$('#alert_success').find('.btn-primary').attr("onclick", "location.reload();");
+				})
+				.fail(function () {
+					$("#alertmsg_failure").text("Verification failed!");
+					$("#alert_failure").modal("show");
+				});
+		} else {
+			alert("Oops! Branch name is still missing.");
+		}
 	}
 
 	async function modifysubmit() {
@@ -956,7 +956,7 @@
 								enctype="multipart/form-data">
 								<input type="hidden" id="srl_no" name="srl_no" th:value="${user_data?.srl_no}" />
 								<input type="hidden" class="entry_user" th:value="${user_data.entry_user}">
-								        <input type="hidden" class="modify_user" th:value="${user_data.modify_user}">
+								<input type="hidden" class="modify_user" th:value="${user_data.modify_user}">
 								<input type="hidden" name="formmode" value="submit" />
 
 								<!-- Main Account Info -->
@@ -1913,21 +1913,20 @@
 							<button type="button" th:if="${formmode == 'modify' and user_data.modify_flg == 'N'}"
 								class="btn btn-xs headderbutton" onclick="modifysubmit()">Submit</button>
 
-								<button type="button"
-								        th:if="${user_data.modify_flg == 'Y' 
+							<button type="button" th:if="${user_data.modify_flg == 'Y' 
+								                 and session.WORK_CLASS == 'C' 
 								                 and user_data.modify_user != session.USERID
-								                 and user_data.entry_user != session.USERID}"
-								        th:attr="data-srl_no=${user_data.srl_no},
+								                 and user_data.entry_user != session.USERID}" th:attr="data-srl_no=${user_data.srlno},
 								                 data-entry_user=${user_data.entry_user},
 								                 data-modify_user=${user_data.modify_user},
-								                 data-login_user=${session.USERID}"
-								        class="btn btn-xs headderbutton"
-								        onclick="verifyrecord(this)">
-								    Verify
-								</button>
+								                 data-login_user=${session.USERID}" class="btn btn-xs headderbutton"
+								onclick="verifyrecord(this)">
+								Verify
+							</button>
 
 
-							
+
+
 
 							<button type="reset" class="btn btn-xs headderbutton" onclick="goBack();">Back</button>
 						</div>
@@ -2077,190 +2076,190 @@
 <!-- FINAL SCRIPT FOR CORPORATE MODIFY MODE -->
 
 <script th:if="${formmode == 'modify'}">
-document.addEventListener("DOMContentLoaded", function () {
-    const kycForm = document.getElementById('kycForm');
-    if (!kycForm) {
-        console.error("CRITICAL: The form with ID 'kycForm' was not found.");
-        return;
-    }
+	document.addEventListener("DOMContentLoaded", function () {
+		const kycForm = document.getElementById('kycForm');
+		if (!kycForm) {
+			console.error("CRITICAL: The form with ID 'kycForm' was not found.");
+			return;
+		}
 
-    let activeSectionId = null;
-    let originalSectionValues = {};
+		let activeSectionId = null;
+		let originalSectionValues = {};
 
-    const updateCharCounter = (field) => {
-        const counter = field.nextElementSibling;
-        if (counter && counter.classList.contains('char-counter')) {
-            const maxLength = field.getAttribute('maxlength');
-            counter.textContent = `${field.value.length} / ${maxLength}`;
-        }
-    };
+		const updateCharCounter = (field) => {
+			const counter = field.nextElementSibling;
+			if (counter && counter.classList.contains('char-counter')) {
+				const maxLength = field.getAttribute('maxlength');
+				counter.textContent = `${field.value.length} / ${maxLength}`;
+			}
+		};
 
-    function handlePepStatusChange() {
-        const pepRadioYes = document.querySelector('input[name="pep_status"][value="Yes"]');
-        const pepRemarksField = document.querySelector('[name="pep_remarks"]');
-        if (!pepRadioYes || !pepRemarksField) return;
-        
-        const isPepYes = pepRadioYes.checked;
-        const isSectionDisabled = pepRadioYes.disabled;
-        
-        if (!isSectionDisabled) {
-            pepRemarksField.disabled = !isPepYes;
-            pepRemarksField.required = isPepYes;
-            if (!isPepYes) pepRemarksField.value = '';
-        }
-    }
+		function handlePepStatusChange() {
+			const pepRadioYes = document.querySelector('input[name="pep_status"][value="Yes"]');
+			const pepRemarksField = document.querySelector('[name="pep_remarks"]');
+			if (!pepRadioYes || !pepRemarksField) return;
 
-    document.querySelectorAll('.modify-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const actionsContainer = this.closest('.section-actions');
-            const targetId = actionsContainer.dataset.target;
+			const isPepYes = pepRadioYes.checked;
+			const isSectionDisabled = pepRadioYes.disabled;
 
-            if (activeSectionId && activeSectionId !== targetId) {
-                alert("Please Save or Cancel the active section first.");
-                return;
-            }
-            activeSectionId = targetId;
-            
-            const targetSection = document.getElementById(targetId);
-            originalSectionValues[targetId] = {};
-            targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-                if (el.name) {
-                    if (el.type === 'radio') {
-                        if (el.checked) originalSectionValues[targetId][el.name] = el.value;
-                    } else {
-                        originalSectionValues[targetId][el.name] = el.value;
-                    }
-                }
-            });
+			if (!isSectionDisabled) {
+				pepRemarksField.disabled = !isPepYes;
+				pepRemarksField.required = isPepYes;
+				if (!isPepYes) pepRemarksField.value = '';
+			}
+		}
 
-            targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-                if (!el.hasAttribute('readonly')) {
-                    el.disabled = false;
-                }
-            });
-            handlePepStatusChange();
-            actionsContainer.querySelector('.modify-btn').classList.add('d-none');
-            actionsContainer.querySelector('.save-cancel-controls').classList.remove('d-none');
-        });
-    });
+		document.querySelectorAll('.modify-btn').forEach(button => {
+			button.addEventListener('click', function () {
+				const actionsContainer = this.closest('.section-actions');
+				const targetId = actionsContainer.dataset.target;
 
-    document.querySelectorAll('.cancel-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const actionsContainer = this.closest('.section-actions');
-            const targetId = actionsContainer.dataset.target;
-            const targetSection = document.getElementById(targetId);
+				if (activeSectionId && activeSectionId !== targetId) {
+					alert("Please Save or Cancel the active section first.");
+					return;
+				}
+				activeSectionId = targetId;
 
-            if (originalSectionValues[targetId]) {
-                targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-                    const key = el.name;
-                    if (el.name && originalSectionValues[targetId].hasOwnProperty(key)) {
-                        if (el.type === 'radio') {
-                            el.checked = (el.value === originalSectionValues[targetId][key]);
-                        } else {
-                            el.value = originalSectionValues[targetId][key];
-                        }
-                    } else if (el.type !== 'radio' && el.type !== 'hidden' && !originalSectionValues[targetId].hasOwnProperty(key)) {
-                        el.value = '';
-                    }
-                });
-            }
-            targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
-            handlePepStatusChange();
-            actionsContainer.querySelector('.modify-btn').classList.remove('d-none');
-            actionsContainer.querySelector('.save-cancel-controls').classList.add('d-none');
-            activeSectionId = null;
-        });
-    });
+				const targetSection = document.getElementById(targetId);
+				originalSectionValues[targetId] = {};
+				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+					if (el.name) {
+						if (el.type === 'radio') {
+							if (el.checked) originalSectionValues[targetId][el.name] = el.value;
+						} else {
+							originalSectionValues[targetId][el.name] = el.value;
+						}
+					}
+				});
 
-    document.querySelectorAll('.save-btn').forEach(button => {
-        button.addEventListener('click', async function () {
-            const actionsContainer = this.closest('.section-actions');
-            const targetId = actionsContainer.dataset.target;
-            const targetSection = document.getElementById(targetId);
+				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+					if (!el.hasAttribute('readonly')) {
+						el.disabled = false;
+					}
+				});
+				handlePepStatusChange();
+				actionsContainer.querySelector('.modify-btn').classList.add('d-none');
+				actionsContainer.querySelector('.save-cancel-controls').classList.remove('d-none');
+			});
+		});
 
-            for (const input of targetSection.querySelectorAll('input:not([type=hidden]), select, textarea')) {
-                if (!input.checkValidity()) {
-                    input.reportValidity();
-                    return;
-                }
-            }
+		document.querySelectorAll('.cancel-btn').forEach(button => {
+			button.addEventListener('click', function () {
+				const actionsContainer = this.closest('.section-actions');
+				const targetId = actionsContainer.dataset.target;
+				const targetSection = document.getElementById(targetId);
 
-            const saveIcon = this.querySelector('i.fa-spinner');
-            this.disabled = true;
-            if (saveIcon) saveIcon.classList.remove('d-none');
+				if (originalSectionValues[targetId]) {
+					targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+						const key = el.name;
+						if (el.name && originalSectionValues[targetId].hasOwnProperty(key)) {
+							if (el.type === 'radio') {
+								el.checked = (el.value === originalSectionValues[targetId][key]);
+							} else {
+								el.value = originalSectionValues[targetId][key];
+							}
+						} else if (el.type !== 'radio' && el.type !== 'hidden' && !originalSectionValues[targetId].hasOwnProperty(key)) {
+							el.value = '';
+						}
+					});
+				}
+				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
+				handlePepStatusChange();
+				actionsContainer.querySelector('.modify-btn').classList.remove('d-none');
+				actionsContainer.querySelector('.save-cancel-controls').classList.add('d-none');
+				activeSectionId = null;
+			});
+		});
 
-            const formData = new FormData();
-            
-            targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(input => {
-                const name = input.name;
-                if (!name) return;
-                if (input.type === 'radio') {
-                    if (input.checked) formData.append(name, input.value);
-                } else if (input.type === 'checkbox') {
-                    if (input.checked) formData.append(name, input.value);
-                } else {
-                    formData.append(name, input.value);
-                }
-            });
-            
-            const srl_no = document.getElementById('srl_no')?.value;
-            if (srl_no) {
-                formData.append('srl_no', srl_no);
-            } else {
-                alert("Error: Cannot find SRL No. Cannot save.");
-                return;
-            }
+		document.querySelectorAll('.save-btn').forEach(button => {
+			button.addEventListener('click', async function () {
+				const actionsContainer = this.closest('.section-actions');
+				const targetId = actionsContainer.dataset.target;
+				const targetSection = document.getElementById(targetId);
 
-            targetSection.querySelectorAll('.format-as-number').forEach(input => {
-                if (formData.has(input.name)) {
-                    const cleanValue = String(formData.get(input.name)).replace(/,/g, '');
-                    formData.set(input.name, cleanValue);
-                }
-            });
+				for (const input of targetSection.querySelectorAll('input:not([type=hidden]), select, textarea')) {
+					if (!input.checkValidity()) {
+						input.reportValidity();
+						return;
+					}
+				}
 
-            try {
-                const response = await fetch(kycForm.action + '?ajax=true', {
-                    method: 'POST',
-                    body: formData
-                });
+				const saveIcon = this.querySelector('i.fa-spinner');
+				this.disabled = true;
+				if (saveIcon) saveIcon.classList.remove('d-none');
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    try {
-                       const errorJson = JSON.parse(errorText);
-                       throw new Error(errorJson.message || `Server error ${response.status}`);
-                    } catch(e) {
-                       throw new Error(errorText || `Server error ${response.status}`);
-                    }
-                }
-                
-                location.reload();
+				const formData = new FormData();
 
-            } catch (error) {
-                console.error('Section save failed:', error);
-                alert(`Save Failed: ${error.message}`);
-                this.disabled = false;
-                if (saveIcon) saveIcon.classList.add('d-none');
-            }
-        });
-    });
+				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(input => {
+					const name = input.name;
+					if (!name) return;
+					if (input.type === 'radio') {
+						if (input.checked) formData.append(name, input.value);
+					} else if (input.type === 'checkbox') {
+						if (input.checked) formData.append(name, input.value);
+					} else {
+						formData.append(name, input.value);
+					}
+				});
 
-    // --- INITIAL PAGE SETUP (RUNS ONCE) ---
-    kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
-    
-    document.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
-        const counter = field.nextElementSibling;
-        if (counter && counter.classList.contains('char-counter')) {
-            updateCharCounter(field);
-            field.addEventListener('input', () => updateCharCounter(field));
-        }
-    });
+				const srl_no = document.getElementById('srl_no')?.value;
+				if (srl_no) {
+					formData.append('srl_no', srl_no);
+				} else {
+					alert("Error: Cannot find SRL No. Cannot save.");
+					return;
+				}
 
-    document.querySelectorAll('input[name="pep_status"]').forEach(radio => {
-        radio.addEventListener('change', handlePepStatusChange);
-    });
-    handlePepStatusChange(); // Initial check on page load
-});
+				targetSection.querySelectorAll('.format-as-number').forEach(input => {
+					if (formData.has(input.name)) {
+						const cleanValue = String(formData.get(input.name)).replace(/,/g, '');
+						formData.set(input.name, cleanValue);
+					}
+				});
+
+				try {
+					const response = await fetch(kycForm.action + '?ajax=true', {
+						method: 'POST',
+						body: formData
+					});
+
+					if (!response.ok) {
+						const errorText = await response.text();
+						try {
+							const errorJson = JSON.parse(errorText);
+							throw new Error(errorJson.message || `Server error ${response.status}`);
+						} catch (e) {
+							throw new Error(errorText || `Server error ${response.status}`);
+						}
+					}
+
+					location.reload();
+
+				} catch (error) {
+					console.error('Section save failed:', error);
+					alert(`Save Failed: ${error.message}`);
+					this.disabled = false;
+					if (saveIcon) saveIcon.classList.add('d-none');
+				}
+			});
+		});
+
+		// --- INITIAL PAGE SETUP (RUNS ONCE) ---
+		kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
+
+		document.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
+			const counter = field.nextElementSibling;
+			if (counter && counter.classList.contains('char-counter')) {
+				updateCharCounter(field);
+				field.addEventListener('input', () => updateCharCounter(field));
+			}
+		});
+
+		document.querySelectorAll('input[name="pep_status"]').forEach(radio => {
+			radio.addEventListener('change', handlePepStatusChange);
+		});
+		handlePepStatusChange(); // Initial check on page load
+	});
 </script>
 <!-- FINAL, CORRECTED SCRIPT FOR VIEW MODE -->
 <script th:if="${formmode == 'view'}">

@@ -149,46 +149,46 @@
 		window.location.reload();
 	}
 	function corporatehome() {
-	    const srlno = document.getElementById("srlno").value;
-	    const url = `/BECDDS/kyc/individual?srlno=${encodeURIComponent(srlno)}&formmode=modify&ts=${Date.now()}`;
-	    window.location.href = url;
+		const srlno = document.getElementById("srlno").value;
+		const url = `/BECDDS/kyc/individual?srlno=${encodeURIComponent(srlno)}&formmode=modify&ts=${Date.now()}`;
+		window.location.href = url;
 	}
 	function verifyrecord(a) {
-	    const srlno = a.getAttribute("data-srlno");
-	    const entryuser = a.getAttribute("data-entry_user");
-	    const modifyuser = a.getAttribute("data-modify_user");
-	    const loginuser = a.getAttribute("data-login_user");
-	    const approvdesig = document.getElementById('branch_name')?.value;
+		const srlno = a.getAttribute("data-srlno");
+		const entryuser = a.getAttribute("data-entry_user");
+		const modifyuser = a.getAttribute("data-modify_user");
+		const loginuser = a.getAttribute("data-login_user");
+		const approvdesig = document.getElementById('branch_name')?.value;
 
-	    // Prevent modifier/creator from verifying
-	    if (loginuser === modifyuser || loginuser === entryuser) {
-	        $("#alertmsg").text("You cannot verify a record you created or modified");
-	        $('#alert').modal("toggle");
-	        return;
-	    }
+		// Prevent modifier/creator from verifying
+		if (loginuser === modifyuser || loginuser === entryuser) {
+			$("#alertmsg").text("You cannot verify a record you created or modified");
+			$('#alert').modal("toggle");
+			return;
+		}
 
-	    if (!approvdesig) {
-	        alert("Please enter approval designation");
-	        return;
-	    }
+		if (!approvdesig) {
+			alert("Please enter approval designation");
+			return;
+		}
 
-	    $.ajax({
-	        url: '/BECDDS/kyc/individual/verify',
-	        type: 'POST',
-	        data: {
-	            formmode: 'verified',
-	            custid: srlno
-	        }
-	    })
-	    .done(function () {
-	        $("#alertmsg_success").text("Verified successfully!");
-	        $("#alert_success").modal("show");
-	        $('#alert_success').find('.btn-primary').attr("onclick", "location.reload();");
-	    })
-	    .fail(function (error) {
-	        $("#alertmsg_failure").text("Verification failed! " + (error.responseText || "Please try again."));
-	        $("#alert_failure").modal("show");
-	    });
+		$.ajax({
+			url: '/BECDDS/kyc/individual/verify',
+			type: 'POST',
+			data: {
+				formmode: 'verified',
+				custid: srlno
+			}
+		})
+			.done(function () {
+				$("#alertmsg_success").text("Verified successfully!");
+				$("#alert_success").modal("show");
+				$('#alert_success').find('.btn-primary').attr("onclick", "location.reload();");
+			})
+			.fail(function (error) {
+				$("#alertmsg_failure").text("Verification failed! " + (error.responseText || "Please try again."));
+				$("#alert_failure").modal("show");
+			});
 	}
 
 	async function Downloadfn(element) {
@@ -239,61 +239,61 @@
 	// Handles the main "Submit" button click.
 
 	async function modifysubmit() {
-	    const form = document.getElementById('kycForm');
+		const form = document.getElementById('kycForm');
 
-	    // --- Validation (Unchanged) ---
-	    const Branchname = document.getElementById('branch_name').value;
-	    if (!Branchname) {
-	        alert('Branch name detail is missing');
-	        return;
-	    }
-	    const confirmationCheckbox = document.getElementById('confirm_screening_cb');
-	    if (confirmationCheckbox && !confirmationCheckbox.checked) {
-	        alert('Please confirm that you have done screening of all account holders by checking the box.');
-	        confirmationCheckbox.focus();
-	        return;
-	    }
+		// --- Validation (Unchanged) ---
+		const Branchname = document.getElementById('branch_name').value;
+		if (!Branchname) {
+			alert('Branch name detail is missing');
+			return;
+		}
+		const confirmationCheckbox = document.getElementById('confirm_screening_cb');
+		if (confirmationCheckbox && !confirmationCheckbox.checked) {
+			alert('Please confirm that you have done screening of all account holders by checking the box.');
+			confirmationCheckbox.focus();
+			return;
+		}
 
-	    // --- THE FIX: We NO LONGER re-enable disabled elements. ---
-	    // The following problematic lines have been REMOVED:
-	    // const allDisabledElements = Array.from(form.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
-	    // allDisabledElements.forEach(el => el.disabled = false);
+		// --- THE FIX: We NO LONGER re-enable disabled elements. ---
+		// The following problematic lines have been REMOVED:
+		// const allDisabledElements = Array.from(form.querySelectorAll('input:disabled, select:disabled, textarea:disabled'));
+		// allDisabledElements.forEach(el => el.disabled = false);
 
-	    try {
-	        // This now correctly gathers data ONLY from enabled fields.
-	        const formData = new FormData(form); 
-	        formData.set("auth_flg", "Y"); // This flag signals a full submission
+		try {
+			// This now correctly gathers data ONLY from enabled fields.
+			const formData = new FormData(form);
+			formData.set("auth_flg", "Y"); // This flag signals a full submission
 
-	        // Unformat numbers (this part is correct and should remain)
-	        form.querySelectorAll('.format-as-number').forEach(input => {
-	            if (formData.has(input.name)) {
-	                const unformattedValue = String(formData.get(input.name)).replace(/,/g, '');
-	                formData.set(input.name, unformattedValue);
-	            }
-	        });
+			// Unformat numbers (this part is correct and should remain)
+			form.querySelectorAll('.format-as-number').forEach(input => {
+				if (formData.has(input.name)) {
+					const unformattedValue = String(formData.get(input.name)).replace(/,/g, '');
+					formData.set(input.name, unformattedValue);
+				}
+			});
 
-	        const response = await fetch(form.action, {
-	            method: 'POST',
-	            body: formData
-	        });
+			const response = await fetch(form.action, {
+				method: 'POST',
+				body: formData
+			});
 
-	        if (!response.ok) {
-	            const errorText = await response.text();
-	            throw new Error(errorText || `Server responded with status: ${response.status}`);
-	        }
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(errorText || `Server responded with status: ${response.status}`);
+			}
 
-	        $('#alertmsg_success').text("All changes submitted successfully!");
-	        $('#alert_success .btn-primary').attr("onclick", "corporatehome();");
-	        $('#alert_success').modal('show');
+			$('#alertmsg_success').text("All changes submitted successfully!");
+			$('#alert_success .btn-primary').attr("onclick", "corporatehome();");
+			$('#alert_success').modal('show');
 
-	    } catch (error) {
-	        console.error("Submit failed:", error);
-	        $('#alertmsg_failure').text(`Error: ${error.message}`);
-	        $('#alert_failure').modal('show');
-	    } finally {
-	        // We no longer need to re-disable elements, so the `finally` block
-	        // for that purpose is also removed.
-	    }
+		} catch (error) {
+			console.error("Submit failed:", error);
+			$('#alertmsg_failure').text(`Error: ${error.message}`);
+			$('#alert_failure').modal('show');
+		} finally {
+			// We no longer need to re-disable elements, so the `finally` block
+			// for that purpose is also removed.
+		}
 	}
 </script>
 
@@ -1987,18 +1987,15 @@
 							th:if="${formmode == 'modify' and user_data.modify_flg == 'N'}"
 							onclick="modifysubmit()">Submit</button>
 
-							<button type="button"
-							        th:if="${user_data.modify_flg == 'Y' and 
+						<button type="button" th:if="${user_data.modify_flg == 'Y' and 
+							                 session.WORK_CLASS == 'C' and
 							                 (session.USERID != user_data.modify_user and session.USERID != user_data.entry_user)}"
-							        class="btn btn-xs headderbutton"
-							        onclick="verifyrecord(this)"
-							        th:attr="data-srlno=${user_data.srlno},
+							class="btn btn-xs headderbutton" onclick="verifyrecord(this)" th:attr="data-srlno=${user_data.srlno},
 							                 data-entry_user=${user_data.entry_user},
 							                 data-modify_user=${user_data.modify_user},
 							                 data-login_user=${session.USERID}">
-							    Verify
-							</button>
-
+							Verify
+						</button>
 
 						<button type="reset" class="btn btn-xs headderbutton" onclick="goBack();">Back</button>
 					</div>
@@ -2197,274 +2194,274 @@
 
 <!-- SCRIPT FOR MODIFY MODE (FINAL VERSION) -->
 <script th:if="${formmode == 'modify'}">
-document.addEventListener("DOMContentLoaded", function () {
-    const kycForm = document.getElementById('kycForm');
-    if (!kycForm) {
-        console.error("CRITICAL: Form with id 'kycForm' not found.");
-        return;
-    }
+	document.addEventListener("DOMContentLoaded", function () {
+		const kycForm = document.getElementById('kycForm');
+		if (!kycForm) {
+			console.error("CRITICAL: Form with id 'kycForm' not found.");
+			return;
+		}
 
-    let originalSectionValues = {};
-    let activeSectionId = null;
+		let originalSectionValues = {};
+		let activeSectionId = null;
 
-    // ===================================================================
-    //                          HELPER FUNCTIONS
-    // ===================================================================
+		// ===================================================================
+		//                          HELPER FUNCTIONS
+		// ===================================================================
 
-    const formatNumber = (num) => (num === null || num === undefined || String(num).trim() === '') ? '' : new Intl.NumberFormat('en-US').format(String(num).replace(/,/g, ''));
-    const unformatNumber = (str) => (typeof str === 'string') ? str.replace(/,/g, '') : str;
-    const updateCharCounter = (field) => {
-        const counter = field.nextElementSibling;
-        if (counter && counter.classList.contains('char-counter')) {
-            const maxLength = field.getAttribute('maxlength');
-            counter.textContent = `${field.value.length} / ${maxLength}`;
-        }
-    };
+		const formatNumber = (num) => (num === null || num === undefined || String(num).trim() === '') ? '' : new Intl.NumberFormat('en-US').format(String(num).replace(/,/g, ''));
+		const unformatNumber = (str) => (typeof str === 'string') ? str.replace(/,/g, '') : str;
+		const updateCharCounter = (field) => {
+			const counter = field.nextElementSibling;
+			if (counter && counter.classList.contains('char-counter')) {
+				const maxLength = field.getAttribute('maxlength');
+				counter.textContent = `${field.value.length} / ${maxLength}`;
+			}
+		};
 
-    // ===================================================================
-    //       FUNCTION TO APPLY SAVED STATUS FROM BROWSER STORAGE
-    // ===================================================================
-    
-    function applyPersistedStatuses() {
-        document.querySelectorAll('.section-actions').forEach(actions => {
-            const targetId = actions.dataset.target;
-            const storageKey = 'savedStatus_' + targetId;
-            if (sessionStorage.getItem(storageKey) === 'true') {
-                const saveStatus = actions.querySelector('.save-status');
-                if (saveStatus) {
-                    saveStatus.textContent = "Saved!";
-                    saveStatus.style.color = 'green';
-                    saveStatus.classList.remove('d-none');
-                }
-            }
-        });
-    }
+		// ===================================================================
+		//       FUNCTION TO APPLY SAVED STATUS FROM BROWSER STORAGE
+		// ===================================================================
 
-    // ===================================================================
-    //                       FIELD DEPENDENCY MANAGEMENT
-    // ===================================================================
+		function applyPersistedStatuses() {
+			document.querySelectorAll('.section-actions').forEach(actions => {
+				const targetId = actions.dataset.target;
+				const storageKey = 'savedStatus_' + targetId;
+				if (sessionStorage.getItem(storageKey) === 'true') {
+					const saveStatus = actions.querySelector('.save-status');
+					if (saveStatus) {
+						saveStatus.textContent = "Saved!";
+						saveStatus.style.color = 'green';
+						saveStatus.classList.remove('d-none');
+					}
+				}
+			});
+		}
 
-    function updateFieldDependencies() {
-        kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
+		// ===================================================================
+		//                       FIELD DEPENDENCY MANAGEMENT
+		// ===================================================================
 
-        if (!activeSectionId) {
-            return;
-        }
+		function updateFieldDependencies() {
+			kycForm.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => el.disabled = true);
 
-        const activeSection = document.getElementById(activeSectionId);
-        if (activeSection) {
-            activeSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-                if (!el.hasAttribute('readonly')) {
-                    el.disabled = false;
-                }
-            });
-        }
+			if (!activeSectionId) {
+				return;
+			}
 
-        const isAccountHolderSectionActive = (activeSectionId === 's2_account_holders');
+			const activeSection = document.getElementById(activeSectionId);
+			if (activeSection) {
+				activeSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+					if (!el.hasAttribute('readonly')) {
+						el.disabled = false;
+					}
+				});
+			}
 
-        if (isAccountHolderSectionActive) {
-            ['joint1', 'joint2', 'joint3'].forEach(prefix => {
-                const custIdInput = document.querySelector(`[name="${prefix}_customer_id"]`);
-                const hasCustomerId = custIdInput && custIdInput.value.trim() !== '';
-                const otherFieldsInGroup = document.querySelectorAll(`[name^="${prefix}_"]:not([name$="_customer_id"])`);
+			const isAccountHolderSectionActive = (activeSectionId === 's2_account_holders');
 
-                otherFieldsInGroup.forEach(field => {
-                    field.disabled = !hasCustomerId;
-                    if (!hasCustomerId) {
-                        if (field.type === 'radio' || field.type === 'checkbox') field.checked = false;
-                        else if (field.tagName !== 'SELECT') field.value = '';
-                    }
-                });
-            });
-        }
-        
-        ['primary', 'joint1', 'joint2', 'joint3'].forEach(prefix => {
-            const pepYesRadio = document.querySelector(`input[name="${prefix}_pep_yn"][value="Yes"]`);
-            const pepApprovalRadios = document.querySelectorAll(`input[name="${prefix}_pep_approval"]`);
-            const groupFields = document.querySelector(`[name^="${prefix}_"]`);
-            const groupIsEnabled = groupFields && !groupFields.disabled;
+			if (isAccountHolderSectionActive) {
+				['joint1', 'joint2', 'joint3'].forEach(prefix => {
+					const custIdInput = document.querySelector(`[name="${prefix}_customer_id"]`);
+					const hasCustomerId = custIdInput && custIdInput.value.trim() !== '';
+					const otherFieldsInGroup = document.querySelectorAll(`[name^="${prefix}_"]:not([name$="_customer_id"])`);
 
-            const allowPepApprovalEditing = groupIsEnabled && pepYesRadio && pepYesRadio.checked;
-            pepApprovalRadios.forEach(radio => {
-                radio.disabled = !allowPepApprovalEditing;
-                if (!allowPepApprovalEditing) radio.checked = false;
-            });
-        });
+					otherFieldsInGroup.forEach(field => {
+						field.disabled = !hasCustomerId;
+						if (!hasCustomerId) {
+							if (field.type === 'radio' || field.type === 'checkbox') field.checked = false;
+							else if (field.tagName !== 'SELECT') field.value = '';
+						}
+					});
+				});
+			}
 
-        const profileNoRadio = document.querySelector('input[name="profile_match_yn"][value="No"]');
-        const remarksTextarea = document.querySelector('[name="profile_mismatch_remarks"]');
-        if (profileNoRadio && remarksTextarea && !profileNoRadio.disabled) {
-            remarksTextarea.disabled = !profileNoRadio.checked;
-            if (remarksTextarea.disabled) remarksTextarea.value = '';
-        }
-    }
+			['primary', 'joint1', 'joint2', 'joint3'].forEach(prefix => {
+				const pepYesRadio = document.querySelector(`input[name="${prefix}_pep_yn"][value="Yes"]`);
+				const pepApprovalRadios = document.querySelectorAll(`input[name="${prefix}_pep_approval"]`);
+				const groupFields = document.querySelector(`[name^="${prefix}_"]`);
+				const groupIsEnabled = groupFields && !groupFields.disabled;
+
+				const allowPepApprovalEditing = groupIsEnabled && pepYesRadio && pepYesRadio.checked;
+				pepApprovalRadios.forEach(radio => {
+					radio.disabled = !allowPepApprovalEditing;
+					if (!allowPepApprovalEditing) radio.checked = false;
+				});
+			});
+
+			const profileNoRadio = document.querySelector('input[name="profile_match_yn"][value="No"]');
+			const remarksTextarea = document.querySelector('[name="profile_mismatch_remarks"]');
+			if (profileNoRadio && remarksTextarea && !profileNoRadio.disabled) {
+				remarksTextarea.disabled = !profileNoRadio.checked;
+				if (remarksTextarea.disabled) remarksTextarea.value = '';
+			}
+		}
 
 
-    // ===================================================================
-    //                      EVENT LISTENERS
-    // ===================================================================
-    
-    document.querySelectorAll('.modify-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            if (activeSectionId) {
-                alert("Please Save or Cancel the active section first.");
-                return;
-            }
-            
-            const actions = this.closest('.section-actions');
-            const targetId = actions.dataset.target;
-            
-            actions.querySelector('.save-status').textContent = '';
-            sessionStorage.removeItem('savedStatus_' + targetId);
+		// ===================================================================
+		//                      EVENT LISTENERS
+		// ===================================================================
 
-            activeSectionId = targetId;
-            const section = document.getElementById(targetId);
+		document.querySelectorAll('.modify-btn').forEach(button => {
+			button.addEventListener('click', function () {
+				if (activeSectionId) {
+					alert("Please Save or Cancel the active section first.");
+					return;
+				}
 
-            originalSectionValues[targetId] = {};
-            section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-                if (el.name) {
-                    if (el.type === 'radio') {
-                        if (el.checked) originalSectionValues[targetId][el.name] = el.value;
-                    } else {
-                        originalSectionValues[targetId][el.name] = el.value;
-                    }
-                }
-            });
+				const actions = this.closest('.section-actions');
+				const targetId = actions.dataset.target;
 
-            actions.querySelector('.modify-btn').classList.add('d-none');
-            actions.querySelector('.save-cancel-controls').classList.remove('d-none');
-            
-            updateFieldDependencies();
-        });
-    });
+				actions.querySelector('.save-status').textContent = '';
+				sessionStorage.removeItem('savedStatus_' + targetId);
 
-    document.querySelectorAll('.cancel-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const actions = this.closest('.section-actions');
-            const targetId = actions.dataset.target;
-            
-            const section = document.getElementById(targetId);
-            if (originalSectionValues[targetId]) {
-                section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-                    const originalValue = originalSectionValues[targetId][el.name];
-                    if (el.type === 'radio') {
-                        el.checked = (originalValue === el.value);
-                    } else {
-                        el.value = originalValue !== undefined ? originalValue : '';
-                    }
-                });
-            }
-            
-            activeSectionId = null;
-            updateFieldDependencies();
-            
-            actions.querySelector('.modify-btn').classList.remove('d-none');
-            actions.querySelector('.save-cancel-controls').classList.add('d-none');
-        });
-    });
+				activeSectionId = targetId;
+				const section = document.getElementById(targetId);
 
-	document.querySelectorAll('.save-btn').forEach(button => {
-	    button.addEventListener('click', async function () {
-	        this.disabled = true;
-	        const spinner = this.querySelector('i.fa-spinner');
-	        if (spinner) spinner.classList.remove('d-none');
+				originalSectionValues[targetId] = {};
+				section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+					if (el.name) {
+						if (el.type === 'radio') {
+							if (el.checked) originalSectionValues[targetId][el.name] = el.value;
+						} else {
+							originalSectionValues[targetId][el.name] = el.value;
+						}
+					}
+				});
 
-	        const actions = this.closest('.section-actions');
-	        const targetId = actions.dataset.target;
-	        const targetSection = document.getElementById(targetId);
+				actions.querySelector('.modify-btn').classList.add('d-none');
+				actions.querySelector('.save-cancel-controls').classList.remove('d-none');
 
-            // --- VALIDATION (on enabled fields only) ---
-	        for (const el of targetSection.querySelectorAll('input:not(:disabled), select:not(:disabled), textarea:not(:disabled)')) {
-	            if (!el.checkValidity()) {
-	                el.reportValidity();
-                    this.disabled = false;
-                    if(spinner) spinner.classList.add('d-none');
-	                return;
-	            }
-	        }
-	        
-	        // --- DATA SUBMISSION (on ALL fields in the section) ---
-	        const formData = new FormData();
-	        formData.append('srlno', kycForm.querySelector('input[name="srlno"]').value);
-	        formData.append('formmode', 'submit');
-			formData.append('sectionId', targetId);
+				updateFieldDependencies();
+			});
+		});
 
-            targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-                if (el.type === 'radio') {
-                    if (el.checked) formData.append(el.name, el.value);
-                } else if (el.type === 'checkbox') {
-                    if (el.checked) formData.append(el.name, el.value);
-                } else {
-                    let valueToSubmit = el.classList.contains('format-as-number') ? unformatNumber(el.value) : el.value;
-                    formData.append(el.name, valueToSubmit);
-                }
-            });
+		document.querySelectorAll('.cancel-btn').forEach(button => {
+			button.addEventListener('click', function () {
+				const actions = this.closest('.section-actions');
+				const targetId = actions.dataset.target;
 
-	        try {
-	            const response = await fetch(kycForm.action + '?ajax=true', { method: 'POST', body: formData });
-	            
-	            if (!response.ok) {
-	                 const errorText = await response.text();
-	                 throw new Error(errorText || `Server responded with status: ${response.status}`);
-	            }
+				const section = document.getElementById(targetId);
+				if (originalSectionValues[targetId]) {
+					section.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+						const originalValue = originalSectionValues[targetId][el.name];
+						if (el.type === 'radio') {
+							el.checked = (originalValue === el.value);
+						} else {
+							el.value = originalValue !== undefined ? originalValue : '';
+						}
+					});
+				}
 
-	            const saveStatus = actions.querySelector('.save-status');
-	            saveStatus.textContent = "Saved!";
-	            saveStatus.style.color = 'green';
-	            saveStatus.classList.remove('d-none');
-	            
-	            sessionStorage.setItem('savedStatus_' + targetId, 'true');
-	            
-                actions.querySelector('.modify-btn').classList.remove('d-none');
-	            actions.querySelector('.save-cancel-controls').classList.add('d-none');
-                
-                activeSectionId = null;
+				activeSectionId = null;
+				updateFieldDependencies();
 
-	        } catch (err) {
-	            console.error("Save failed:", err);
-	            alert("Save Failed: " + err.message);
-	        } finally {
-	            this.disabled = false;
-	            if (spinner) spinner.classList.add('d-none');
-	            updateFieldDependencies();
-	        }
-	    });
+				actions.querySelector('.modify-btn').classList.remove('d-none');
+				actions.querySelector('.save-cancel-controls').classList.add('d-none');
+			});
+		});
+
+		document.querySelectorAll('.save-btn').forEach(button => {
+			button.addEventListener('click', async function () {
+				this.disabled = true;
+				const spinner = this.querySelector('i.fa-spinner');
+				if (spinner) spinner.classList.remove('d-none');
+
+				const actions = this.closest('.section-actions');
+				const targetId = actions.dataset.target;
+				const targetSection = document.getElementById(targetId);
+
+				// --- VALIDATION (on enabled fields only) ---
+				for (const el of targetSection.querySelectorAll('input:not(:disabled), select:not(:disabled), textarea:not(:disabled)')) {
+					if (!el.checkValidity()) {
+						el.reportValidity();
+						this.disabled = false;
+						if (spinner) spinner.classList.add('d-none');
+						return;
+					}
+				}
+
+				// --- DATA SUBMISSION (on ALL fields in the section) ---
+				const formData = new FormData();
+				formData.append('srlno', kycForm.querySelector('input[name="srlno"]').value);
+				formData.append('formmode', 'submit');
+				formData.append('sectionId', targetId);
+
+				targetSection.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+					if (el.type === 'radio') {
+						if (el.checked) formData.append(el.name, el.value);
+					} else if (el.type === 'checkbox') {
+						if (el.checked) formData.append(el.name, el.value);
+					} else {
+						let valueToSubmit = el.classList.contains('format-as-number') ? unformatNumber(el.value) : el.value;
+						formData.append(el.name, valueToSubmit);
+					}
+				});
+
+				try {
+					const response = await fetch(kycForm.action + '?ajax=true', {method: 'POST', body: formData});
+
+					if (!response.ok) {
+						const errorText = await response.text();
+						throw new Error(errorText || `Server responded with status: ${response.status}`);
+					}
+
+					const saveStatus = actions.querySelector('.save-status');
+					saveStatus.textContent = "Saved!";
+					saveStatus.style.color = 'green';
+					saveStatus.classList.remove('d-none');
+
+					sessionStorage.setItem('savedStatus_' + targetId, 'true');
+
+					actions.querySelector('.modify-btn').classList.remove('d-none');
+					actions.querySelector('.save-cancel-controls').classList.add('d-none');
+
+					activeSectionId = null;
+
+				} catch (err) {
+					console.error("Save failed:", err);
+					alert("Save Failed: " + err.message);
+				} finally {
+					this.disabled = false;
+					if (spinner) spinner.classList.add('d-none');
+					updateFieldDependencies();
+				}
+			});
+		});
+
+		document.querySelectorAll('a.btn-link[data-toggle="collapse"]').forEach(button => {
+			button.addEventListener('click', function (e) {
+				const icon = this.querySelector('.collapse-icon');
+				const targetId = this.getAttribute('href');
+				const targetBody = document.querySelector(targetId);
+				if (targetBody && icon) {
+					setTimeout(() => {
+						const isOpening = targetBody.classList.contains('show');
+						icon.textContent = isOpening ? '−' : '+';
+					}, 100);
+				}
+			});
+		});
+
+		// ===================================================================
+		//                       INITIAL PAGE SETUP
+		// ===================================================================
+
+		kycForm.querySelectorAll('.format-as-number').forEach(input => {if (input.value) input.value = formatNumber(input.value);});
+		kycForm.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
+			updateCharCounter(field);
+			field.addEventListener('input', () => updateCharCounter(field));
+		});
+
+		kycForm.addEventListener('input', (event) => {
+			const name = event.target.name;
+			if (name && (name.endsWith('_customer_id') || name.endsWith('_pep_yn') || name === 'profile_match_yn')) {
+				updateFieldDependencies();
+			}
+		});
+
+		updateFieldDependencies();
+		applyPersistedStatuses();
 	});
-
-    document.querySelectorAll('a.btn-link[data-toggle="collapse"]').forEach(button => {
-        button.addEventListener('click', function (e) {
-            const icon = this.querySelector('.collapse-icon');
-            const targetId = this.getAttribute('href');
-            const targetBody = document.querySelector(targetId);
-            if (targetBody && icon) {
-                setTimeout(() => {
-                    const isOpening = targetBody.classList.contains('show');
-                    icon.textContent = isOpening ? '−' : '+';
-                }, 100);
-            }
-        });
-    });
-
-    // ===================================================================
-    //                       INITIAL PAGE SETUP
-    // ===================================================================
-    
-    kycForm.querySelectorAll('.format-as-number').forEach(input => { if (input.value) input.value = formatNumber(input.value); });
-    kycForm.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(field => {
-        updateCharCounter(field);
-        field.addEventListener('input', () => updateCharCounter(field));
-    });
-
-    kycForm.addEventListener('input', (event) => {
-        const name = event.target.name;
-        if(name && (name.endsWith('_customer_id') || name.endsWith('_pep_yn') || name === 'profile_match_yn')) {
-             updateFieldDependencies();
-        }
-    });
-    
-    updateFieldDependencies(); 
-    applyPersistedStatuses();
-});
 </script>
 <!-- SCRIPT FOR UPLOAD/DOWNLOAD MODALS -->
 <script>
