@@ -1987,8 +1987,8 @@
 							th:if="${formmode == 'modify' and user_data.modify_flg == 'N'}"
 							onclick="modifysubmit()">Submit</button>
 
-						<button type="button" th:if="${user_data.modify_flg == 'Y' and 
-							                 session.WORK_CLASS == 'C' and
+						<button type="button" th:if="${user_data.modify_flg == 'Y' 
+						and session.WORKCLASS == 'C' and
 							                 (session.USERID != user_data.modify_user and session.USERID != user_data.entry_user)}"
 							class="btn btn-xs headderbutton" onclick="verifyrecord(this)" th:attr="data-srlno=${user_data.srlno},
 							                 data-entry_user=${user_data.entry_user},
