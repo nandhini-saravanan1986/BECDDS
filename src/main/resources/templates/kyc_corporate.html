@@ -126,9 +126,14 @@
 		height: 1em;
 	}
 </style>
-<script>
+<script th:inline="javascript">
 	var loginuser = /*[[${session.USERID}]]*/ '';
+	var workclass = /*[[${session.WORKCLASS}]]*/ '';
+
+	console.log("DEBUG loginuser:", loginuser);
+	console.log("DEBUG workclass:", workclass);
 </script>
+
 
 <script type="text/javascript">
 	function goHome() {
@@ -1913,21 +1918,16 @@
 							<button type="button" th:if="${formmode == 'modify' and user_data.modify_flg == 'N'}"
 								class="btn btn-xs headderbutton" onclick="modifysubmit()">Submit</button>
 
-							<button type="button" th:if="${user_data.modify_flg == 'Y' 
-								                 and session.WORK_CLASS == 'C' 
-								                 and user_data.modify_user != session.USERID
-								                 and user_data.entry_user != session.USERID}" th:attr="data-srl_no=${user_data.srlno},
+							<button type="button" th:if="${user_data.modify_flg == 'Y'
+								                and session.WORKCLASS == 'C'
+								                and user_data.modify_user != session.USERID
+								                and user_data.entry_user != session.USERID}" th:attr="data-srl_no=${user_data.srl_no},
 								                 data-entry_user=${user_data.entry_user},
 								                 data-modify_user=${user_data.modify_user},
 								                 data-login_user=${session.USERID}" class="btn btn-xs headderbutton"
 								onclick="verifyrecord(this)">
 								Verify
 							</button>
-
-
-
-
-
 							<button type="reset" class="btn btn-xs headderbutton" onclick="goBack();">Back</button>
 						</div>
 					</div>

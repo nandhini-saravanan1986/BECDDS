@@ -995,6 +995,7 @@ public class XBRLNavigationController {
 
 		List<EcddCorporateEntity> user_data = kyc_corporate_repo.GetUser(srl_no);
 		model.addAttribute("userId", userId);
+		model.addAttribute("workClass", workClass);
 		model.addAttribute("user_data", user_data);
 		model.addAttribute("formmode", formmode);
 
