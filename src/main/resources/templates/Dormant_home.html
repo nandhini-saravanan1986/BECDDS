@@ -147,7 +147,7 @@
 	function navigateToForm(element, action, type) {
 		
 		const srlno = element.getAttribute('data-srlno');
-		const baseUrl = `/BECDDS/KycDormantProfiles/${type}`;
+		const baseUrl = `/BECDDS/kyc/${type}`;
 		let url = "";
 
 		if (action === 'view') {
@@ -173,7 +173,7 @@
 	function navigateToForm1(element, action, type) {
 			
 			const srl_no = element.getAttribute('data-srl_no');
-			const baseUrl = `/BECDDS/KycDormantProfiles/${type}`;
+			const baseUrl = `/BECDDS/kyc/${type}`;
 			let url = "";
 
 			if (action === 'view') {
@@ -378,7 +378,10 @@
 						</thead>
 						<tbody>
 							<tr style="letter-spacing: .1em;" th:each="row : ${reportlist}">
-								<td th:text="${row[0]}"></td>
+								<td>
+									<a href="javascript:void(0)" th:attr="data-srlno=${row[5]}" onclick="navigateToForm(this, 'view', 'individual')"
+										th:text="${row[0]}"></a>
+								</td>
 								<td th:text="${row[8]}"></td>
 								<!--<td th:text="${row[10]"></td>-->
 								<td th:text="${row[9] != null ? #dates.format(row[9], 'dd-MM-yyyy') : ''}"></td>
@@ -415,7 +418,10 @@
 						</thead>
 						<tbody>
 							<tr style="letter-spacing: .1em" th:each="row : ${kycData}" th:attr="data-srl_no=${row[10]}">
-								<td th:text="${row[0]}"></td>
+								<td>
+									<a href="javascript:void(0)" th:attr="data-srl_no=${row[10]}" onclick="navigateToForm1(this, 'view', 'corporate')"
+										th:text="${row[0]}"></a>
+								</td>
 								<td th:text="${row[1]}"></td>
 								<td th:text="${row[2]}"></td>
 								<td th:text="${row[3]}"></td>

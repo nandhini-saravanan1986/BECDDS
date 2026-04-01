@@ -1233,53 +1233,53 @@
 									<tr>
 										<td>Latest Passport No.</td>
 										<td><input type="text" class="form-control" name="primary_passport_no"
-												th:value="${user_data?.primary_passport_no}" maxlength="50" /></td>
+												th:value="${user_data?.primary_passport_no}" maxlength="50" readonly/></td>
 										<td><input type="text" class="form-control" name="joint1_passport_no"
-												th:value="${user_data?.joint1_passport_no}" maxlength="50" /></td>
+												th:value="${user_data?.joint1_passport_no}" maxlength="50" readonly/></td>
 										<td><input type="text" class="form-control" name="joint2_passport_no"
-												th:value="${user_data?.joint2_passport_no}" maxlength="50" /></td>
+												th:value="${user_data?.joint2_passport_no}" maxlength="50" readonly/></td>
 										<td><input type="text" class="form-control" name="joint3_passport_no"
-												th:value="${user_data?.joint3_passport_no}" maxlength="50" /></td>
+												th:value="${user_data?.joint3_passport_no}" maxlength="50" readonly/></td>
 									</tr>
 									<tr>
 										<td>Passport Exp. Date</td>
 										<td><input type="date" class="form-control" name="primary_passport_exp_date"
-												th:value="${user_data.primary_passport_exp_date != null ? #dates.format(user_data.primary_passport_exp_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.primary_passport_exp_date != null ? #dates.format(user_data.primary_passport_exp_date, 'yyyy-MM-dd') : ''}" readonly>
 										</td>
 										<td><input type="date" class="form-control" name="joint1_passport_exp_date"
-												th:value="${user_data.joint1_passport_exp_date != null ? #dates.format(user_data.joint1_passport_exp_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.joint1_passport_exp_date != null ? #dates.format(user_data.joint1_passport_exp_date, 'yyyy-MM-dd') : ''}" readonly>
 										</td>
 										<td><input type="date" class="form-control" name="joint2_passport_exp_date"
-												th:value="${user_data.joint2_passport_exp_date != null ? #dates.format(user_data.joint2_passport_exp_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.joint2_passport_exp_date != null ? #dates.format(user_data.joint2_passport_exp_date, 'yyyy-MM-dd') : ''}" readonly>
 										</td>
 										<td><input type="date" class="form-control" name="joint3_passport_exp_date"
-												th:value="${user_data.joint3_passport_exp_date != null ? #dates.format(user_data.joint3_passport_exp_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.joint3_passport_exp_date != null ? #dates.format(user_data.joint3_passport_exp_date, 'yyyy-MM-dd') : ''}" readonly>
 										</td>
 									</tr>
 									<tr>
 										<td>Emirates ID No</td>
 										<td><input type="text" class="form-control" name="primary_emirates_id_no"
-												th:value="${user_data?.primary_emirates_id_no}" maxlength="50" /></td>
+												th:value="${user_data?.primary_emirates_id_no}" maxlength="50" readonly/></td>
 										<td><input type="text" class="form-control" name="joint1_emirates_id_no"
-												th:value="${user_data?.joint1_emirates_id_no}" maxlength="50" /></td>
+												th:value="${user_data?.joint1_emirates_id_no}" maxlength="50" readonly/></td>
 										<td><input type="text" class="form-control" name="joint2_emirates_id_no"
-												th:value="${user_data?.joint2_emirates_id_no}" maxlength="50" /></td>
+												th:value="${user_data?.joint2_emirates_id_no}" maxlength="50" readonly/></td>
 										<td><input type="text" class="form-control" name="joint3_emirates_id_no"
-												th:value="${user_data?.joint3_emirates_id_no}" maxlength="50" /></td>
+												th:value="${user_data?.joint3_emirates_id_no}" maxlength="50" readonly/></td>
 									</tr>
 									<tr>
 										<td>EID Expiry Date</td>
 										<td><input type="date" class="form-control" name="primary_emirates_exp_date"
-												th:value="${user_data.primary_emirates_exp_date != null ? #dates.format(user_data.primary_emirates_exp_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.primary_emirates_exp_date != null ? #dates.format(user_data.primary_emirates_exp_date, 'yyyy-MM-dd') : ''}" readonly>
 										</td>
 										<td><input type="date" class="form-control" name="joint1_emirates_exp_date"
-												th:value="${user_data.joint1_emirates_exp_date != null ? #dates.format(user_data.joint1_emirates_exp_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.joint1_emirates_exp_date != null ? #dates.format(user_data.joint1_emirates_exp_date, 'yyyy-MM-dd') : ''}" readonly> 
 										</td>
 										<td><input type="date" class="form-control" name="joint2_emirates_exp_date"
-												th:value="${user_data.joint2_emirates_exp_date != null ? #dates.format(user_data.joint2_emirates_exp_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.joint2_emirates_exp_date != null ? #dates.format(user_data.joint2_emirates_exp_date, 'yyyy-MM-dd') : ''}" readonly>
 										</td>
 										<td><input type="date" class="form-control" name="joint3_emirates_exp_date"
-												th:value="${user_data.joint3_emirates_exp_date != null ? #dates.format(user_data.joint3_emirates_exp_date, 'yyyy-MM-dd') : ''}">
+												th:value="${user_data.joint3_emirates_exp_date != null ? #dates.format(user_data.joint3_emirates_exp_date, 'yyyy-MM-dd') : ''}" readonly>
 										</td>
 									</tr>
 									<tr>
@@ -1990,8 +1990,8 @@
 
 						<button type="button" class="btn btn-xs headderbutton" onclick="goHome();">Home</button>
 
-						<button type="button" class="btn btn-xs headderbutton"
-							th:if="${formmode == 'modify' and user_data.modify_flg == 'N'}"
+						<button type="button" class="btn btn-xs headderbutton" id="submitBtn"
+							th:if="${formmode == 'modify' and user_data.auth_flg == 'N'}"
 							onclick="modifysubmit()">Submit</button>
 
 						<button type="button" th:if="${user_data.modify_flg == 'Y' 
@@ -2020,8 +2020,7 @@
 			<div class="modal-content">
 				<div class="menu-title-header" style="background-color: #003366; padding: 10px;">
 					<h5 class="modal-title" id="modalLabel" style="text-align: center; color: white; margin: 0;">
-						BANK OF
-						BARODA</h5>
+						BANK OF BARODA</h5>
 				</div>
 				<div class="modal-body" style="text-align: center; background-color: #c6ccd2;">
 					<p id="alertmsg_success" style="font-size: 16px; color: black;"></p>
@@ -2301,6 +2300,7 @@
 				remarksTextarea.disabled = !profileNoRadio.checked;
 				if (remarksTextarea.disabled) remarksTextarea.value = '';
 			}
+			
 		}
 
 
@@ -2423,6 +2423,7 @@
 					actions.querySelector('.save-cancel-controls').classList.add('d-none');
 
 					activeSectionId = null;
+					location.reload(true);
 
 				} catch (err) {
 					console.error("Save failed:", err);

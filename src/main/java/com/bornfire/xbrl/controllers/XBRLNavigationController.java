@@ -67,6 +67,7 @@ import com.bornfire.xbrl.entities.AlertEntity;
 import com.bornfire.xbrl.entities.AlertManagementRepository;
 import com.bornfire.xbrl.entities.EcddCorporateEntity;
 import com.bornfire.xbrl.entities.EcddCustomerDocumentsEntity;
+import com.bornfire.xbrl.entities.Ecdd_bcpdatedetail_rep;
 import com.bornfire.xbrl.entities.Ecdd_profile_report_entity;
 import com.bornfire.xbrl.entities.Ecdd_profile_report_repo;
 import com.bornfire.xbrl.entities.KYC_Audit_Rep;
@@ -135,6 +136,9 @@ public class XBRLNavigationController {
 
 	@Autowired
 	Charge_Back_Rep charge_Back_Rep;
+	
+	@Autowired
+	Ecdd_bcpdatedetail_rep Ecdd_bcpdatedetail_rep;
 
 	private String auditRefNo;
 
@@ -194,11 +198,17 @@ public class XBRLNavigationController {
 		String userid = (String) req.getSession().getAttribute("USERID");
 		String Dashboardpage = (String) req.getSession().getAttribute("ROLEID");
 		String BRANCHCODE = (String) req.getSession().getAttribute("BRANCHCODE");
+		
+		LocalDate today = LocalDate.now(); // Get today's date
+		Date fromDateToUse; // Declare a variable for the date to use
+
+		fromDateToUse = java.sql.Date.valueOf(today.minusDays(0));
 
 		md.addAttribute("menu", "Dashboard");
 		md.addAttribute("checkpassExpiry", loginServices.checkpassexpirty(userid));
 		md.addAttribute("checkAcctExpiry", loginServices.checkAcctexpirty(userid));
 		md.addAttribute("changepassword", loginServices.checkPasswordChangeReq(userid));
+		md.addAttribute("Lastupdateddays", Ecdd_bcpdatedetail_rep.Getdataforcurrentdate(fromDateToUse));
 
 		if (Dashboardpage.equals("DCD_ADMIN") || Dashboardpage.equals("DCD_BRANCH")) {
 			int IndvSubmitted = 0;
@@ -355,10 +365,16 @@ public class XBRLNavigationController {
 		String Dashboardpage = (String) req.getSession().getAttribute("ROLEID");
 		String BRANCHCODE = (String) req.getSession().getAttribute("BRANCHCODE");
 
+		LocalDate today = LocalDate.now(); // Get today's date
+		Date fromDateToUse; // Declare a variable for the date to use
+
+		fromDateToUse = java.sql.Date.valueOf(today.minusDays(0));
+
 		md.addAttribute("menu", "Dashboard");
 		md.addAttribute("checkpassExpiry", loginServices.checkpassexpirty(userid));
 		md.addAttribute("checkAcctExpiry", loginServices.checkAcctexpirty(userid));
 		md.addAttribute("changepassword", loginServices.checkPasswordChangeReq(userid));
+		md.addAttribute("Lastupdateddays", Ecdd_bcpdatedetail_rep.Getdataforcurrentdate(fromDateToUse));
 
 		if (Dashboardpage.equals("DCD_ADMIN") || Dashboardpage.equals("DCD_BRANCH")) {
 			int IndvSubmitted = 0;
@@ -859,6 +875,47 @@ public class XBRLNavigationController {
 							: ecddIndividualProfileRepository.findAllIndividualsByBranch(BRANCHCODE))
 					: (hasFilters ? ecddIndividualProfileRepository.findFilteredIndividuals(customerRisk, age)
 							: ecddIndividualProfileRepository.findAllIndividuals());
+			md.addAttribute("reportlist", results);
+		}
+		LocalDate today = LocalDate.now(); // Get today's date
+		Date fromDateToUse; // Declare a variable for the date to use
+
+		fromDateToUse = java.sql.Date.valueOf(today.minusDays(0));
+		md.addAttribute("datavalue", fromDateToUse);
+		md.addAttribute("formmode", formmode);
+		return "KYC_Home";
+	}
+	
+	
+	@RequestMapping(value = "KycCompletedProfiles", method = { RequestMethod.GET, RequestMethod.POST })
+	public String KycCompletedProfiles(@RequestParam(required = false) String formmode,
+			@RequestParam(required = false) String customerRisk, @RequestParam(required = false) Integer age, // days
+			Model md, HttpServletRequest req) {
+
+		String ROLEID = (String) req.getSession().getAttribute("ROLEID");
+		String BRANCHCODE = (String) req.getSession().getAttribute("BRANCHCODE");
+
+		formmode = (formmode == null) ? "individual" : formmode;
+
+		boolean isBranchRole = "DCD_BRANCH".equals(ROLEID);
+		// Check if both filter parameters are present and not empty
+		boolean hasFilters = (customerRisk != null && !customerRisk.isEmpty() && age != null);
+
+		if ("corporate".equals(formmode)) {
+			List<Object[]> results = isBranchRole
+					? (hasFilters ? kyc_corporate_repo.getBranchDynamicValue(customerRisk, age, BRANCHCODE)
+							: kyc_corporate_repo.getCompletedBranchList(BRANCHCODE))
+					: (hasFilters ? kyc_corporate_repo.getDynamicValue(customerRisk, age)
+							: kyc_corporate_repo.getCompletedList());
+			md.addAttribute("kycData", results);
+		} else { // Individual case
+			List<Object[]> results = isBranchRole
+					? (hasFilters
+							? ecddIndividualProfileRepository.findFilteredIndividualsByBranch(customerRisk, age,
+									BRANCHCODE)
+							: ecddIndividualProfileRepository.findAllCompletedIndividualsByBranch(BRANCHCODE))
+					: (hasFilters ? ecddIndividualProfileRepository.findFilteredIndividuals(customerRisk, age)
+							: ecddIndividualProfileRepository.findAllCompletedIndividuals());
 			md.addAttribute("reportlist", results);
 		}
 		LocalDate today = LocalDate.now(); // Get today's date

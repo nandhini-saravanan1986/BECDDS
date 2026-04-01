@@ -47,8 +47,11 @@ public interface EcddIndividualProfileRepository extends JpaRepository<Ecdd_Indi
     /**
      * Replaces findAllIndividuals(). Corresponds to getList() in the corporate repo.
      */
-    @Query(value = INDIVIDUAL_KYC_QUERY_FOR_VIEW + " and p.dormant_flg='N'", nativeQuery = true)
+    @Query(value = INDIVIDUAL_KYC_QUERY_FOR_VIEW + " and p.dormant_flg='N' and FINACLE_FLG != 'Y'", nativeQuery = true)
     List<Object[]> findAllIndividuals();
+    
+    @Query(value = INDIVIDUAL_KYC_QUERY_FOR_VIEW + " and p.dormant_flg='N' and FINACLE_FLG = 'Y'", nativeQuery = true)
+    List<Object[]> findAllCompletedIndividuals();
     
     @Query(value = "SELECT  p.CUSTOMER_ID,p.SYSTEM_RISK,p.ECDD_DATE,CASE WHEN p.SYSTEM_RISK = 'High'   THEN p.ECDD_DATE + 365\r\n"
     		+ "        WHEN p.SYSTEM_RISK = 'Medium' THEN p.ECDD_DATE + 1095\r\n"
@@ -72,10 +75,13 @@ public interface EcddIndividualProfileRepository extends JpaRepository<Ecdd_Indi
     /**
      * Replaces findAllIndividualsByBranch(). Corresponds to getBranchList() in the corporate repo.
      */
-    @Query(value = INDIVIDUAL_KYC_QUERY_FOR_VIEW + " AND p.BRANCH = ?1 and p.dormant_flg='N'", nativeQuery = true)
+    @Query(value = INDIVIDUAL_KYC_QUERY_FOR_VIEW + " AND p.BRANCH = ?1 and p.dormant_flg='N'  and FINACLE_FLG != 'Y'", nativeQuery = true)
     List<Object[]> findAllIndividualsByBranch(String Branchcode);
     
-    @Query(value = INDIVIDUAL_KYC_QUERY_FOR_VIEW + " p.BRANCH = ?1 and p.dormant_flg='Y'", nativeQuery = true)
+    @Query(value = INDIVIDUAL_KYC_QUERY_FOR_VIEW + " AND p.BRANCH = ?1 and p.dormant_flg='N'  and FINACLE_FLG = 'Y'", nativeQuery = true)
+    List<Object[]> findAllCompletedIndividualsByBranch(String Branchcode);
+    
+    @Query(value = INDIVIDUAL_KYC_QUERY_FOR_VIEW + " and p.BRANCH = ?1 and p.dormant_flg='Y'", nativeQuery = true)
     List<Object[]> findAllIndividualsdormantBranch(String Branchcode);
 
     /**
@@ -185,18 +191,22 @@ public interface EcddIndividualProfileRepository extends JpaRepository<Ecdd_Indi
 			+ "", nativeQuery = true)
 	List<Object[]> getpendingstatuscount();
 	
-	@Query(value = "Select customer_id,account_title,branch,Case when FINACLE_FLG = 'Y' AND entity_flg = 'Y' AND modify_flg = 'N' Then 'Completed in finacle'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'Y' AND modify_flg = 'N' Then 'Verified in portal Fincale Pending'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'Y' THEN 'Working in Progress'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' THEN 'Unattended' End as \"ECDD STATUS\",modify_user,modify_time,\r\n"
-			+ "			verify_user,verify_time,system_risk from ecdd_indiv_profile where DORMANT_FLG ='N'", nativeQuery = true)
+	@Query(value = "Select customer_id,account_title,branch,Case when FINACLE_FLG = 'Y' AND entity_flg = 'Y' AND modify_flg = 'N' and dormant_flg = 'N' Then 'Completed in finacle'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'Y' AND modify_flg = 'N' and dormant_flg = 'N' Then 'Verified in portal Fincale Pending'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'Y' and dormant_flg = 'N' THEN 'Working in Progress'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' and dormant_flg = 'N' THEN 'Unattended'\r\n"
+			+ "                        when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' and dormant_flg = 'Y' THEN 'Dormant Customer' \r\n"
+			+ "                        End as \"ECDD STATUS\",modify_user,modify_time,\r\n"
+			+ "			verify_user,verify_time,system_risk from ecdd_indiv_profile", nativeQuery = true)
 	List<Object[]> GetEcddstatus();
 	
-	@Query(value = "Select customer_id,account_title,branch,Case when FINACLE_FLG = 'Y' AND entity_flg = 'Y' AND modify_flg = 'N' Then 'Completed in finacle'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'Y' AND modify_flg = 'N' Then 'Verified in portal Fincale Pending'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'Y' THEN 'Working in Progress'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' THEN 'Unattended' End as \"ECDD STATUS\",modify_user,modify_time,\r\n"
-			+ "verify_user,verify_time,system_risk from ecdd_indiv_profile where DORMANT_FLG ='N' and branch=?1", nativeQuery = true)
+	@Query(value = "Select customer_id,account_title,branch,Case when FINACLE_FLG = 'Y' AND entity_flg = 'Y' AND modify_flg = 'N' and dormant_flg = 'N' Then 'Completed in finacle'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'Y' AND modify_flg = 'N' and dormant_flg = 'N' Then 'Verified in portal Fincale Pending'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'Y' and dormant_flg = 'N' THEN 'Working in Progress'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' and dormant_flg = 'N' THEN 'Unattended'\r\n"
+			+ "                        when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' and dormant_flg = 'Y' THEN 'Dormant Customer' \r\n"
+			+ "                        End as \"ECDD STATUS\",modify_user,modify_time,\r\n"
+			+ "			verify_user,verify_time,system_risk from ecdd_indiv_profile where branch=?1", nativeQuery = true)
 	List<Object[]> GetEcddbranchstatus(String branch);
     
 }

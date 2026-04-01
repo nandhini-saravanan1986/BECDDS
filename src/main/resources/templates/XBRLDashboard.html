@@ -133,10 +133,7 @@
 			color: white;
 		}
 
-		.button-hover span {
-			font-size: ;
-			font-weight: ;
-		}
+
 
 		.button-hover label {
 			font-size: 16px;
@@ -180,99 +177,177 @@
 			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 			margin-bottom: 20px;
 		}
+
+		.responsive-table {
+			border: 1px solid #ccc;
+			border-collapse: collapse;
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			table-layout: fixed;
+		}
+
+		.responsive-table caption {
+			font-size: 1.5em;
+			margin: .5em 0 .75em;
+		}
+
+		.responsive-table tr {
+			background-color: #f8f8f8;
+			border: 1px solid #ddd;
+			padding: .35em;
+		}
+
+		.responsive-table th,
+		.responsive-table td {
+			padding: .625em;
+			text-align: center;
+		}
+
+		.responsive-table th {
+			font-size: .85em;
+			letter-spacing: .1em;
+			text-transform: uppercase;
+		}
+
+		/* Responsive: Mobile View */
+		@media screen and (max-width: 600px) {
+			.responsive-table {
+				border: 0;
+			}
+
+			.responsive-table caption {
+				font-size: 1.3em;
+			}
+
+			.responsive-table thead {
+				border: none;
+				clip: rect(0 0 0 0);
+				height: 1px;
+				margin: -1px;
+				overflow: hidden;
+				padding: 0;
+				position: absolute;
+				width: 1px;
+			}
+
+			.responsive-table tr {
+				border-bottom: 3px solid #ddd;
+				display: block;
+				margin-bottom: .625em;
+			}
+
+			.responsive-table td {
+				border-bottom: 1px solid #ddd;
+				display: block;
+				font-size: .8em;
+				text-align: right;
+			}
+
+			.responsive-table td::before {
+				content: attr(data-label);
+				float: left;
+				font-weight: bold;
+				text-transform: uppercase;
+			}
+
+			.responsive-table td:last-child {
+				border-bottom: 0;
+			}
+		}
 	</style>
 
 	<script th:inline="javascript">
-	/*<![CDATA[*/
-	$(function () {
-	    var Dashboardpage = /*[[${Dashboardpage}]]*/0;
+		/*<![CDATA[*/
+		$(function () {
+			var Dashboardpage = /*[[${Dashboardpage}]]*/0;
 
-	    var Indvcompleted   = /*[[${IndvSubmitted}]]*/0;
-	    var IndvVerified    = /*[[${IndvVerified}]]*/0;
-	    var IndvPending     = /*[[${IndvPending}]]*/0;
-	    var IndvUnattended  = /*[[${IndvUnattended}]]*/0;
+			var Indvcompleted = /*[[${IndvSubmitted}]]*/0;
+			var IndvVerified = /*[[${IndvVerified}]]*/0;
+			var IndvPending = /*[[${IndvPending}]]*/0;
+			var IndvUnattended = /*[[${IndvUnattended}]]*/0;
 
-	    if (Dashboardpage == 'DCD_BRANCH' || Dashboardpage == 'DCD_ADMIN' 
-	        || Dashboardpage == 'DCD_BRANCH_MANAGER' || Dashboardpage == 'Superadmin') {
+			if (Dashboardpage == 'DCD_BRANCH' || Dashboardpage == 'DCD_ADMIN'
+				|| Dashboardpage == 'DCD_BRANCH_MANAGER' || Dashboardpage == 'Superadmin') {
 
-	        var ctxL = document.getElementById("pieChart").getContext('2d');
-	        var myBarChart = new Chart(ctxL, {
-	            type: 'bar',
-	            data: {
-	                labels: ["Completed in finacle", "Verified in portal Fincale Pending", "Working in Progress", "Unattended"],
-	                datasets: [{
-	                    label: "Individual Task Status",
-	                    data: [Indvcompleted, IndvVerified, IndvPending, IndvUnattended],
-	                    backgroundColor: [
-	                        'rgba(40,167,69,0.85)',   // Green - Completed
-	                        'rgba(241,196,15,0.85)', // Yellow - Verified
-	                        'rgba(243,156,18,0.85)', // Orange - Pending
-	                        'rgba(231,76,60,0.85)'   // Red - Unattended
-	                    ],
-	                    borderColor: [
-	                        'rgba(40,167,69,1)',
-	                        'rgba(241,196,15,1)',
-	                        'rgba(243,156,18,1)',
-	                        'rgba(231,76,60,1)'
-	                    ],
-	                    borderWidth: 1
-	                }]
-	            },
-	            options: {
-	                responsive: true,
-	                scales: {
-	                    y: { beginAtZero: true }
-	                }
-	            }
-	        });
-	    }
-	});
+				var ctxL = document.getElementById("pieChart").getContext('2d');
+				var myBarChart = new Chart(ctxL, {
+					type: 'bar',
+					data: {
+						labels: ["Completed in finacle", "Verified in portal Fincale Pending", "Working in Progress", "Unattended"],
+						datasets: [{
+							label: "Individual Task Status",
+							data: [Indvcompleted, IndvVerified, IndvPending, IndvUnattended],
+							backgroundColor: [
+								'rgba(40,167,69,0.85)',   // Green - Completed
+								'rgba(241,196,15,0.85)', // Yellow - Verified
+								'rgba(243,156,18,0.85)', // Orange - Pending
+								'rgba(231,76,60,0.85)'   // Red - Unattended
+							],
+							borderColor: [
+								'rgba(40,167,69,1)',
+								'rgba(241,196,15,1)',
+								'rgba(243,156,18,1)',
+								'rgba(231,76,60,1)'
+							],
+							borderWidth: 1
+						}]
+					},
+					options: {
+						responsive: true,
+						scales: {
+							y: {beginAtZero: true}
+						}
+					}
+				});
+			}
+		});
 
 
-	$(function () {
-	    var Dashboardpage = /*[[${Dashboardpage}]]*/0;
+		$(function () {
+			var Dashboardpage = /*[[${Dashboardpage}]]*/0;
 
-	    var Corpcompleted   = /*[[${CorpSubmitted}]]*/0;
-	    var CorpVerified    = /*[[${CorpVerified}]]*/0;
-	    var CorpPending     = /*[[${CorpPending}]]*/0;
-	    var CorpUnattended  = /*[[${CorpUnattended}]]*/0;
+			var Corpcompleted = /*[[${CorpSubmitted}]]*/0;
+			var CorpVerified = /*[[${CorpVerified}]]*/0;
+			var CorpPending = /*[[${CorpPending}]]*/0;
+			var CorpUnattended = /*[[${CorpUnattended}]]*/0;
 
-	    if (Dashboardpage == 'DCD_BRANCH' || Dashboardpage == 'DCD_ADMIN' 
-	        || Dashboardpage == 'DCD_BRANCH_MANAGER' || Dashboardpage == 'Superadmin') {
+			if (Dashboardpage == 'DCD_BRANCH' || Dashboardpage == 'DCD_ADMIN'
+				|| Dashboardpage == 'DCD_BRANCH_MANAGER' || Dashboardpage == 'Superadmin') {
 
-	        var ctxL = document.getElementById("pieChart1").getContext('2d');
-	        var myBarChart = new Chart(ctxL, {
-	            type: 'bar',
-	            data: {
-	                labels: ["Completed in finacle", "Verified in portal Fincale Pending", "Working in Progress", "Unattended"],
-	                datasets: [{
-	                    label: "Corporate Task Status",
-	                    data: [Corpcompleted, CorpVerified, CorpPending, CorpUnattended],
-	                    backgroundColor: [
-	                        'rgba(40,167,69,0.85)',   // Green - Completed
-	                        'rgba(241,196,15,0.85)', // Yellow - Verified
-	                        'rgba(243,156,18,0.85)', // Orange - Pending
-	                        'rgba(231,76,60,0.85)'   // Red - Unattended
-	                    ],
-	                    borderColor: [
-	                        'rgba(40,167,69,1)',
-	                        'rgba(241,196,15,1)',
-	                        'rgba(243,156,18,1)',
-	                        'rgba(231,76,60,1)'
-	                    ],
-	                    borderWidth: 1
-	                }]
-	            },
-	            options: {
-	                responsive: true,
-	                scales: {
-	                    y: { beginAtZero: true }
-	                }
-	            }
-	        });
-	    }
-	});
-	/*]]>*/
+				var ctxL = document.getElementById("pieChart1").getContext('2d');
+				var myBarChart = new Chart(ctxL, {
+					type: 'bar',
+					data: {
+						labels: ["Completed in finacle", "Verified in portal Fincale Pending", "Working in Progress", "Unattended"],
+						datasets: [{
+							label: "Corporate Task Status",
+							data: [Corpcompleted, CorpVerified, CorpPending, CorpUnattended],
+							backgroundColor: [
+								'rgba(40,167,69,0.85)',   // Green - Completed
+								'rgba(241,196,15,0.85)', // Yellow - Verified
+								'rgba(243,156,18,0.85)', // Orange - Pending
+								'rgba(231,76,60,0.85)'   // Red - Unattended
+							],
+							borderColor: [
+								'rgba(40,167,69,1)',
+								'rgba(241,196,15,1)',
+								'rgba(243,156,18,1)',
+								'rgba(231,76,60,1)'
+							],
+							borderWidth: 1
+						}]
+					},
+					options: {
+						responsive: true,
+						scales: {
+							y: {beginAtZero: true}
+						}
+					}
+				});
+			}
+		});
+		/*]]>*/
 	</script>
 
 
@@ -936,6 +1011,29 @@
 							style="font-weight: 900; font-family: verdana; letter-spacing: .1em; background-color: white;; color: orange; padding: 1em .05em; font: xx-large; text-decoration: underline;">
 							ECDD
 							/ CDD Dashboard</h4>
+
+						<table class="responsive-table"
+							th:if="${Dashboardpage=='DCD_ADMIN' or Dashboardpage=='DCD_BRANCH' or Dashboardpage =='Superadmin'}">
+							<caption>Last Updated Date (only main tables)</caption>
+							<thead>
+								<tr>
+									<th scope="col">General Detail</th>
+									<th scope="col">Coreinterface Detail</th>
+									<th scope="col">Address Detail</th>
+									<th scope="col">Demographic Detail</th>
+									<th scope="col">Corporate Detail</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="row : ${Lastupdateddays}">
+									<td th:text="${#dates.format(row.general_detail_table,'dd-MM-yyyy')}"></td>
+									<td th:text="${#dates.format(row.coreinterface_detail_table,'dd-MM-yyyy')}"></td>
+									<td th:text="${#dates.format(row.demographic_detail_table,'dd-MM-yyyy')}"></td>
+									<td th:text="${#dates.format(row.address_detail_table,'dd-MM-yyyy')}"></td>
+									<td th:text="${#dates.format(row.corporate_detail_table,'dd-MM-yyyy')}"></td>
+								</tr>
+							</tbody>
+						</table>
 
 					</div>
 					<!-- The following div row is used to display the Pending Individual count on the dashboard. -->

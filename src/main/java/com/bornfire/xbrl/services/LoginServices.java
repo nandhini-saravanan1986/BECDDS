@@ -886,12 +886,13 @@ public class LoginServices {
 				"BECDDS Login OTP: " + otp + " . Please do not share this with anyone. Valid for one-time use only.");
 		Smsserviceotp.setToemail(UserProfile.getEmail_id());
 		Smsserviceotp.setEmailsubject("ECDD OTP");
-		Smsserviceotp.setEmailtemplateid("BOBAlert");
+		Smsserviceotp.setEmailtemplateid("BOBCBS");
 		Smsserviceotp.setEmailtext(
 				"BECDDS Login OTP: " + otp + " . Please do not share this with anyone. Valid for one-time use only.");
 		HttpEntity<Smsserviceotp> entity = new HttpEntity<>(Smsserviceotp, httpHeaders);
+		
+	//	logger.info(entity.toString());
 
-		// logger.info(entity.toString());
 		ResponseEntity<String> response = null;
 		try {
 			logger.info("Ready to Call URL for OTP");

@@ -21,8 +21,18 @@ public interface Kyc_Corprate_Repo extends JpaRepository<EcddCorporateEntity, St
 			+ "                 CASE WHEN SYSTEM_RISK = 'High' THEN ECDD_DATE+365\r\n"
 			+ "                 WHEN SYSTEM_RISK = 'Medium' THEN ECDD_DATE+1095\r\n"
 			+ "                 WHEN SYSTEM_RISK = 'Low' THEN ECDD_DATE+1825 END AS DUE_DATE,SRL_NO,MODIFY_FLG,ENTITY_FLG\r\n"
-			+ "            FROM ECDD_CORPORATE_TABLE WHERE del_flg = 'N' AND ECDD_DATE IS NOT NULL and dormant_flg='N'", nativeQuery = true)
+			+ "            FROM ECDD_CORPORATE_TABLE WHERE del_flg = 'N' AND ECDD_DATE IS NOT NULL and dormant_flg='N'  and FINACLE_FLG != 'Y'", nativeQuery = true)
 	List<Object[]> getList();
+	
+	@Query(value = "SELECT CUSTOMER_ID, COMPANY_NAME, ASSOCIATED_ACCOUNT_NUMBER, TRADE_LICENSE_NUMBER, TRADE_EXPIRY_DATE, SYSTEM_RISK, LATEST_RISK, ECDD_DATE,\r\n"
+			+ "			CASE WHEN SYSTEM_RISK = 'High' THEN ABS(ABS(FLOOR(NVL(ECDD_DATE, SYSDATE) - SYSDATE))-365)\r\n"
+			+ "                 WHEN SYSTEM_RISK = 'Medium' THEN ABS(ABS(FLOOR(NVL(ECDD_DATE, SYSDATE) - SYSDATE))-1095)\r\n"
+			+ "                 WHEN SYSTEM_RISK = 'Low' THEN ABS(ABS(FLOOR(NVL(ECDD_DATE, SYSDATE) - SYSDATE))-1825) END AS Age,\r\n"
+			+ "                 CASE WHEN SYSTEM_RISK = 'High' THEN ECDD_DATE+365\r\n"
+			+ "                 WHEN SYSTEM_RISK = 'Medium' THEN ECDD_DATE+1095\r\n"
+			+ "                 WHEN SYSTEM_RISK = 'Low' THEN ECDD_DATE+1825 END AS DUE_DATE,SRL_NO,MODIFY_FLG,ENTITY_FLG\r\n"
+			+ "            FROM ECDD_CORPORATE_TABLE WHERE del_flg = 'N' AND ECDD_DATE IS NOT NULL and dormant_flg='N' and FINACLE_FLG = 'Y'", nativeQuery = true)
+	List<Object[]> getCompletedList();
 
 	@Query(value = "SELECT CUSTOMER_ID, COMPANY_NAME, ASSOCIATED_ACCOUNT_NUMBER, TRADE_LICENSE_NUMBER, TRADE_EXPIRY_DATE, SYSTEM_RISK, LATEST_RISK, ECDD_DATE,\r\n"
 			+ "			CASE WHEN SYSTEM_RISK = 'High' THEN ABS(ABS(FLOOR(NVL(ECDD_DATE, SYSDATE) - SYSDATE))-365)\r\n"
@@ -43,8 +53,20 @@ public interface Kyc_Corprate_Repo extends JpaRepository<EcddCorporateEntity, St
 			+ "                 WHEN SYSTEM_RISK = 'Medium' THEN ECDD_DATE+1095\r\n"
 			+ "                 WHEN SYSTEM_RISK = 'Low' THEN ECDD_DATE+1825 END AS DUE_DATE,SRL_NO,MODIFY_FLG,ENTITY_FLG\r\n"
 			+ "            FROM ECDD_CORPORATE_TABLE WHERE del_flg = 'N' AND ECDD_DATE IS NOT NULL AND BRANCH_CODE = ?1 "
-			+ "and dormant_flg='N'", nativeQuery = true)
+			+ "and dormant_flg='N' and FINACLE_FLG != 'Y'", nativeQuery = true)
 	List<Object[]> getBranchList(String Branchcode);
+	
+////Retrive Branch wise details
+	@Query(value = "SELECT CUSTOMER_ID, COMPANY_NAME, ASSOCIATED_ACCOUNT_NUMBER, TRADE_LICENSE_NUMBER, TRADE_EXPIRY_DATE, SYSTEM_RISK, LATEST_RISK, ECDD_DATE,\r\n"
+			+ "			CASE WHEN SYSTEM_RISK = 'High' THEN ABS(ABS(FLOOR(NVL(ECDD_DATE, SYSDATE) - SYSDATE))-365)\r\n"
+			+ "                 WHEN SYSTEM_RISK = 'Medium' THEN ABS(ABS(FLOOR(NVL(ECDD_DATE, SYSDATE) - SYSDATE))-1095)\r\n"
+			+ "                 WHEN SYSTEM_RISK = 'Low' THEN ABS(ABS(FLOOR(NVL(ECDD_DATE, SYSDATE) - SYSDATE))-1825) END AS Age,\r\n"
+			+ "                 CASE WHEN SYSTEM_RISK = 'High' THEN ECDD_DATE+365\r\n"
+			+ "                 WHEN SYSTEM_RISK = 'Medium' THEN ECDD_DATE+1095\r\n"
+			+ "                 WHEN SYSTEM_RISK = 'Low' THEN ECDD_DATE+1825 END AS DUE_DATE,SRL_NO,MODIFY_FLG,ENTITY_FLG\r\n"
+			+ "            FROM ECDD_CORPORATE_TABLE WHERE del_flg = 'N' AND ECDD_DATE IS NOT NULL AND BRANCH_CODE = ?1 "
+			+ "and dormant_flg='N' and FINACLE_FLG = 'Y'", nativeQuery = true)
+	List<Object[]> getCompletedBranchList(String Branchcode);
 
 	@Query(value = "SELECT CUSTOMER_ID, COMPANY_NAME, ASSOCIATED_ACCOUNT_NUMBER, TRADE_LICENSE_NUMBER, TRADE_EXPIRY_DATE, SYSTEM_RISK, LATEST_RISK, ECDD_DATE,\r\n"
 			+ "			CASE WHEN SYSTEM_RISK = 'High' THEN ABS(ABS(FLOOR(NVL(ECDD_DATE, SYSDATE) - SYSDATE))-365)\r\n"
@@ -127,18 +149,22 @@ public interface Kyc_Corprate_Repo extends JpaRepository<EcddCorporateEntity, St
 			+ "ORDER BY branch_code", nativeQuery = true)
 	List<Object[]> getunattendstatuscount();
 
-	@Query(value = "Select customer_id,company_name,branch_code,Case when FINACLE_FLG = 'Y' AND entity_flg = 'Y' AND modify_flg = 'N' Then 'Completed in finacle'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'Y' AND modify_flg = 'N' Then 'Verified in portal Fincale Pending'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'Y' THEN 'Working in Progress'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' THEN 'Unattended' End as \"ECDD STATUS\",modify_user,modify_time,\r\n"
-			+ "verify_user,verify_time,system_risk from ecdd_corporate_table where DORMANT_FLG= 'N'", nativeQuery = true)
+	@Query(value = "Select customer_id,company_name,branch_code,Case when FINACLE_FLG = 'Y' AND entity_flg = 'Y' AND modify_flg = 'N' and dormant_flg = 'N' Then 'Completed in finacle'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'Y' AND modify_flg = 'N' and dormant_flg = 'N' Then 'Verified in portal Fincale Pending'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'Y' and dormant_flg = 'N' THEN 'Working in Progress'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' and dormant_flg = 'N' THEN 'Unattended' \r\n"
+			+ "                     when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' and dormant_flg = 'Y' THEN 'Dormant customer' \r\n"
+			+ "                     End as \"ECDD STATUS\",modify_user,modify_time,\r\n"
+			+ "			verify_user,verify_time,system_risk from ecdd_corporate_table", nativeQuery = true)
 	List<Object[]> GetEcddstatusreport();
 	
-	@Query(value = "Select customer_id,company_name,branch_code,Case when FINACLE_FLG = 'Y' AND entity_flg = 'Y' AND modify_flg = 'N' Then 'Completed in finacle'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'Y' AND modify_flg = 'N' Then 'Verified in portal Fincale Pending'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'Y' THEN 'Working in Progress'\r\n"
-			+ "			when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' THEN 'Unattended' End as \"ECDD STATUS\",modify_user,modify_time,\r\n"
-			+ "verify_user,verify_time,system_risk from ecdd_corporate_table where DORMANT_FLG= 'N' and branch_code=?1", nativeQuery = true)
+	@Query(value = "Select customer_id,company_name,branch_code,Case when FINACLE_FLG = 'Y' AND entity_flg = 'Y' AND modify_flg = 'N' and dormant_flg = 'N' Then 'Completed in finacle'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'Y' AND modify_flg = 'N' and dormant_flg = 'N' Then 'Verified in portal Fincale Pending'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'Y' and dormant_flg = 'N' THEN 'Working in Progress'\r\n"
+			+ "						when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' and dormant_flg = 'N' THEN 'Unattended' \r\n"
+			+ "                     when FINACLE_FLG = 'N' AND entity_flg = 'N' AND modify_flg = 'N' and dormant_flg = 'Y' THEN 'Dormant customer' \r\n"
+			+ "                     End as \"ECDD STATUS\",modify_user,modify_time,\r\n"
+			+ "			verify_user,verify_time,system_risk from ecdd_corporate_table where branch_code=?1", nativeQuery = true)
 	List<Object[]> GetEcddbranchstatusreport(String branchcode);
 
 }
